@@ -18,7 +18,7 @@ serviceWorkerManager = (function () {
             return false;
         }
         //const options = {scope: "./"};
-        navigator.serviceWorker.register("/service_worker.min.js").then(
+        navigator.serviceWorker.register("/service_worker").then(
             function(registrationObject) {
                 serviceWorkerRegistration = registrationObject;
                 //console.log("service worker installed success!", registration);

@@ -1,10 +1,6 @@
 #Server in the browser
 
-
-
-
 ## Why
-
 
 
 Setting up a server against the Internet to run a dynamic web app requires dedicated time investment, with upfront limitations that can go away with money. It can take even more time for beginners. With server in the browser it is possible to run ephemeral application without the cost and hassle of a traditional server. New services appeared lately to tackle those issues in different shapes and forms. Here's one more attempt as many new browser APIs are available now, it was time to explore the possibilities. 
@@ -42,7 +38,7 @@ Custom distributed computing framework with the same model, as worker, trust und
 ##Status
 
 
-This is a prototype only
+alpha version. Some bugs need to be fixed.
 
 
 ##Try
@@ -50,13 +46,42 @@ This is a prototype only
 
 try it out locally:
 
+
  * download this repository
- * install node.js from http://nodejs.org/
+ * install node.js from http://nodejs.org/ **version 7** or higher
  * open the node command line interface, go in the correct directory
  * `npm install`
- * `npm install concat-file-array-cli -g`
  * `npm run start`
  * open the local host address in 2 different browser context
+
+ 
+##Build from source
+
+
+The last build result is included for convenience.
+
+ 
+###only required once:
+
+
+ * `npm install`
+ * `npm install concat-file-array-cli -g`
+ * `npm install browserify -g`
+
+
+###build everything 
+
+
+ * `npm run buildall`
+ 
+
+###build specific files
+
+
+ * `npm run buildjs`
+ * `npm run buildcss`
+ * `npm run buildhtml`
+ * `npm run builddoc`
 
 
 ##Tests
@@ -74,7 +99,7 @@ https://github.com/gildas-lormeau/zip.js
 
 
 `adapter.js` for WebRTC.
-
+    
 
 also see package.json
 

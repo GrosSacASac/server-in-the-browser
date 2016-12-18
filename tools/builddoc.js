@@ -13,10 +13,21 @@ const thisName = "Parse markdown and produce html";
 
 const BEFORE_BODY_TEMPLATE_PATH = "client/html/beforeBodyTemplate.part.html";
 const AFTER_BODY_TEMPLATE_PATH = "client/html/afterBodyTemplate.part.html";
+const ABOUT_MD_PATH = "documentation/about.md";
+const HELP_MD_PATH = "documentation/help.md";
+const OPEN_SOURCE_MD_PATH = "documentation/open_source.md";
 const OUTPUTS_FROM_INPUT_PATH = {
-    "documentation/about.md": [
+    [ABOUT_MD_PATH]: [
         "client/html/built/about.part.min.html", //fragment
         "client/html/built/about.min.html" // standalone
+    ],
+    [HELP_MD_PATH]: [
+        "client/html/built/help.part.min.html",
+        "client/html/built/help.min.html"
+    ],
+    [OPEN_SOURCE_MD_PATH]: [
+        "client/html/built/open_source.part.min.html",
+        "client/html/built/open_source.min.html"
     ]
 };
 
@@ -55,6 +66,5 @@ Promise.all([
             console.log(errorText);
             throw new Error(errorText);
         });
-        
     });
 });

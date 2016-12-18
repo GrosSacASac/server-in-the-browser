@@ -15,6 +15,7 @@ const app = express();
 /*force https on heroku*/
 
 const environment = process.env.NODE_ENV || "local";
+/*make sure no duplicate keys*/
 const staticFileFromUrl = {
     "/": `${__dirname}/client/html/built/index.min.html`,
     "/favicon.png": `${__dirname}/client/images/icons/16.png`,
@@ -22,11 +23,13 @@ const staticFileFromUrl = {
     "/css": `${__dirname}/client/css/built/all.min.css`,     
     "/example.zip": `${__dirname}/client/temp.zip`,    
     "/about": `${__dirname}/client/html/built/about.min.html`,
+    "/help": `${__dirname}/client/html/built/help.min.html`,
+    "/open_source": `${__dirname}/client/html/built/open_source.min.html`,
     "/offline": `${__dirname}/client/html/built/offline.min.html`,
     "/quit": `${__dirname}/client/html/built/quit.min.html`,    
     //todo remove
     "/quitt": `${__dirname}/client/html/quitt.html`,
-    "/service_worker.min.js": `${__dirname}/client/js/built/service_worker.min.js`,
+    "/service_worker": `${__dirname}/client/js/built/service_worker.min.js`,
     "/z-worker.js": `${__dirname}/client/js/external_dependencies/zip/z-worker.js`,    
     "/inflate.js": `${__dirname}/client/js/external_dependencies/zip/inflate.js`,
     /*experimental, could also put that into service worker or already include it in the inject ready worker*/
@@ -254,8 +257,8 @@ io.on("connection", socket => {
 
 const start = function (port) {
 
-    Object.entries(staticFileFromUrl).forEach(funtion ([urlPattern, staticFile]) {
-        app.get(urlPattern, (request, response) => {
+    Object.entries(staticFileFromUrl).forEach(function ([urlPattern, staticFile]) {
+        app.get(urlPattern, function (request, response) {
             response.sendFile(staticFile);
         });
     });
