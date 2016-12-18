@@ -47,8 +47,8 @@
   },
   "devDependenciesGlobals": {
     "installed before with -g": "true",
-    "browserify": "?",
-    "concat-files": "?",
+    "browserify": "13.0.1",
+    "concat-file-array-cli": "0.0.2",
     "heroku": "?"
   },
   "private": true

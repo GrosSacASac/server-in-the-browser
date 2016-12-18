@@ -54,6 +54,7 @@ try it out locally:
  * install node.js from http://nodejs.org/
  * open the node command line interface, go in the correct directory
  * `npm install`
+ * `npm install concat-file-array-cli -g`
  * `npm run start`
  * open the local host address in 2 different browser context
 

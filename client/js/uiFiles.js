@@ -12,6 +12,8 @@ uiFiles = (function () {
     const ressourceContentFromElement = new WeakMap();
     const fileNameFromKey = {}; 
     
+    const FILE_INPUT_PREFIX = "FI";
+    
     const STRINGS = {
         CANNOT_LOAD_ZIP: "Could not load zip: ",
         FILE_LOADED: "file loaded"
@@ -186,7 +188,6 @@ uiFiles = (function () {
             let fileObject;
             
             for (fileObject of fileList) {
-
                 const mime = fileObject.type || "";
                 const name = fileObject.name;
                 //fileObject.size
@@ -253,18 +254,18 @@ uiFiles = (function () {
                         }));
                         return;
                     }
-                    const ressourceUiIdString = "ressource_" + String(ressourceUiId);
+                    const ressourceUiIdString = FILE_INPUT_PREFIX + String(ressourceUiId);
                     ressourceUiId += 1;
                     //todo remove duplicate code
                     
                     const fileInputElement = D.createElement2({
-                        "tagName": "file-input",
+                        tagName: "file-input",
                         "data-in": ressourceUiIdString
                     });
                     D.vr = {
                         [ressourceUiIdString]: {
-                            "fileName" : name,
-                            "fileBody" : STRINGS.FILE_LOADED,
+                            fileName: name,
+                            fileBody: STRINGS.FILE_LOADED,
                             fileMime: mime
                         }
                     };
@@ -306,7 +307,7 @@ uiFiles = (function () {
         
         D.fx.addRessourceEmpty = function (event) {
         
-            const ressourceUiIdString = "ressource_" + String(ressourceUiId);
+            const ressourceUiIdString = FILE_INPUT_PREFIX + String(ressourceUiId);
             ressourceUiId += 1;
             
             const fileInputElement = D.createElement2({
@@ -342,7 +343,7 @@ uiFiles = (function () {
                     }
                 });
             } else {
-                const ressourceUiIdString = "ressource_" + String(ressourceUiId);
+                const ressourceUiIdString = FILE_INPUT_PREFIX + String(ressourceUiId);
                 ressourceUiId += 1;
                 
                 const fileInputElement = D.createElement2({
