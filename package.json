@@ -1,0 +1,55 @@
+{
+  "name": "server-in-the-browser",
+  "author": "author",
+  "version": "0.9.0",
+  "main": "index.js",
+  "dependencies": {
+    "dom99": "~1.23.32",
+    "express": "~4.14.0",
+    "ramda": "~0.21.0",
+    "socket.io": "~1.7.1",
+    "webrtc-adapter": "~1.4.0"
+  },
+  "engines": {
+    "node": ">=6"
+  },
+  "scripts": {
+    "build0jsinsertnodeemulator": "node tools/buildbrowserserverwithemulator.js",
+    "build0comment": "browserserver.js + node_emulator_for_worker.js = browserserver_with_node_emulator_for_worker.js (dynamic worker creation at runtime needs a string of code)",
+    "build1js": "cd client/js && concat-files declare.js external_dependencies/zip/zip_zip-ext.js ui.js uiFiles.js rtc.js bytes.js localData.js sockets.js built/browserserver_with_node_emulator_for_worker.js serviceWorkerManager.js launcher.js -o built/concat.js && cd ../..",
+    "build2js": "cd client/js && browserify built/concat.js -o built/browserified.js && concat-files external_dependencies/zip/zip_zip-ext.js built/browserified.js -o built/all.js && cd ../..",
+    "minifytest": "uglifyjs temp/uglifyjstest/u.js --mangle --compress --preamble \"//See u.js/ to see the source;\" --screw-ie8 --output temp/uglifyjstest/u.min.js",
+    "minifyjs3": "uglifyjs client/js/built/all.js --mangle --compress --preamble \"//See client/ to see the source;\" --screw-ie8 --output client/js/built/all.min.js",
+    "minifyjs3verbose": "uglifyjs client/js/built/all.js --mangle --compress --preamble \"//See client/ to see the source;\" --screw-ie8 --verbose --lint --output client/js/built/all.min.js",
+    "minifylintconclusion": "Ramda is almost not used",
+    "minifyserviceworkerjs4": "uglifyjs client/js/service_worker.js --mangle --compress --screw-ie8 --output client/js/built/service_worker.min.js",
+    "buildjs": "npm run build0jsinsertnodeemulator && npm run build1js && npm run build2js && npm run minifyjs3 && npm run minifyserviceworkerjs4",
+    "buildcss1": "cd client/css && concat-files base.css header.css userlist.css fileinput.css yesNoDialog.css -o built/all.css && cd ../..",
+    "minifycss2": "csso client/css/built/all.css  client/css/built/all.min.css",
+    "buildcss": "npm run buildcss1 && npm run minifycss2",
+    "minifyhtml1": "node tools/minifyHtml.js",
+    "buildhtml": "npm run minifyhtml1",
+    "builddoc": "node tools/builddoc.js",
+    "buildall": "npm run buildjs && npm run buildcss && npm run buildhtml && npm run builddoc",
+    "start": "node index.js",
+    "buildjsstart": "npm run buildjs && npm start",
+    "buildallstart": "npm run buildall && npm start",
+    "heroku": "git push heroku master",
+    "herokulog": "heroku logs --tail",
+    "testw": "client\\js\\tests\\SpecRunner.html"
+  },
+  "devDependencies": {
+    "csso": "~2.3.0",
+    "html-minifier": "3.2.3",
+    "markdown-it": "^8.2.2",
+    "markdown-it-lazy-headers": "^0.1.3",
+    "uglify-js": "github:mishoo/UglifyJS2#harmony"
+  },
+  "devDependenciesGlobals": {
+    "installed before with -g": "true",
+    "browserify": "?",
+    "concat-files": "?",
+    "heroku": "?"
+  },
+  "private": true
+}

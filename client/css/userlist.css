@@ -1,0 +1,14 @@
+/*userlist.css*/
+
+.userlist {
+  list-style-type: none;
+}
+
+.userlist > li {
+ background-color: silver;
+ font-size: 1.3em;
+}
+
+.userlist > li.active {
+ background-color: green;
+}
