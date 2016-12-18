@@ -80,9 +80,9 @@ also see package.json
 
 ##License
 
-Some dependencies have other licenses
+Some dependencies inlcuded in this project have other licenses !
 
-http://creativecommons.org/publicdomain/zero/1.0/
+https://creativecommons.org/publicdomain/zero/1.0/legalcode
 
 
 ### Links
