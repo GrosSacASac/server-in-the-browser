@@ -23,7 +23,7 @@ Server in the browser establishes a two way connection between the user and the 
 
 ##Limitations
 
-Many of the limitation come from all the double edged swords that are also the strengths of this system. Users are serving, and accessing each others sites, with no control and no limits on what, how and how much. The central server is unaware of what is being proposed and therefore cannot prevent some missuses. A golden rule of security is : Don't trust what is outside of control. This rule is straight up ignored by the system design itself. The project is young and may change alot in the near future.
+Node.js is not fully supported. Many of the limitation come from all the double edged swords that are also the strengths of this system. Users are serving, and accessing each others sites, with no control and no limits on what, how and how much. The central server is unaware of what is being proposed and therefore cannot prevent some missuses. A golden rule of security is : Don't trust what is outside of control. This rule is straight up ignored by the system design itself. The project is young and may change alot in the near future.
 
 
 ##Delete informations
