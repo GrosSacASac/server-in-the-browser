@@ -53,6 +53,7 @@ try it out locally:
  * `npm install`
  * `npm run start`
  * open the local host address in 2 different browser context
+ * http://localhost:8080/
 
 
 ##HTTPS
@@ -120,7 +121,7 @@ https://creativecommons.org/publicdomain/zero/1.0/legalcode
 ##Contribute
 
 
-See documentation/todo.txt to see next steps. Before doing anything please consider [discussing with us](https://dystroy.org/miaou/3) (free Github account is required), the what, why and how.
+See documentation/todo.txt to see next steps. Before doing anything please consider [discussing with us](https://dystroy.org/miaou/3) (free Github account is required), the what, why and how. To report an issue , [it is over here](https://github.com/GrosSacASac/server-in-the-browser/issues).
 
 
 
