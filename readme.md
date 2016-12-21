@@ -54,7 +54,13 @@ try it out locally:
  * `npm run start`
  * open the local host address in 2 different browser context
 
- 
+
+##HTTPS
+
+
+The app must be served over https. The server.js is meant for a heroku like environment where https is handled outside the node.js code
+
+
 ##Build from source
 
 
@@ -78,9 +84,9 @@ The last build result is included for convenience.
 ###build specific files
 
 
- * `npm run buildjs`
- * `npm run buildcss`
- * `npm run buildhtml`
+ * `npm run buildjs` or
+ * `npm run buildcss` or
+ * `npm run buildhtml` or
  * `npm run builddoc`
 
 
@@ -111,7 +117,14 @@ Some dependencies inlcuded in this project have other licenses !
 https://creativecommons.org/publicdomain/zero/1.0/legalcode
 
 
-### Links
+##Contribute
+
+
+See documentation/todo.txt to see next steps. Before doing anything please consider [discussing with us](https://dystroy.org/miaou/3) (free Github account is required), the what, why and how.
+
+
+
+##Links
 
 https://www.w3.org/TR/webrtc/
 
