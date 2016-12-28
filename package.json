@@ -26,7 +26,9 @@
     "buildjs": "npm run build0jsinsertnodeemulator && npm run build1js && npm run build2js && npm run minifyjs3 && npm run minifyserviceworkerjs4",
     "buildcss1": "cd client/css && concat-files base.css header.css userlist.css fileinput.css yesNoDialog.css -o built/all.css && cd ../..",
     "minifycss2": "csso client/css/built/all.css  client/css/built/all.min.css",
-    "buildcss": "npm run buildcss1 && npm run minifycss2",
+    "buildcss3": "cd client/css && concat-files base.css header.css pre.css -o built/documentation.css && cd ../..",
+    "minifycss4": "csso client/css/built/documentation.css  client/css/built/documentation.min.css",
+    "buildcss": "npm run buildcss1 && npm run minifycss2 && npm run buildcss3 && npm run minifycss4",
     "minifyhtml1": "node tools/minifyHtml.js",
     "buildhtml": "npm run minifyhtml1",
     "builddoc": "node tools/builddoc.js",
@@ -40,6 +42,7 @@
   },
   "devDependencies": {
     "csso": "~2.3.0",
+    "escape-html": "^1.0.3",
     "html-minifier": "3.2.3",
     "markdown-it": "^8.2.2",
     "markdown-it-lazy-headers": "^0.1.3",

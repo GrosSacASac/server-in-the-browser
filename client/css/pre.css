@@ -1,0 +1,11 @@
+/*pre.css*/
+pre {
+  background-color: #e5e5e8;
+  font-family: Consolas;
+  font-size: 1.3em;
+  padding: 2px;
+  width: auto;
+  overflow: auto;
+  white-space: pre-wrap;
+}
+

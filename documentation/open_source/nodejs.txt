@@ -1,22 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Server in the browser</title><link rel="stylesheet" href="doc.css"><meta name="viewport" content="width=device-width"><link rel="icon" href="favicon.png"></head><body><header><h1>Server in the browser <span class="titleversion">alpha</span></h1><nav><ul><li><a href="/about">About</a></li><li><a href="/help">Help</a></li><li><a href="/open_source">Open Source</a></li><li><a href="/">Server in the browser</a></li></ul></nav></header><main><h1>Open source</h1><h2>Server in the browser source can be found at GitHub</h2><p><a href="https://github.com/GrosSacASac/server-in-the-browser">https://github.com/GrosSacASac/server-in-the-browser</a></p><p>Here’s is a list of open source software used.</p><h2>Stucture</h2><ul><li>project name - org or author</li><li>website URL</li><li>source URL</li><li>license</li></ul><h2>List</h2><h3>DOM99 - <a href="https://github.com/GrosSacASac/">https://github.com/GrosSacASac/</a></h3><p><a href="https://cdn.rawgit.com/GrosSacASac/DOM99/1.23.31/documentation/documentation.html">https://cdn.rawgit.com/GrosSacASac/DOM99/1.23.31/documentation/documentation.html</a></p><p><a href="https://github.com/GrosSacASac/DOM99">https://github.com/GrosSacASac/DOM99</a></p><pre>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-</pre><h3>WebRTC adapter - WebRTC project</h3><p><a href="https://webrtc.github.io/adapter/adapter-latest.js">https://webrtc.github.io/adapter/adapter-latest.js</a></p><p><a href="https://github.com/webrtc/adapter">https://github.com/webrtc/adapter</a></p><pre>
-Copyright (c) 2014, The WebRTC project authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
-
-    Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
-
-    Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-
-    Neither the name of Google nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-</pre><h3>Node.js - Node.js Foundation</h3><p><a href="https://nodejs.org/en/">https://nodejs.org/en/</a></p><p><a href="https://github.com/nodejs/node">https://github.com/nodejs/node</a></p><pre>
 Node.js is licensed for use as follows:
 
 """
@@ -610,7 +592,7 @@ The externally maintained libraries used by Node.js are:
 
 - Punycode.js, located at lib/punycode.js, is licensed as follows:
   """
-    Copyright Mathias Bynens &lt;https://mathiasbynens.be/>
+    Copyright Mathias Bynens <https://mathiasbynens.be/>
 
     Permission is hereby granted, free of charge, to any person obtaining
     a copy of this software and associated documentation files (the
@@ -1092,7 +1074,7 @@ The externally maintained libraries used by Node.js are:
 
 - node-weak, located at test/gc/node_modules/weak, is licensed as follows:
   """
-    Copyright (c) 2011, Ben Noordhuis &lt;info@bnoordhuis.nl>
+    Copyright (c) 2011, Ben Noordhuis <info@bnoordhuis.nl>
 
     Permission to use, copy, modify, and/or distribute this software for any
     purpose with or without fee is hereby granted, provided that the above
@@ -1208,13 +1190,4 @@ The externally maintained libraries used by Node.js are:
     NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
     SOFTWARE AND DOCUMENTATION, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
     DAMAGE.
-  """</pre><h3>zip.js - Gildas Lormeau</h3><p><a href="http://gildas-lormeau.github.io/zip.js/">http://gildas-lormeau.github.io/zip.js/</a></p><p><a href="https://github.com/gildas-lormeau/zip.js">https://github.com/gildas-lormeau/zip.js</a></p><pre>Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-
-3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-</pre></main></body></html>
+  """

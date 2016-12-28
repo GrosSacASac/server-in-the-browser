@@ -1,7 +1,7 @@
 /*rtc.js
 real time communication uses WebRTC, see https://en.wikipedia.org/wiki/WebRTC*/
 /*jslint
-    es6, maxerr: 100, browser, devel, fudge, maxlen: 120, white, node,eval
+    es6, maxerr: 100, browser, devel, fudge, maxlen: 120, white, node, eval
 */
 /*global
     RTCPeerConnection, RTCSessionDescription, RTCIceCandidate

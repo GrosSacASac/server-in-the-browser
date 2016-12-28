@@ -89,39 +89,14 @@ header > nav > ul > li {
 header > nav > ul > li > a {
   color: #5565e7;
 }
-/*userlist.css*/
-
-.userlist {
-  list-style-type: none;
+/*pre.css*/
+pre {
+  background-color: #e5e5e8;
+  font-family: Consolas;
+  font-size: 1.3em;
+  padding: 2px;
+  width: auto;
+  overflow: auto;
+  white-space: pre-wrap;
 }
 
-.userlist > li {
- background-color: silver;
- font-size: 1.3em;
-}
-
-.userlist > li.active {
- background-color: green;
-}/*fileinput.css*/
-file-input {
-  display: block;
-  border: 1px solid black;
-}
-
-progress {
-  width: 100%;
-}
-/**/
-
-
-.dialogactive *:not(.dialog) *{ 
-  display: none;
-}
-
-.dialog {
-  display: none;
-}
-
-/*body*/.dialogactive .dialog {
-  display: block;
-}

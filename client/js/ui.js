@@ -214,11 +214,11 @@ ui = (function () {
         console.log(any);
     };
     
-    const displayNonMetRequirement = function (nonMetRequirement) {
+    let displayNonMetRequirement = function (nonMetRequirement) {
         D.linkJsAndDom();
         let i = 0;
         const splitTextContentHref = function (link) {
-            return {textContent: link, href: link, target:"_blank"};
+            return {innerHTML: `<a href="${link}" target="_blank">${link}</a>`};
         };
         Object.keys(nonMetRequirement).forEach(function (technicalName) {
             i += 1;
@@ -234,7 +234,7 @@ ui = (function () {
                 [iString]: {
                     title : technicalName,
                     text : requirementI.text,
-                    links: requirementI.links.map(splitTextContentHref)/*ul > a ? not good*/
+                    links: requirementI.links.map(splitTextContentHref)
                 }
             };
             D.linkJsAndDom(missingFeatureElement);
@@ -245,13 +245,21 @@ ui = (function () {
     const start = function () {
         D.linkJsAndDom();
         uiFiles.start();
-        
+        const removeAndForget = function (elementName) {
+            D.el[elementName].remove();
+            D.forgetKey(elementName);
+        };
+        removeAndForget("missingFeatures");
+        removeAndForget("missingFeatureTemplate");
+        displayNonMetRequirement = undefined;
+
         D.vr.log = "Starting ...";
         D.el.input.disabled = true;
         D.el.send_button.disabled = true;
         D.vr.input = "";
         D.vr.output = "";
         D.vr.newId = "";
+        D.vr.warnBeforeLeave = localData.getElseDefault("warnBeforeLeave", "false");
         D.vr.useCustom = false;
         D.vr.your_id = "not yet connected";
         D.vr.localServerAvailability = false;
@@ -290,6 +298,11 @@ server.listen(port, hostname, () => {
             }
         };
 
+        D.fx.warnBeforeLeaveChange = function (event) {
+            localData.set("warnBeforeLeave", D.bool(D.vr.warnBeforeLeave));
+            //todo display change saved
+        };
+        
         D.fx.useCustom = function (event) {
             /*USE custom index.js as the pseudo server*/
             

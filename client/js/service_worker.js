@@ -26,12 +26,30 @@ https://heycam.github.io/webidl/#es-ByteString
 
 "use strict";
 
-const version = "2.0.21"; // update if this file changes todo make run build do useless ?
+const version = "2.0.23"; // update if this file changes todo make run build do useless ?
 const latestCacheVersion = version; // update if the cache files change
 //const ressourcesToSaveInCache = ["/"];
 const HOME = "/";
-const OFFLINE_ALTERNATIVE = "/offline"
-const ressourcesToSaveInCache = [OFFLINE_ALTERNATIVE];
+const OFFLINE_ALTERNATIVE = "/offline";
+/*see server/serve.js staticFileFromUrl variable*/
+const ressourcesToSaveInCache = [
+    OFFLINE_ALTERNATIVE,
+    "/favicon.png",
+    "/css",
+    "/doc.css",
+    "/about",
+    "/help",
+    "/open_source",
+    "/offline",
+    "/quit",
+    "/z-worker.js",
+    "/inflate.js",
+    /*not sure if we let this stay here or move it closer to the application layer*/
+    "/http",
+    "/express",
+    "/body-parser",
+    "/socket.io"
+];
 const rtcLength = 4; // "rtc/".length; 
 const rtcFetchDelay = 10000;//ms
 const origin = location.origin;
@@ -59,9 +77,9 @@ const rejectAskPageForRessource = function (ressource, reason) {
 
 const askPageForRessource = function (customRequestObject) {
     /*asks all page for a ressource*/
-    
+
     const ressource = customRequestObject.header.ressource;
-    
+
     const promise = new Promise(function (resolve, reject) {
         resolveFromRessource[ressource] = resolve;
         rejectFromRessource[ressource] = reject;
@@ -96,7 +114,6 @@ self.addEventListener("install", function (event) {
             return self.skipWaiting();
         })
     );
-    
 });
 
 self.addEventListener("activate", function (event) {
@@ -115,7 +132,6 @@ self.addEventListener("activate", function (event) {
             );
         })
     );
-    
 });
 
 self.addEventListener("message", function (event) {
@@ -193,7 +209,6 @@ self.addEventListener("fetch", function (fetchEvent) {
         //https://fetch.spec.whatwg.org/#terminology-headers            
         customRequestObject.header[key] = value;
     });
-    
 
     //console.log(request);
     fetchEvent.respondWith(
@@ -229,6 +244,4 @@ self.addEventListener("fetch", function (fetchEvent) {
             return responseInstance;
         })
     );
-
-    
 });

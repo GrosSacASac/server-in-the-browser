@@ -15,7 +15,6 @@
                     <li><a href="/about">About</a></li>
                     <li><a href="/help">Help</a></li>
                     <li><a href="/open_source">Open Source</a></li>
-                    <li><a href="https://github.com/GrosSacASac/server-in-the-browser/">GitHub</a></li>
                 </ul>
             </nav>
         </header>
@@ -122,6 +121,9 @@
                     <div>
                         <button data-fx="click-deleteAll">Delete all data and quit</button>
                     </div>
+                    <div>
+                        <label><input data-vr="warnBeforeLeave" data-fx="warnBeforeLeaveChange" type="checkbox">Warn before leaving</label>
+                    </div>
                 </section>
             </details>
         </main>
@@ -131,10 +133,12 @@
             <section>
                 <h3 data-vr="title"></h3>
                 <p data-vr="text"></p><p>To enable this feature, install the latest update for the browser and see</p>
-                <ul data-list="links-a"></ul>
+                <ul data-list="links-li"></ul>
             </section>
         </template>
-        <article data-el="missingFeatures"></article>
+        <article data-el="missingFeatures">
+            <p><a href="/">Try again</a> Server in the browser is not available for the following reasons: </p>
+        </article>
         <script src="app"></script>
     </body>
 </html>

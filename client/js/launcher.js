@@ -10,7 +10,7 @@
     const minimumRequirement = {
         "Service Worker": {
             API: navigator.serviceWorker,
-            text: "Service Worker must be enabled.",
+            text: "Service Worker must be enabled. Service Worker cannot be used in private browsing mode.",
             links: ["https://duckduckgo.com/?q=how+to+enable+service+worker"]
         },
         WebRTC: {
@@ -51,7 +51,28 @@
         serviceWorkerManager.start();
         sockets.start();
         window.addEventListener("beforeunload", function (event) {
-            //console.log(event);
+            /*https://developer.mozilla.org/en-US/docs/Web/Events/beforeunload
+            if the setting warnBeforeLeave is true
+            then we prompt user if really want to leave
+            https://html.spec.whatwg.org/#the-beforeunloadevent-interface says to use
+            preventDefault but it does not work in a test*/
+            if (D.bool(D.vr.warnBeforeLeave)) {
+                const message = "Are you sure you want to leave ?";
+                /*if (event.preventDefault) {
+                    const answer = prompt("Are you sure you want to leave ?");
+                    if (answer) {
+                        event.preventDefault();
+                    }
+                } else {*/
+                    event.returnValue = message;
+                    return message;
+                /*}*/
+            } else {
+                ; // do not warn before leaving
+            }
+        }, false);
+        window.addEventListener("unload", function (event) {
+            /*not necessary but better*/
             sockets.socket.emit(MESSAGES.EXIT, 
                 {}
             );

@@ -2830,11 +2830,11 @@ ui = (function () {
         console.log(any);
     };
     
-    const displayNonMetRequirement = function (nonMetRequirement) {
+    let displayNonMetRequirement = function (nonMetRequirement) {
         D.linkJsAndDom();
         let i = 0;
         const splitTextContentHref = function (link) {
-            return {textContent: link, href: link, target:"_blank"};
+            return {innerHTML: `<a href="${link}" target="_blank">${link}</a>`};
         };
         Object.keys(nonMetRequirement).forEach(function (technicalName) {
             i += 1;
@@ -2850,7 +2850,7 @@ ui = (function () {
                 [iString]: {
                     title : technicalName,
                     text : requirementI.text,
-                    links: requirementI.links.map(splitTextContentHref)/*ul > a ? not good*/
+                    links: requirementI.links.map(splitTextContentHref)
                 }
             };
             D.linkJsAndDom(missingFeatureElement);
@@ -2861,13 +2861,21 @@ ui = (function () {
     const start = function () {
         D.linkJsAndDom();
         uiFiles.start();
-        
+        const removeAndForget = function (elementName) {
+            D.el[elementName].remove();
+            D.forgetKey(elementName);
+        };
+        removeAndForget("missingFeatures");
+        removeAndForget("missingFeatureTemplate");
+        displayNonMetRequirement = undefined;
+
         D.vr.log = "Starting ...";
         D.el.input.disabled = true;
         D.el.send_button.disabled = true;
         D.vr.input = "";
         D.vr.output = "";
         D.vr.newId = "";
+        D.vr.warnBeforeLeave = localData.getElseDefault("warnBeforeLeave", "false");
         D.vr.useCustom = false;
         D.vr.your_id = "not yet connected";
         D.vr.localServerAvailability = false;
@@ -2906,6 +2914,11 @@ server.listen(port, hostname, () => {
             }
         };
 
+        D.fx.warnBeforeLeaveChange = function (event) {
+            localData.set("warnBeforeLeave", D.bool(D.vr.warnBeforeLeave));
+            //todo display change saved
+        };
+        
         D.fx.useCustom = function (event) {
             /*USE custom index.js as the pseudo server*/
             
@@ -3496,7 +3509,7 @@ uiFiles = (function () {
 /*rtc.js
 real time communication uses WebRTC, see https://en.wikipedia.org/wiki/WebRTC*/
 /*jslint
-    es6, maxerr: 100, browser, devel, fudge, maxlen: 120, white, node,eval
+    es6, maxerr: 100, browser, devel, fudge, maxlen: 120, white, node, eval
 */
 /*global
     RTCPeerConnection, RTCSessionDescription, RTCIceCandidate
@@ -4291,38 +4304,43 @@ bytes = (function () {
 /*localData.js
 manages data stored in the client*/
 /*jslint
-    es6, maxerr: 100, browser, devel, fudge, maxlen: 120, white, node,eval
+    es6, maxerr: 100, browser, devel, fudge, maxlen: 120, white
 */
 /*global
-    localStorage, 
+    localStorage, localData
 */
 
-/*todo 
+/*todo:
+maybe add support for other data types not just String
+maybe use localForage library
 */
 
 localData = (function () {
-    const API = {
-    };
+
 
     const get = function (itemName) {
         return localStorage.getItem(itemName);
+    };
+    
+    const getElseDefault = function (itemName, defaultValue) {
+        return get(itemName) || defaultValue;
     };
     
     const set = function (itemName, stringValue) {
         return localStorage.setItem(itemName, stringValue);
     };
     
-    const clearAll = function (itemName) {
+    const clearAll = function () {
         localStorage.clear();
     };
     
-    Object.assign(API, {
+    return {
         get,
+        getElseDefault,
         set,
         clearAll
-    });
-    
-    return API;
+    };
+
 }());
 //client
 /*jslint
@@ -4950,7 +4968,7 @@ serviceWorkerManager = (function () {
     const minimumRequirement = {
         "Service Worker": {
             API: navigator.serviceWorker,
-            text: "Service Worker must be enabled.",
+            text: "Service Worker must be enabled. Service Worker cannot be used in private browsing mode.",
             links: ["https://duckduckgo.com/?q=how+to+enable+service+worker"]
         },
         WebRTC: {
@@ -4991,7 +5009,28 @@ serviceWorkerManager = (function () {
         serviceWorkerManager.start();
         sockets.start();
         window.addEventListener("beforeunload", function (event) {
-            //console.log(event);
+            /*https://developer.mozilla.org/en-US/docs/Web/Events/beforeunload
+            if the setting warnBeforeLeave is true
+            then we prompt user if really want to leave
+            https://html.spec.whatwg.org/#the-beforeunloadevent-interface says to use
+            preventDefault but it does not work in a test*/
+            if (D.bool(D.vr.warnBeforeLeave)) {
+                const message = "Are you sure you want to leave ?";
+                /*if (event.preventDefault) {
+                    const answer = prompt("Are you sure you want to leave ?");
+                    if (answer) {
+                        event.preventDefault();
+                    }
+                } else {*/
+                    event.returnValue = message;
+                    return message;
+                /*}*/
+            } else {
+                ; // do not warn before leaving
+            }
+        }, false);
+        window.addEventListener("unload", function (event) {
+            /*not necessary but better*/
             sockets.socket.emit(MESSAGES.EXIT, 
                 {}
             );

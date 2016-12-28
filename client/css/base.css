@@ -11,6 +11,9 @@ body {
     font-family: 'Open Sans',Arial,sans-serif;
 }
 
+code {
+  font-family: Consolas;
+}
 
 summary {
   font-size: 2em;

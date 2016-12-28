@@ -1,1 +1,13 @@
-<h1>Help</h1><h2>How to do X ?</h2><p>…</p><h2>How to do Y ?</h2><p>…</p>
+<h1>Help</h1><h2>How to share (static) files ?</h2><ol><li>Open the Server panel</li><li>Click the “Load from file” Button.</li><li>Select the files you want to share. Multiselection is enabled. A zip file will be opened in the process.</li><li>Go to step 2 if you want to share more files</li><li>Click “Generate Index”</li><li>Enable “Make local server available”</li></ol><h2>How to view shared files from others ?</h2><ol><li>Open the Connection panel</li><li>Select a connected user in the list. Click “Connect and select” or “Select”</li><li>Click the “Visit selected index” link if it appears</li><li>If it does not appear, it means the selected user does not share files yet. Go to step 2 to select another connected user.</li><li>Click on a filename to view it</li></ol><h2>How to host a static website ?</h2><ol><li>Also See “How to share (static) files ?”</li><li>Load all necessary files for your website</li><li>Do not generate an index file. Instead make sure your entry point html file is named “index.html”</li><li>If your static website is dependent to a certain folder structure, you need to put everything into a .zip file an upload this zip file instead</li><li>Enable “Make local server available”</li></ol><h2>How to host a dynamic website ?</h2><p>Server in the browser runs a handported Nodejs environment, the port is not finished yet. Only small parts of express, http and body-parser have been ported. Download /example.zip to see an example. In your package.json make the following change:</p><p>Add a new key-value pair as follow, where “index.js” is the entry point of your app. This will do the equivalent of <code>node index.js</code> in the command line.</p><pre><code>"serverinthebrowser" : {
+    "server": "index.js"
+}
+</code></pre><h3>package.json Example:</h3><pre><code>{
+  "name": "NAME",
+  "author": "AUTHOR",
+  "version": "1.0.0",
+  "main": "index.js",
+  "serverinthebrowser" : {
+    "server": "index.js"
+  }
+}
+</code></pre><p>Alternatively, it is also possible to manually copy paste the server program in the textarea.</p><ol><li>Put your dynamic website inside a single .zip and load it.</li><li>Enable “Make local server available”</li><li>Enable “Use a node.js program to handle requests”</li><li>Look if there are error reports on the screen</li><li>To update individual files, reupload a new entire zip.</li></ol><h2>How to change name ?</h2><p>Open the setting Panel, and make a request to change name.</p><h2>How to delet all data and exit ?</h2><p>Open the setting Panel, and click “Delete all data and quit”. Then close every tab related to Server in the browser.</p>

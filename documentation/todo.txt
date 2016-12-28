@@ -1,4 +1,4 @@
-add full list of open_source in documentation/open_source.md
+make index.js the default server programm
 
 full template strings escape in tools for worker
 
