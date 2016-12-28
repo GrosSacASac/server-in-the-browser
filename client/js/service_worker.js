@@ -167,7 +167,7 @@ self.addEventListener("fetch", function (fetchEvent) {
         fetchEvent.respondWith(
             caches.match(request).then(function (response) {
 
-                console.log(request, url);
+                //console.log(request, url);
                 if (response) {
                     // We have it in the cache
                     return response;

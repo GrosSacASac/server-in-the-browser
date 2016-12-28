@@ -1,4 +1,6 @@
 make index.js the default server programm
+make require work outside yeah
+errors in sw see receipts maybe. somthing is wrong with service worker
 
 full template strings escape in tools for worker
 
