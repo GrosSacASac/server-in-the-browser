@@ -30,7 +30,7 @@ Object.keys(OUTPUT_FROM_INPUT_PATH).forEach(function (path) {
         return files.writeTextInFilePromiseFromPathAndString(OUTPUT_FROM_INPUT_PATH[path], 
             minifiedHtml);
     }).then(function () {
-        console.log(path + " minified !");
+        //console.log(path + " minified !");
     }).catch(function (reason) {
         const errorText = thisName + " failed: " + String(reason);
         console.log(errorText);

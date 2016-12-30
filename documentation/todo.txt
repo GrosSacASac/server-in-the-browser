@@ -1,9 +1,15 @@
 make index.js the default server programm
+
 make require work outside yeah
-fillServiceWorkerCache in service worker rejects in firefox 52 research why
+
+try to guess max DataChannel brandwitdth, is it 30kbs ?
+
 enter to confirm some options
+
 connecting ... make it fail faster
-increment service worker version number !!! and/or do network then cache
+
+increment service worker version number also for nahrung !!! and/or do network then cache
+
 full template strings escape in tools for worker
 
 readme upgrade
@@ -13,7 +19,6 @@ API Doc
 related ressources
 
 add enter to send message see fetchpostexample
-
 
 
 you have 4 places or 3 where headerBodyObject is forwarded, could you reuse some code harmonize the API make shema with arrows to see where it is forwarded, maybe good idea to use <new Header and Response ? high priority this will help large file sending (currently data is not received 100% the same)

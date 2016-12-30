@@ -36,7 +36,7 @@ Promise.all([
     const browserserver_with_node_emulator_for_workerText = browserserverText.replace(NODE_EMULATOR_FOR_WORKERTEXT, node_emulator_for_workerTemplateString);
     return files.writeTextInFilePromiseFromPathAndString(BROWSERSERVER_WITH_NODE_EMULATOR_FOR_WORKER_PATH, browserserver_with_node_emulator_for_workerText);
 }).then(function () {
-    console.log(thisName + " finished with success !");
+    //console.log(thisName + " finished with success !");
 }).catch(function (reason) {
     const errorText = thisName + " failed: " + String(reason);
     console.log(errorText);

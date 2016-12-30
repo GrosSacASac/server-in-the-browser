@@ -7,3 +7,9 @@ file-input {
 progress {
   width: 100%;
 }
+
+input[type=checkbox], input[type=radiobutton] {
+  cursor: pointer;
+  width: 2.5em;
+  height: 2.5em;
+}

@@ -100,7 +100,7 @@ Promise.all([
                     OUTPUTS_FROM_INPUT_PATH[path][1], standalone)
             ]);
         }).then(function () {
-            console.log(path + " markdown parsed !");
+            //console.log(path + " markdown parsed !");
         }).catch(function (reason) {
             const errorText = thisName + " failed: " + String(reason);
             console.log(errorText);
@@ -121,7 +121,7 @@ Promise.all([
             files.writeTextInFilePromiseFromPathAndString(OPEN_SOURCE_BUILT_PATH, standalone)
         ]);
     }).then(function () {
-        console.log("open source notes success");
+        //console.log("open source notes success");
     }).catch(function (reason) {
         const errorText = thisName + " open source notes failed: " + String(reason);
         console.log(errorText);
