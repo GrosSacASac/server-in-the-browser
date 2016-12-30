@@ -1,4 +1,4 @@
-/*uiFiles.js*/
+/*bytes.js*/
 /*jslint
     es6, maxerr: 15, browser, devel, fudge, maxlen: 100
 */

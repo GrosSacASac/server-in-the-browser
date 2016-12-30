@@ -1,6 +1,6 @@
 #Server in the browser
 
-## Why
+##Why
 
 
 Setting up a server against the Internet to run a dynamic web app requires dedicated time investment, with upfront limitations that can go away with money. It can take even more time for beginners. With server in the browser it is possible to run ephemeral application without the cost and hassle of a traditional server. New services appeared lately to tackle those issues in different shapes and forms. Here's one more attempt as many new browser APIs are available now, it was time to explore the possibilities. 
@@ -38,7 +38,7 @@ Custom distributed computing framework with the same model, as worker, trust und
 ##Status
 
 
-alpha version. Some bugs need to be fixed.
+alpha version. Some bugs need to be fixed. The design and usage flow may change.
 
 
 ##Try
@@ -72,8 +72,8 @@ The last build result is included for convenience.
 
 
  * `npm install`
- * `npm install concat-file-array-cli -g`
- * `npm install browserify -g`
+ * `npm install concat-file-array-cli@0.0.2 -g`
+ * `npm install browserify@13.0.1 -g`
 
 
 ###build everything 
@@ -85,44 +85,68 @@ The last build result is included for convenience.
 ###build specific files
 
 
- * `npm run buildjs` or
- * `npm run buildcss` or
- * `npm run buildhtml` or
+ * `npm run buildjs`
+ * `npm run buildcss`
+ * `npm run buildhtml`
  * `npm run builddoc`
 
 
 ##Tests
 
 
-client/js/tests/SpecRunner.html
+Launch `client/js/tests/SpecRunner.html`
 
 
 ##Dependencies
 
 
-zip.js by Gildas
+[open_source](client/html/built/open_source.min.html)
 
-https://github.com/gildas-lormeau/zip.js
-
-
-`adapter.js` for WebRTC.
-    
-
-also see package.json
+also see [package.json](./package.json)
 
 
 ##License
 
-Some dependencies inlcuded in this project have other licenses !
 
-https://creativecommons.org/publicdomain/zero/1.0/legalcode
+[CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/legalcode)
+
+
+###Warning
+
+
+Some dependencies inlcuded in this project have other licenses !
 
 
 ##Contribute
 
 
-See documentation/todo.txt to see next steps. Before doing anything please consider [discussing with us](https://dystroy.org/miaou/3) (free Github account is required), the what, why and how. To report an issue , [it is over here](https://github.com/GrosSacASac/server-in-the-browser/issues).
+###Help 
 
+See [todo](documentation/todo.txt) to see next steps. Before doing anything please consider [discussing with us](https://dystroy.org/miaou/3) (free Github account is required), the what, why and how. 
+
+
+###Report issue
+
+To report an issue , [it is over here](https://github.com/GrosSacASac/server-in-the-browser/issues).
+
+
+###Coding Style
+
+
+JSLint is used. The filename should have an almost identical name to the single variable that is exported. Example `bytes.js` exports `bytes`. Preference for declarative looking code over imperative, using lot of functions named to describing what is happening.
+
+
+####Skeleton for a js file:
+
+
+
+    /*FILENAME*/
+    /*Important comments about the file, design decision, todos, etc*/
+    /*jslint directives*/
+    1-2 empty line, then the code
+    variableExported = assignemnt using the facade pattern
+    ...
+    1empy line at the end
 
 
 ##Links

@@ -2,14 +2,11 @@
 todo fix undefined behaviour if there is more than 1 client (active window), client claim
 todo fix, the page gets old js files sometimes, because they are loaded before the new
 todo see if service worker timeout can cause bugs 
-*/
-/*jslint
-    es6, maxerr: 100, browser, devel, fudge, maxlen: 120, white
-*/
-/*global
-    self, fetch, caches, Response, Request, Header, 
-*/
-/*
+
+
+todo maybe swtich to µWS in the future
+
+todo split file in 2 files, service_worker_common.js and my_service_worker.js, 
 a service worker is a special kind of program, it cannot be included with a <script> tag, 
 search for service worker on mdn for more info
 service worker simplified lifecycle
@@ -23,17 +20,27 @@ fetch
 
 https://heycam.github.io/webidl/#es-ByteString
 */
+/*jslint
+    es6, maxerr: 100, browser, devel, fudge, maxlen: 120, white
+*/
+/*global
+    self, fetch, caches, Response, Request, Header, 
+*/
+
 
 "use strict";
 
-const version = "2.0.23"; // update if this file changes todo make run build do useless ?
-const latestCacheVersion = version; // update if the cache files change
+const SERVICE_WORKER_VERSION = "3.0.1"; // update if this file changes todo make run build do useless ?
+const CACHE_VERSION = SERVICE_WORKER_VERSION; // update if the cache files change
 //const ressourcesToSaveInCache = ["/"];
 const HOME = "/";
 const OFFLINE_ALTERNATIVE = "/offline";
 /*see server/serve.js staticFileFromUrl variable*/
 const ressourcesToSaveInCache = [
+    /*"/", not included to enable the offline page support to appear, 
+    todo change mechanism*/
     OFFLINE_ALTERNATIVE,
+    "app",
     "/favicon.png",
     "/css",
     "/doc.css",
@@ -59,7 +66,7 @@ const rejectFromRessource = {};
 const timeOutIdFromRessource = {};
 // todo put all into single container
 
-const resolveAskPageForRessource = function (ressource) {
+const resolveFetchFromPeerToPeer = function (ressource) {
     clearTimeout(timeOutIdFromRessource[ressource]);
     resolveFromRessource[ressource](answerFromRessource[ressource]);
     delete answerFromRessource[ressource];//stop listening
@@ -67,7 +74,7 @@ const resolveAskPageForRessource = function (ressource) {
     delete rejectFromRessource[ressource];
 };
 
-const rejectAskPageForRessource = function (ressource, reason) {
+const rejectFetchFromPeerToPeer = function (ressource, reason) {
     if (rejectFromRessource[ressource]) {
         rejectFromRessource[ressource](reason);
         delete resolveFromRessource[ressource];
@@ -75,7 +82,7 @@ const rejectAskPageForRessource = function (ressource, reason) {
     }
 };
 
-const askPageForRessource = function (customRequestObject) {
+const fetchFromPeerToPeer = function (customRequestObject) {
     /*asks all page for a ressource*/
 
     const ressource = customRequestObject.header.ressource;
@@ -84,10 +91,10 @@ const askPageForRessource = function (customRequestObject) {
         resolveFromRessource[ressource] = resolve;
         rejectFromRessource[ressource] = reject;
         if (answerFromRessource.hasOwnProperty(ressource)) {
-            resolveAskPageForRessource(ressource);
+            resolveFetchFromPeerToPeer(ressource);
         }
         timeOutIdFromRessource[ressource] = setTimeout(function() {
-            rejectAskPageForRessource(ressource, "No answer after 10 seconds");
+            rejectFetchFromPeerToPeer(ressource, "No answer after 10 seconds");
         }, rtcFetchDelay);
     });
     
@@ -99,39 +106,91 @@ const askPageForRessource = function (customRequestObject) {
     return promise;
 };
 
+const logInTheUI = (function () {
+    console.log("logInTheUI function exists");
+    return function (what) {
+        self.clients.matchAll().then(function(clientList) {
+            clientList.forEach(function(client) {
+                client.postMessage({LOG: what});
+            });
+        });
+    };
+}());
+
+const fetchFromMainServer = function (request, options = {}) {
+    /*wrap over fetch. The problem with fetch here, it doesn't reject properly sometimes
+    see if statement below*/
+    return fetch(request, options).then(function (fetchResponse) {
+        // console.log("fetchFromMainServer:", fetchResponse.ok, fetchResponse);
+        if ((!fetchResponse) || (!fetchResponse.ok)) {
+            return Promise.reject("fetch failed");
+        }
+        return fetchResponse;
+    });
+};
+
+
+const fetchFromCache = function (request) {
+    return caches.open(CACHE_VERSION).then(function (cache) {
+        return cache.match(request).then(function (CacheResponse) {
+            //console.log("fetchFromCache:", CacheResponse.ok, CacheResponse);
+            if ((!CacheResponse) || (!CacheResponse.ok)) {
+                return Promise.reject("Not in Cache");
+            }
+            return CacheResponse;
+        });
+    });
+};
+
 const isLocalURL = function (url) {
     return !(String(url).match("rtc"));
 };
 
+const fillServiceWorkerCache = function () {
+    /* save in cache some static ressources 
+    this happens before activation */
+    return caches.open(CACHE_VERSION).then(function(cache) {
+        return cache.addAll(ressourcesToSaveInCache);
+    });
+};
+
+const deleteServiceWorkerOldCache = function () {
+    return caches.keys().then(function (cacheVersions) {
+        return Promise.all(
+            cacheVersions.map(function (cacheVersion) {
+                if (CACHE_VERSION === cacheVersion) {
+                    //console.log("No change in cache");
+                } else {
+                    //console.log("New SERVICE_WORKER_VERSION of cache, delete old");
+                    return caches.delete(cacheVersion);          
+                }
+            })
+        );
+    });
+};
+const useOfflineAlternative = function () {
+    return fetchFromCache(new Request(OFFLINE_ALTERNATIVE));
+};
 
 self.addEventListener("install", function (event) {
-    // save in cache some static ressources
+    /*the install event can occur while another service worker is still active
+    
+    waitUntil blocks the state (here installing) of the service worker until the 
+    promise is fulfilled (resolved or rejected). It is useful to make the service worker more readable and more deterministic*/
     event.waitUntil(
-        caches.open(latestCacheVersion).then(function(cache) {
-            return cache.addAll(ressourcesToSaveInCache);
-        }).then(function() {
-            //console.log("[ServiceWorker] Skip waiting on install caches:", caches);
-            return self.skipWaiting();
-        })
+        fillServiceWorkerCache()
+        .then(skipWaiting)
+        .catch(skipWaiting)
     );
 });
 
 self.addEventListener("activate", function (event) {
-    //delete old cache versions if necessary
-    event.waitUntil(
-        caches.keys().then(function (cacheVersions) {
-            return Promise.all(
-                cacheVersions.map(function (cacheVersion) {
-                    if (latestCacheVersion === cacheVersion) {
-                        //console.log("No change in cache");
-                    } else {
-                        //console.log("New version of cache, delete old");
-                        return caches.delete(cacheVersion);          
-                    }
-                })
-            );
-        })
-    );
+    /* about to take over, other service worker are killed after activate, syncronous
+    a good moment to clear old cache*/
+    event.waitUntil(deleteServiceWorkerOldCache().then(function() {
+        //console.log("[ServiceWorker] Skip waiting on install caches:", caches);
+        return self.clients.claim();
+    }));
 });
 
 self.addEventListener("message", function (event) {
@@ -147,7 +206,7 @@ self.addEventListener("message", function (event) {
     answerFromRessource[ressource] = answer;
     //console.log(ressource, answer, resolveFromRessource);
     if (resolveFromRessource.hasOwnProperty(ressource)) {//
-        resolveAskPageForRessource(ressource);
+        resolveFetchFromPeerToPeer(ressource);
     }
 });
 
@@ -158,90 +217,95 @@ self.addEventListener("fetch", function (fetchEvent) {
     syncronously fetchEvent.respondWith must be called with a response object or a 
     promise that resolves with a response object. if fetchEvent.respondWith is called 
     later in a callback the browser will take over and asks the remote server directly, do not do that
+    
+    why have fetchEvent.respondWith( and not respond with the return value of the callback function ?
+    -->
+    It allows to do other thing before killing the service worker, like saving stuff in cache
     */
     const request = fetchEvent.request;//Request implements Body;
+    const requestClone = request.clone();//Request implements Body;
     const url = request.url;
+    logInTheUI(["fetch"]);
     // Needs to activate to handle fetch
     if (isLocalURL(url)) {
         //Normal Fetch
-        fetchEvent.respondWith(
-            caches.match(request).then(function (response) {
 
+        logInTheUI(["Normal Fetch"]);
+        fetchEvent.respondWith(
+            fetchFromCache(request).then(function (cacheResponse) {
+                /* cannot use request again from here, use requestClone */
                 //console.log(request, url);
-                if (response) {
-                    // We have it in the cache
-                    return response;
-                }
+                return cacheResponse;
+            }).catch(function (reason) {
                 // We don't have it in the cache, fetch it
-                return fetch(request).then(function (fetchResponse) {
-                    if (fetchResponse) {
-                        return fetchResponse;
-                    }
-                }).catch(function (reason) {
-                    if ((origin + HOME) === url) {
-                        //if it is the landing page that is asked
-                        return caches.match(new Request(OFFLINE_ALTERNATIVE));
-                        //todo if we are offline , siplay /offline directly
-                    }
-                    throw new Error(reason);
-                });
+                return fetchFromMainServer(requestClone);
+            }).then(function (mainServerResponse) {
+                return mainServerResponse;
+            }).catch(function (reason) {
+                if ((origin + HOME) === url) {
+                    //if it is the landing page that is asked
+                    return useOfflineAlternative();
+                    //todo if we are offline , siplay /offline directly
+                }
+                return Promise.reject(reason);
             })
         );
-        return;
+    } else {
+        //Special Fetch
+        //console.log(SERVICE_WORKER_VERSION, "rtc fetch" url:", fetchEvent.request.url);
+        // request, url are defined 
+        const method = request.method;
+        const requestHeaders = request.headers;
+
+        logInTheUI(["Special Fetch"]);
+        const customRequestObject = {
+            header: {
+                ressource: url.substring(url.indexOf("rtc/") + rtcLength),
+                method
+            },
+            body: ""
+        };
+        requestHeaders.forEach(function (value, key) {
+            //value, key correct order
+            //is there a standard way to use Object.assign with Map like iterables ?
+            //todo handle duplicates
+            //https://fetch.spec.whatwg.org/#terminology-headers            
+            customRequestObject.header[key] = value;
+        });
+
+        //console.log(request);
+        fetchEvent.respondWith(
+            /*should provide the peer the full request*/
+            request.arrayBuffer().then(function (bodyAsArrayBuffer) {
+                const bodyUsed = request.bodyUsed;
+                if (bodyUsed && bodyAsArrayBuffer) {
+                    customRequestObject.body = bodyAsArrayBuffer;
+                }
+            }).catch(function (reason) {
+                /*console.log("no body sent, a normal GET or HEAD request has no body", 
+                reason);*/
+            }).then(function (notUsed) {
+                return fetchFromPeerToPeer(customRequestObject);
+            }).then(function (response) {
+                const responseInstance = new Response(response.body, {
+                    headers: response.header,
+                    status: response.header.status || 200,
+                    statusText : response.header.statusText || "OK"
+                });
+                
+                return responseInstance;
+            }).catch(function (error) {
+                const responseInstance = new Response(`<html><p>${error}</p></html>`,
+                    {
+                    headers: {
+                        "Content-type": "text/html"
+                    },
+                    status: 500,
+                    statusText : "timedout"
+                });
+                
+                return responseInstance;
+            })
+        );
     }
-    //Special Fetch
-    //console.log(version, "rtc fetch" url:", fetchEvent.request.url);
-    // request, url are defined 
-    const method = request.method;
-    const requestHeaders = request.headers;
-
-    const customRequestObject = {
-        header: {
-            ressource: url.substring(url.indexOf("rtc/") + rtcLength),
-            method
-        },
-        body: ""
-    };
-    requestHeaders.forEach(function (value, key) {
-        //value, key correct order
-        //is there a standard way to use Object.assign with Map like iterables ?
-        //todo handle duplicates
-        //https://fetch.spec.whatwg.org/#terminology-headers            
-        customRequestObject.header[key] = value;
-    });
-
-    //console.log(request);
-    fetchEvent.respondWith(
-        /*should provide the peer the full request*/
-        request.arrayBuffer().then(function (bodyAsArrayBuffer) {
-            const bodyUsed = request.bodyUsed;
-            if (bodyUsed && bodyAsArrayBuffer) {
-                customRequestObject.body = bodyAsArrayBuffer;
-            }
-        }).catch(function (reason) {
-            /*console.log("no body sent, a normal GET or HEAD request has no body", 
-            reason);*/
-        }).then(function (notUsed) {
-            return askPageForRessource(customRequestObject);
-        }).then(function (response) {
-            const responseInstance = new Response(response.body, {
-                headers: response.header,
-                status: response.header.status || 200,
-                statusText : response.header.statusText || "OK"
-            });
-            
-            return responseInstance;
-        }).catch(function (error) {
-            const responseInstance = new Response(`<html><p>${error}</p></html>`,
-                {
-                headers: {
-                    "Content-type": "text/html"
-                },
-                status: 500,
-                statusText : "timedout"
-            });
-            
-            return responseInstance;
-        })
-    );
 });

@@ -71,6 +71,6 @@ Alternatively, it is also possible to manually copy paste the server program in 
 Open the setting Panel, and make a request to change name.
 
 
-##How to delet all data and exit ?
+##How to delete all data and exit ?
 
 Open the setting Panel, and click "Delete all data and quit". Then close every tab related to Server in the browser.

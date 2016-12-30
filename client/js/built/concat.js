@@ -2700,7 +2700,7 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
     
     return API;
 }());
-/*uiFiles.js*/
+/*bytes.js*/
 /*jslint
     es6, maxerr: 15, browser, devel, fudge, maxlen: 100
 */
@@ -3544,6 +3544,7 @@ ${readyCodeText};
 /*serviceWorkerManager.js
 lives on the main thread
 registers service_worker.js
+todo listen to the events and make the app active/not active accordingly
 */
 /*jslint
     es6, maxerr: 100, browser, devel, fudge, maxlen: 120, white
@@ -3557,7 +3558,6 @@ serviceWorkerManager = (function () {
     let serviceWorkerRegistration;
     const register = function () {
         if (!navigator.serviceWorker) {
-            //todo display serviceWorker not available error
             return false;
         }
         //const options = {scope: "./"};
@@ -3573,14 +3573,12 @@ serviceWorkerManager = (function () {
 
         navigator.serviceWorker.addEventListener("message", function(event) {
             const message = event.data;
-            /*
-            if (message.hasOwnProperty("FUTURE")) {
-                navigator.serviceWorker.controller.postMessage({
-                    
-                });                    
+            
+            if (message.hasOwnProperty("LOG")) {
+                ui.serverLog(message.LOG);
                 return;
             }
-            */
+            
             const requestObject = message;
             const ressource = requestObject.header.ressource;
             rtc.rtcRequest(requestObject).then(function (answer) {
@@ -3593,12 +3591,11 @@ serviceWorkerManager = (function () {
         });
         
         navigator.serviceWorker.addEventListener("activate", function(event) {
-
-            //console.log("activate,", location.origin);
+            console.log("serviceWorker: activate", location.origin);
         });
         
         navigator.serviceWorker.addEventListener("controllerchange", function(event) {
-            //console.log("ready, controllerchange:");
+            console.log("serviceWorker: controllerchange");
         });
         return true;//success
     };
@@ -3623,7 +3620,8 @@ serviceWorkerManager = (function () {
         start,
         deleteServiceWorker
     };
-}());//launcher.js
+}());
+//launcher.js
 (function () {
     if (window.test) {
         //console.log("test");

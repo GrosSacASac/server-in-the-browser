@@ -1,7 +1,9 @@
 make index.js the default server programm
 make require work outside yeah
-errors in sw see receipts maybe. somthing is wrong with service worker
-
+fillServiceWorkerCache in service worker rejects in firefox 52 research why
+enter to confirm some options
+connecting ... make it fail faster
+increment service worker version number !!! and/or do network then cache
 full template strings escape in tools for worker
 
 readme upgrade
