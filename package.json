@@ -1,7 +1,7 @@
 {
   "name": "server-in-the-browser",
   "author": "author",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "main": "index.js",
   "dependencies": {
     "dom99": "~1.23.32",
@@ -22,8 +22,10 @@
     "minifyjs3": "uglifyjs client/js/built/all.js --mangle --compress --preamble \"//See client/ to see the source;\" --screw-ie8 --output client/js/built/all.min.js",
     "minifyjs3verbose": "uglifyjs client/js/built/all.js --mangle --compress --preamble \"//See client/ to see the source;\" --screw-ie8 --verbose --lint --output client/js/built/all.min.js",
     "minifylintconclusion": "Ramda is almost not used",
-    "minifyserviceworkerjs4": "uglifyjs client/js/service_worker.js --mangle --compress --screw-ie8 --output client/js/built/service_worker.min.js",
-    "buildjs": "npm run build0jsinsertnodeemulator && npm run build1js && npm run build2js && npm run minifyjs3 && npm run minifyserviceworkerjs4",
+    "bumpversion": "npm version patch --force",
+    "versioninserviceworker4": "node tools/service_worker_version.js",
+    "minifyserviceworkerjs5": "uglifyjs client/js/built/service_worker_with_version.js --mangle --compress --screw-ie8 --output client/js/built/service_worker.min.js",
+    "buildjs": "npm run build0jsinsertnodeemulator && npm run build1js && npm run build2js && npm run minifyjs3 && npm run bumpversion && npm run versioninserviceworker4 && npm run minifyserviceworkerjs5",
     "buildcss1": "cd client/css && concat-files base.css header.css userlist.css fileinput.css yesNoDialog.css -o built/all.css && cd ../..",
     "minifycss2": "csso client/css/built/all.css  client/css/built/all.min.css",
     "buildcss3": "cd client/css && concat-files base.css header.css pre.css -o built/documentation.css && cd ../..",
