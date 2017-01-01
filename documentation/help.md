@@ -74,3 +74,8 @@ Open the setting Panel, and make a request to change name.
 ##How to delete all data and exit ?
 
 Open the setting Panel, and click "Delete all data and quit". Then close every tab related to Server in the browser.
+
+
+##How to report an issue ?
+
+To report an issue , [it is over here](https://github.com/GrosSacASac/server-in-the-browser/issues).

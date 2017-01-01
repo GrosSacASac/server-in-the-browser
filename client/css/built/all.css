@@ -52,8 +52,10 @@ a.disabled, [hidden], template {
 /*header.css*/
 header {
   width: 100%;
+  /*
   padding: 0 8px;
-  margin: 0 -8px;
+  margin: 0 0;
+  */
 }
 
 header > h1 {
@@ -76,13 +78,11 @@ header > nav {
 
 header > nav > ul {
   list-style: none;
-  width: 100%;
   margin: 0;
   padding-bottom: 2px;
 }
 
 header > nav > ul > li {
-  width: 100%;
   display: inline;
   padding-right: 20px;
 }

@@ -21,10 +21,12 @@ Loading is more correct term. Algorithm:
  * For each file name
     * Check if a ressource with a similar name is already loaded
         * If yes prompt pause and ask the user
-            * Overwrite the old ressource and do the same for all the others
-            * Overwrite only this one
-            * Ignore this new file and continue
-            * Cancel everything
+            * Overwrite the old ressource 
+                * and do the same for all the others not yet implemented
+            * Do not overwrite the old ressource
+            * Overwrite only this one not yet implemented
+            * Ignore this new file and continue not yet implemented
+            * Cancel everything not yet implemented
     * Load the file content, its file name and other interesting attributes (such as MIME-type) in the memory of the sofware.
  * For each file name
     * Check if the fileName is "package.json"

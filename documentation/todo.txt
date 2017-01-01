@@ -1,5 +1,7 @@
 make index.js the default server programm
 
+think about notification design
+
 make require work outside yeah
 
 try to guess max DataChannel brandwitdth, is it 30kbs ?
@@ -8,9 +10,11 @@ enter to confirm some options
 
 connecting ... make it fail faster
 
-increment service worker version number also for nahrung !!! and/or do network then cache
+service worker claim does not always work ?
 
 full template strings escape in tools for worker
+
+visit https://github.com/jvilk/BrowserFS
 
 readme upgrade
 high level overview how it works

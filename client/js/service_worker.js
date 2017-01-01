@@ -3,10 +3,13 @@ todo fix undefined behaviour if there is more than 1 client (active window), cli
 todo fix, the page gets old js files sometimes, because they are loaded before the new
 todo see if service worker timeout can cause bugs 
 
+todo how to update the cache with just 1 or 2 files an not do a request for things that didn't change. Concat css and js files still a good practice, for first visit always, but do some research for later visits with cache invalidation so that not everything has to be reloaded
 
 todo maybe swtich to µWS in the future
 
 todo split file in 2 files, service_worker_common.js and my_service_worker.js, 
+
+
 a service worker is a special kind of program, it cannot be included with a <script> tag, 
 search for service worker on mdn for more info
 service worker simplified lifecycle
@@ -108,7 +111,7 @@ const fetchFromPeerToPeer = function (customRequestObject) {
 };
 
 const logInTheUI = (function () {
-    console.log("logInTheUI function exists");
+    //console.log("logInTheUI function exists");
     return function (what) {
         self.clients.matchAll().then(function(clientList) {
             clientList.forEach(function(client) {
@@ -173,6 +176,13 @@ const fillServiceWorkerCache2 = function () {
     });
 };
 
+const latePutToCache = function (request, response) {
+    return caches.open(CACHE_VERSION).then(function(cache) {
+        cache.put(request, response.clone());
+        return response;
+    });
+};
+
 const deleteServiceWorkerOldCache = function () {
     return caches.keys().then(function (cacheVersions) {
         return Promise.all(
@@ -187,8 +197,15 @@ const deleteServiceWorkerOldCache = function () {
         );
     });
 };
+
 const useOfflineAlternative = function () {
     return fetchFromCache(new Request(OFFLINE_ALTERNATIVE));
+};
+
+const isAppPage = function (url) {
+    /*appPage does not work offline, and we don't serve it if offline
+    returns Boolean*/
+    return (origin + HOME) === url;
 };
 
 self.addEventListener("install", function (event) {
@@ -244,7 +261,7 @@ self.addEventListener("fetch", function (fetchEvent) {
     It allows to do other thing before killing the service worker, like saving stuff in cache
     */
     const request = fetchEvent.request;//Request implements Body;
-    const requestClone = request.clone();//Request implements Body;
+    //const requestClone = request.clone(); //no need to clone ?
     const url = request.url;
     if (logLater) {
         logLater.forEach(logInTheUI);
@@ -263,11 +280,20 @@ self.addEventListener("fetch", function (fetchEvent) {
                 return cacheResponse;
             }).catch(function (reason) {
                 // We don't have it in the cache, fetch it
-                return fetchFromMainServer(requestClone);
+                return fetchFromMainServer(request);
             }).then(function (mainServerResponse) {
-                return mainServerResponse;
+                if (isAppPage(url)) {
+                    return mainServerResponse;
+                }
+                return latePutToCache(request, mainServerResponse).catch(
+                    function (reason) {
+                        /*failed to put in cache do not propagate catch, not important enough*/
+                        return mainServerResponse;
+                    }
+                );
+
             }).catch(function (reason) {
-                if ((origin + HOME) === url) {
+                if (isAppPage(url)) {
                     //if it is the landing page that is asked
                     return useOfflineAlternative();
                     //todo if we are offline , siplay /offline directly
