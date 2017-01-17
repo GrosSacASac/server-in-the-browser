@@ -21,3 +21,53 @@ This allows 1 dashboard page to keep rtc peer connections alive while other page
 
 To inform the user about connectivity loss which happen often in p2p application, we use Notification API.
 
+
+##About the Notification API
+
+
+The Notification API, enables interaction that are impossible to replicate with just HTML + JS.
+
+
+ * Display a Notification while no tabs are open  (with service worker)
+ * Display a Notification while visiting other sites 
+ 
+
+https://github.com/Nickersoft/push.js
+
+
+###Alternatives
+
+
+Before the Notification API was introduced, to get an user attention, one could
+
+
+ * Change the title text and icon (favicon) repeatedly with an time interval
+
+
+##Notification Groups
+
+
+Notification Groups or Tags are grouped by a shared String. When the user uses the application, two notification from the same group will not stack, but collapse instead;the most young overwites the oldest. Example of end visual result of 3 Notification displayed in a short period:
+
+
+Without Group:
+
+
+ * You are Offline !
+ * You are Online !
+ * You are Offline !
+
+
+With Group
+
+
+ * You are Offline !
+
+
+Groups are usefull to reduce clutter from the interface. Groups used:
+
+
+ * Online State 
+ * Selected Peer State 
+ * System status
+ * Chat

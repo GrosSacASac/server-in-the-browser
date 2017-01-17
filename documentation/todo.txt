@@ -2,7 +2,9 @@ make index.js the default server programm
 
 think about notification design
 
-make require work outside yeah
+make require work with custom scripts that are imported
+
+in the delete all callback, delete all the cache see https://developer.mozilla.org/en-US/docs/Web/API/Cache/delete and service_worker.js
 
 try to guess max DataChannel brandwitdth, is it 30kbs ?
 
@@ -54,17 +56,16 @@ http://danml.com/download.html for mobile download without opening a new tab
 
 is minfied js consiedered binary form for license ?
 
-loading experience display an erro while loading ... not good
-
-how to report a bug ? github issues maybe 
+loading experience display an erro while loading ... not good (invisble if less than 0.5 second, very bad UX otherwise)
 
 
-translate
+
+translate projects
 
 
 make it work without server after the first time, if there are enough users connected
 
-store peers info in localstorage
+store peers info in localstorage, do not request same info twice
 
 stateless server
 
