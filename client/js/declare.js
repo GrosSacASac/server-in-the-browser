@@ -29,7 +29,9 @@ let localData;
 let serviceWorkerManager;  
 let browserServer;
 let localDisplayedName = "";
+let isOnLine = true;
 window.test = window.test || false;
+
 
 
 const R = require("ramda");

@@ -22,7 +22,7 @@
         <noscript>
             <p>JavaScript must be enabled to use Server in the browser</p>
         </noscript>
-        <p id="starterror">There was an error in the program, please download the latest <a target="_blank" href="https://www.mozilla.org/en-US/firefox/new/?scene=2">firefox or chrome version</a>.</p>
+        <p id="starterror">There was an error in the program, please download the latest <a target="_blank" rel="noopener noreferrer" href="https://www.mozilla.org/en-US/firefox/new/?scene=2" >firefox or chrome version</a>.</p>
         <p id="requirementerror"></p>
         <p data-fx="click-debug"><span data-vr="log" id="log"></span></p>
         
@@ -51,7 +51,12 @@
                         <button hidden>future addition</button>
                     </template>
                     <ul data-el="connected_users" class="userlist"></ul>
-                    <p><a data-el="indexLink" class="disabled" target="_blank" href="rtc/">Visit selected index</a></p>
+                    <p><a 
+                        data-el="indexLink"
+                        class="disabled"
+                        target="_blank"
+                        href="rtc/"
+                        rel="noopener noreferrer">Visit selected index</a></p>
                 </section>
             </details>
 

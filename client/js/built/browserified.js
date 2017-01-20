@@ -153,7 +153,9 @@ let localData;
 let serviceWorkerManager;  
 let browserServer;
 let localDisplayedName = "";
+let isOnLine = true;
 window.test = window.test || false;
+
 
 
 const R = require("ramda");
@@ -1625,7 +1627,7 @@ ui = (function () {
         D.linkJsAndDom();
         let i = 0;
         const splitTextContentHref = function (link) {
-            return {innerHTML: `<a href="${link}" target="_blank">${link}</a>`};
+            return {innerHTML: `<a href="${link}" target="_blank" rel="noopener noreferrer">${link}</a>`};
         };
         Object.keys(nonMetRequirement).forEach(function (technicalName) {
             i += 1;
@@ -3833,6 +3835,23 @@ serviceWorkerManager = (function () {
                 event.preventDefault();
             }
         }, false);
+        
+        const updateOnLineState = function (event) {
+            isOnLine = navigator.onLine;
+            let text;
+            if (isOnLine) {
+                text = "Connected to the network";
+            } else {
+                text = "Not connected to the network";
+            }
+            const onLineNotification = new Notification("Online Status", {
+                body: text,
+                tag: "onLine",
+                noscreen: true /* don't force turn on screen*/
+            });
+        };
+        window.addEventListener("online", updateOnLineState);
+        window.addEventListener("offline", updateOnLineState);
     };
     if (accepted) {
         startServiceWorkerAndSockets();

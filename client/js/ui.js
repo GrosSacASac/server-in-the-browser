@@ -218,7 +218,7 @@ ui = (function () {
         D.linkJsAndDom();
         let i = 0;
         const splitTextContentHref = function (link) {
-            return {innerHTML: `<a href="${link}" target="_blank">${link}</a>`};
+            return {innerHTML: `<a href="${link}" target="_blank" rel="noopener noreferrer">${link}</a>`};
         };
         Object.keys(nonMetRequirement).forEach(function (technicalName) {
             i += 1;

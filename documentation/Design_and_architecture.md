@@ -67,7 +67,7 @@ With Group
 Groups are usefull to reduce clutter from the interface. Groups used:
 
 
- * Online State 
- * Selected Peer State 
- * System status
- * Chat
+ * Online State: onLine
+ * Selected Peer State: peerState 
+ * System status: system
+ * Chat: chat

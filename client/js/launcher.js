@@ -86,6 +86,23 @@
                 event.preventDefault();
             }
         }, false);
+        
+        const updateOnLineState = function (event) {
+            isOnLine = navigator.onLine;
+            let text;
+            if (isOnLine) {
+                text = "Connected to the network";
+            } else {
+                text = "Not connected to the network";
+            }
+            const onLineNotification = new Notification("Online Status", {
+                body: text,
+                tag: "onLine",
+                noscreen: true /* don't force turn on screen*/
+            });
+        };
+        window.addEventListener("online", updateOnLineState);
+        window.addEventListener("offline", updateOnLineState);
     };
     if (accepted) {
         startServiceWorkerAndSockets();
