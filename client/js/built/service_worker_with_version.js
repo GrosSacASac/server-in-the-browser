@@ -33,7 +33,7 @@ https://heycam.github.io/webidl/#es-ByteString
 
 "use strict";
 
-const SERVICE_WORKER_VERSION = "0.9.13"; // updated with tools/service_worker_version.js (String)
+const SERVICE_WORKER_VERSION = "0.9.18"; // updated with tools/service_worker_version.js (String)
 const CACHE_VERSION = SERVICE_WORKER_VERSION;
 //const ressourcesToSaveInCache = ["/"];
 const HOME = "/";
@@ -272,6 +272,11 @@ self.addEventListener("fetch", function (fetchEvent) {
     if (isLocalURL(url)) {
         //Normal Fetch
 
+        if (request.method ==='POST') {
+            // do not handle post requests
+            return;
+        }
+        
         //logInTheUI(["Normal Fetch"]);
         fetchEvent.respondWith(
             fetchFromCache(request).then(function (cacheResponse) {
@@ -302,7 +307,7 @@ self.addEventListener("fetch", function (fetchEvent) {
             })
         );
     } else {
-        //Special Fetch
+        // Peer to peer Fetch
         //console.log(SERVICE_WORKER_VERSION, "rtc fetch" url:", fetchEvent.request.url);
         // request, url are defined 
         const method = request.method;

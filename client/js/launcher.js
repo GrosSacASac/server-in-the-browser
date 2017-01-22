@@ -88,6 +88,9 @@
         }, false);
         
         const updateOnLineState = function (event) {
+            if (!notificationEnabled) {
+                return;
+            }
             isOnLine = navigator.onLine;
             let text;
             if (isOnLine) {
@@ -100,6 +103,7 @@
                 tag: "onLine",
                 noscreen: true /* don't force turn on screen*/
             });
+            setTimeout(onLineNotification.close.bind(onLineNotification), MAX_NOTIFICATION_TIME); 
         };
         window.addEventListener("online", updateOnLineState);
         window.addEventListener("offline", updateOnLineState);

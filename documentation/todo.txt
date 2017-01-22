@@ -1,6 +1,5 @@
 make index.js the default server programm
 
-think about notification design
 
 make require work with custom scripts that are imported
 

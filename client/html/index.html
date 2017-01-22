@@ -121,13 +121,34 @@
                 <summary>Settings</summary>
                 <section data-el="settings">
                     <div>
-                        <label>Change your ID: <input data-vr="newId" data-el="newId" type="text" min="4" max="25" pattern="[a-zA-Z0-9]+" title="An ID is 4 to 25 characters long, and only etters from a to Z and digits from 0 to 9  are allowed"></label><button data-fx="click-idChangeRequest"  data-el="idChangeRequestButton">Request ID change</button><p data-vr="idChangeFeedback"></p>
+                        <label>
+                            Change your ID:
+                            <input data-vr="newId" data-el="newId" type="text" min="4" max="25" pattern="[a-zA-Z0-9]+" title="An ID is 4 to 25 characters long, and only etters from a to Z and digits from 0 to 9  are allowed">
+                        </label>
+                        <button data-fx="click-idChangeRequest"
+                            data-el="idChangeRequestButton"
+                        >Request ID change</button>
+                        <p data-vr="idChangeFeedback"></p>
                     </div>
                     <div>
                         <button data-fx="click-deleteAll">Delete all data and quit</button>
                     </div>
                     <div>
-                        <label><input data-vr="warnBeforeLeave" data-fx="warnBeforeLeaveChange" type="checkbox">Warn before leaving</label>
+                        <label>
+                            <input data-vr="warnBeforeLeave" data-fx="warnBeforeLeaveChange" type="checkbox">
+                            Warn before leaving
+                        </label>
+                    </div>
+                    <div>
+                        <label>
+                            <input
+                                data-vr="wantNotification"
+                                data-fx="wantNotificationChange"
+                                type="checkbox"
+                            >
+                            Display Notification
+                        </label>
+                        <p data-vr="wantNotificationFeedBack"></p>
                     </div>
                 </section>
             </details>

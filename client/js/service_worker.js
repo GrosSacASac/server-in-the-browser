@@ -272,6 +272,11 @@ self.addEventListener("fetch", function (fetchEvent) {
     if (isLocalURL(url)) {
         //Normal Fetch
 
+        if (request.method ==='POST') {
+            // do not handle post requests
+            return;
+        }
+        
         //logInTheUI(["Normal Fetch"]);
         fetchEvent.respondWith(
             fetchFromCache(request).then(function (cacheResponse) {
@@ -302,7 +307,7 @@ self.addEventListener("fetch", function (fetchEvent) {
             })
         );
     } else {
-        //Special Fetch
+        // Peer to peer Fetch
         //console.log(SERVICE_WORKER_VERSION, "rtc fetch" url:", fetchEvent.request.url);
         // request, url are defined 
         const method = request.method;

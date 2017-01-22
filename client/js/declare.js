@@ -30,8 +30,14 @@ let serviceWorkerManager;
 let browserServer;
 let localDisplayedName = "";
 let isOnLine = true;
+let notificationEnabled = false; 
+/* true if supported;
+    permission granted,
+    and activated
+    */
 window.test = window.test || false;
 
+const MAX_NOTIFICATION_TIME = 8000; // ms
 
 
 const R = require("ramda");

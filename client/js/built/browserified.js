@@ -154,6 +154,11 @@ let serviceWorkerManager;
 let browserServer;
 let localDisplayedName = "";
 let isOnLine = true;
+let notificationEnabled = false; 
+/* true if supported;
+    permission granted,
+    and activated
+    */
 window.test = window.test || false;
 
 
@@ -1654,40 +1659,6 @@ ui = (function () {
     const start = function () {
         D.linkJsAndDom();
         uiFiles.start();
-        const removeAndForget = function (elementName) {
-            D.el[elementName].remove();
-            D.forgetKey(elementName);
-        };
-        removeAndForget("missingFeatures");
-        removeAndForget("missingFeatureTemplate");
-        displayNonMetRequirement = undefined;
-
-        D.vr.log = "Starting ...";
-        D.el.input.disabled = true;
-        D.el.send_button.disabled = true;
-        D.vr.input = "";
-        D.vr.output = "";
-        D.vr.newId = "";
-        D.vr.warnBeforeLeave = localData.getElseDefault("warnBeforeLeave", "false");
-        D.vr.useCustom = false;
-        D.vr.your_id = "not yet connected";
-        D.vr.localServerAvailability = false;
-        //needs to be same as handleRequestDefault
-        D.vr.userCode = `const http = require("http");
-const hostname = "127.0.0.1";
-const port = 3000;
-
-const server = http.createServer((req, res) => {
-  res.statusCode = 200;
-  res.setHeader("Content-Type", "text/plain");
-  res.end("Hello World\\n");
-});
-
-server.listen(port, hostname, () => {
-  console.log(\`Server running at http://\${hostname}:\${port}/\`);
-});
-`;
-
         D.fx.acceptAndStart = function (event) {
             acceptConditionResolve();
             display(true);
@@ -1711,6 +1682,49 @@ server.listen(port, hostname, () => {
             localData.set("warnBeforeLeave", D.bool(D.vr.warnBeforeLeave));
             //todo display change saved
         };
+        
+        D.fx.wantNotificationChange = function (event) {
+            // notificationEnabled = false
+            const wantNotification = D.bool(D.vr.wantNotification);
+            let feedBackText;
+            
+            if (wantNotification) {
+                if (!("Notification" in window)) {
+                    feedBackText = "This browser does not support desktop notification, or this option has been disabled";
+                    notificationEnabled = false;
+                    localData.set("notifications", notificationEnabled);
+                    D.vr.wantNotification = notificationEnabled;
+                } else {
+                
+                    if (Notification.permission === "granted") {
+                        feedBackText = "Notifications enabled";
+                        notificationEnabled = true;
+                        localData.set("notifications", notificationEnabled);
+                    } else {
+                        feedBackText = "Waiting for autorization";
+                        D.vr.wantNotification = false;
+                        Notification.requestPermission(function (permission) {
+                            if (permission === "granted") {
+                                D.vr.wantNotificationFeedBack = "Notifications enabled";
+                                notificationEnabled = true;
+                                localData.set("notifications", notificationEnabled);
+                                D.vr.wantNotification = notificationEnabled;
+                            } else {
+                                D.vr.wantNotificationFeedBack = "Notifications access denied";
+                                notificationEnabled = false;
+                                localData.set("notifications", notificationEnabled);
+                            }
+                        });
+                    }                
+                }
+            } else {
+                feedBackText = "Notifications disabled";
+                notificationEnabled = false;
+                localData.set("notifications", notificationEnabled);
+            }
+            D.vr.wantNotificationFeedBack = feedBackText;
+        };
+          
         
         D.fx.useCustom = function (event) {
             /*USE custom index.js as the pseudo server*/
@@ -1796,6 +1810,43 @@ server.listen(port, hostname, () => {
                 }
             });
         };
+        const removeAndForget = function (elementName) {
+            D.el[elementName].remove();
+            D.forgetKey(elementName);
+        };
+        removeAndForget("missingFeatures");
+        removeAndForget("missingFeatureTemplate");
+        displayNonMetRequirement = undefined;
+
+        D.vr.log = "Starting ...";
+        D.el.input.disabled = true;
+        D.el.send_button.disabled = true;
+        D.vr.input = "";
+        D.vr.output = "";
+        D.vr.newId = "";
+        D.vr.warnBeforeLeave = localData.getElseDefault("warnBeforeLeave", "false");
+        D.vr.wantNotification = localData.getElseDefault("notifications", notificationEnabled);
+        D.fx.wantNotificationChange();
+        D.vr.useCustom = false;
+        D.vr.your_id = "not yet connected";
+        D.vr.localServerAvailability = false;
+        //needs to be same as handleRequestDefault
+        D.vr.userCode = `const http = require("http");
+const hostname = "127.0.0.1";
+const port = 3000;
+
+const server = http.createServer((req, res) => {
+  res.statusCode = 200;
+  res.setHeader("Content-Type", "text/plain");
+  res.end("Hello World\\n");
+});
+
+server.listen(port, hostname, () => {
+  console.log(\`Server running at http://\${hostname}:\${port}/\`);
+});
+`;
+
+        
         
         
         
@@ -3837,6 +3888,9 @@ serviceWorkerManager = (function () {
         }, false);
         
         const updateOnLineState = function (event) {
+            if (!notificationEnabled) {
+                return;
+            }
             isOnLine = navigator.onLine;
             let text;
             if (isOnLine) {
