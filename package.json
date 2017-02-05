@@ -1,10 +1,10 @@
 {
   "name": "server-in-the-browser",
   "author": "author",
-  "version": "0.9.18",
+  "version": "0.9.19",
   "main": "index.js",
   "dependencies": {
-    "dom99": "~1.23.32",
+    "dom99": "~2.0.0",
     "express": "~4.14.0",
     "ramda": "~0.21.0",
     "socket.io": "~1.7.1",
