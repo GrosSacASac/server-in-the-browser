@@ -1370,11 +1370,12 @@ let notificationEnabled = false;
     */
 window.test = window.test || false;
 
+const MAX_NOTIFICATION_TIME = 8000; // ms
 
 
 const R = require("ramda");
 const D = require("dom99");
-const yesNoDialog = require("dom99/components/yesNoDialog/yesNoDialog.js").yesNoDialog;
+const { yesNoDialog } = require("dom99/components/yesNoDialog/yesNoDialog.js");
 const socketIo = require("socket.io-client");
 require("webrtc-adapter");//require is enough
 
@@ -2866,7 +2867,6 @@ ui = (function () {
     };
     
     const start = function () {
-        D.linkJsAndDom();
         uiFiles.start();
         D.fx.acceptAndStart = function (event) {
             acceptConditionResolve();
@@ -2877,7 +2877,7 @@ ui = (function () {
         
         D.fx.changeCustom = function (event) {
                     
-            const wantedToUseCustom = D.bool(D.vr.useCustom);
+            const wantedToUseCustom = D.vr.useCustom;
             
             if (wantedToUseCustom) {
                 D.vr.useCustom = false;
@@ -2888,13 +2888,13 @@ ui = (function () {
         };
 
         D.fx.warnBeforeLeaveChange = function (event) {
-            localData.set("warnBeforeLeave", D.bool(D.vr.warnBeforeLeave));
+            localData.set("warnBeforeLeave", D.vr.warnBeforeLeave);
             //todo display change saved
         };
         
         D.fx.wantNotificationChange = function (event) {
             // notificationEnabled = false
-            const wantNotification = D.bool(D.vr.wantNotification);
+            const wantNotification = D.vr.wantNotification;
             let feedBackText;
             
             if (wantNotification) {
@@ -2938,7 +2938,7 @@ ui = (function () {
         D.fx.useCustom = function (event) {
             /*USE custom index.js as the pseudo server*/
             
-            const wantToUseCustom = D.bool(D.vr.useCustom);
+            const wantToUseCustom = D.vr.useCustom;
             
             if (wantToUseCustom) {
                 browserServer.setBrowserServerCode(D.vr.userCode);
@@ -2961,7 +2961,8 @@ ui = (function () {
         };
 
         D.fx.connectToUser = function (event) {
-            const selectedUserId = D.followPath(D.vr, event.dKeys).userDisplayName;
+            const selectedUserUiPiece = D.getParentContext(event.target);
+            const selectedUserId = selectedUserUiPiece.vr.userDisplayName;
             markUserAsConnecting(selectedUserId);
             wantToConnectTo = selectedUserId;
             rtc.startConnectionWith(true, selectedUserId);
@@ -2969,7 +2970,8 @@ ui = (function () {
         };
 
         D.fx.selectUser = function (event) {
-            const selectedUserId = D.followPath(D.vr, event.dKeys).userDisplayName;
+            const selectedUserUiPiece = D.getParentContext(event.target);
+            const selectedUserId = selectedUserUiPiece.vr.userDisplayName;
             //wantToConnectTo = selectedUserId;
             markUserAsSelected(selectedUserId);
         };
@@ -2981,13 +2983,10 @@ ui = (function () {
         };
         
         D.fx.idChangeRequest = function (event) {
-            /*min="4" max="25" pattern="[a-zA-Z0-9]+"*/
-            const MIN = 4;
-            const MAX = 25;
             const PATTERN = /[a-zA-Z0-9]{4,25}/;
             const newId = D.vr.newId;
             const length = newId.length;
-            if (length < MIN || length > MAX || !PATTERN.test(newId)) {
+            if (!PATTERN.test(newId)) {
                 D.vr.idChangeFeedback = UISTRINGS.BAD_ID_FORMAT;
                 return;
             }
@@ -3001,7 +3000,7 @@ ui = (function () {
         //todo needs server confirmation ? not important
             sockets.socket.emit(MESSAGES.LOCAL_SERVER_STATE, {
                 displayedName: localDisplayedName,
-                isServer: D.bool(D.vr.localServerAvailability)
+                isServer: D.vr.localServerAvailability
             });
         };
 
@@ -3015,6 +3014,7 @@ ui = (function () {
                     close websocket
                     uninstall service worker
                     */
+                    D.vr.warnBeforeLeave = false; // don't ask twice
                     location.href = location.href + "quit";
                 }
             });
@@ -3023,13 +3023,9 @@ ui = (function () {
             D.el[elementName].remove();
             D.forgetKey(elementName);
         };
-        removeAndForget("missingFeatures");
-        removeAndForget("missingFeatureTemplate");
         displayNonMetRequirement = undefined;
 
         D.vr.log = "Starting ...";
-        D.el.input.disabled = true;
-        D.el.send_button.disabled = true;
         D.vr.input = "";
         D.vr.output = "";
         D.vr.newId = "";
@@ -3056,9 +3052,10 @@ server.listen(port, hostname, () => {
 `;
 
         
-        
-        
-        
+
+        D.linkJsAndDom();
+        removeAndForget("missingFeatures");
+        removeAndForget("missingFeatureTemplate");
         
     };
     
@@ -3825,7 +3822,7 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
             const originalRessourceName = headerBodyObject.header.ressource;
             if (headerBodyObject.header.method === "MESSAGE") {
                 ui.handleMessage(headerBodyObject, from);
-            } else if (!(D.bool(D.vr.localServerAvailability))) {
+            } else if (!(D.vr.localServerAvailability)) {
                 ;//do nothing
             } else {
                 headerBodyObject.header.ressource = decodeURI(headerBodyObject.header.ressource);
@@ -5065,7 +5062,7 @@ serviceWorkerManager = (function () {
             then we prompt user if really want to leave
             https://html.spec.whatwg.org/#the-beforeunloadevent-interface says to use
             preventDefault but it does not work in a test*/
-            if (D.bool(D.vr.warnBeforeLeave)) {
+            if (D.vr.warnBeforeLeave) {
                 const message = "Are you sure you want to leave ?";
                 /*if (event.preventDefault) {
                     const answer = prompt("Are you sure you want to leave ?");
@@ -5112,6 +5109,7 @@ serviceWorkerManager = (function () {
                 tag: "onLine",
                 noscreen: true /* don't force turn on screen*/
             });
+            setTimeout(onLineNotification.close.bind(onLineNotification), MAX_NOTIFICATION_TIME); 
         };
         window.addEventListener("online", updateOnLineState);
         window.addEventListener("offline", updateOnLineState);
@@ -5124,7 +5122,7 @@ serviceWorkerManager = (function () {
     }
 }());
 
-},{"dom99":15,"dom99/components/yesNoDialog/yesNoDialog.js":14,"ramda":42,"socket.io-client":44,"webrtc-adapter":57}],4:[function(require,module,exports){
+},{"dom99":15,"dom99/components/yesNoDialog/yesNoDialog.js":14,"ramda":41,"socket.io-client":43,"webrtc-adapter":56}],4:[function(require,module,exports){
 module.exports = after
 
 function after(count, callback, err_cb) {
@@ -6009,14 +6007,14 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":38}],14:[function(require,module,exports){
+},{"ms":37}],14:[function(require,module,exports){
 //yesNoDialog.js
 //browserify version
 /*jslint
     es6, maxerr: 15, browser, devel, fudge, maxlen: 100
 */
 /*global
-    Promise
+    Promise, require
 */
 "use strict";
 const D = require("dom99");
@@ -6082,7 +6080,25 @@ module.exports = {
 /*jslint
     es6, maxerr: 200, browser, devel, fudge, maxlen: 100, node
 */
-/**/
+/*
+    need to update all examples and docs
+        
+
+    update readme, make a link to the new docs
+    
+    document DVRP, DVRPL, CONTEXT element extension,
+    use WeakMap instead where supported
+    
+    
+    decide when to use event
+        .target
+        .orignialTarget
+        .currentTarget
+    
+    
+    when to use is="" syntax
+    think about overlying framework
+*/
 const dom99 = (function () {
     "use strict";
 
@@ -6090,7 +6106,9 @@ const dom99 = (function () {
     const variables = {};
     const variablesSubscribers = {};
     const elements = {};
-
+    const functions = {};
+    
+    const templateElementFromCustomElementName = {};
     let pathIn = [];
 
     let variablesPointer = variables;
@@ -6099,21 +6117,16 @@ const dom99 = (function () {
 
     let directiveSyntaxFunctionPairs;
 
-    const functions = {};
-    const templateElementFromCustomElementName = {};
-    const doc = document;
-    const miss = "miss";
-    const value = "value";
-    const textContent = "textContent";
-    const source = "src";
-    const checked = "checked";
+    const MISS = "MISS";
 
     const isNotNullObject = function (x) {
         /*array or object*/
-        return (typeof x === "object" && x !== null && !(x instanceof String));
+        return (typeof x === "object" && x !== null);
     };
 
     const copyArrayFlat = function (array1) {
+        // stop using this
+        // its not GC friendly
         return array1.map((x) => x);
     };
 
@@ -6134,50 +6147,42 @@ const dom99 = (function () {
         });
     };
 
-    const booleanFromBooleanString = function (booleanString) {
-        return (booleanString === "true");
-    };
-
     const valueElseMissDecorator = function (object1) {
         /*Decorator function around an Object to provide a default value
-        Decorated object must have a miss key with the default value associated
+        Decorated object must have a MISS key with the default value associated
         Arrays are also objects
         */
         return function (key) {
             if (object1.hasOwnProperty(key)) {
                 return object1[key];
             }
-            return object1[miss];
+            return object1[MISS];
         };
     };
 
     const propertyFromTag = valueElseMissDecorator({
         //Input Type : appropriate property name to retrieve and set the value
-        "input": value,
-        "textarea": value,
-        "progress": value,
-        "select": value,
-        "img": source,
-        "source": source,
-        "audio": source,
-        "video": source,
-        "track": source,
-        "script": source,
-        "option": value,
-        "link": "href",
-        miss: textContent
+        "INPUT": "value",
+        "TEXTAREA": "value",
+        "PROGRESS": "value",
+        "SELECT": "value",
+        "IMG": "src",
+        "SOURCE": "src",
+        "AUDIO": "src",
+        "VIDEO": "src",
+        "TRACK": "src",
+        "SCRIPT": "src",
+        "OPTION": "value",
+        "LINK": "href",
+        "DETAILS": "open",
+        MISS: "textContent"
     });
-
-    /*booleanProperties = [
-        // add here all relevant boolean properties
-        checked
-    ],*/
 
     const propertyFromInputType = valueElseMissDecorator({
         //Input Type : appropriate property name to retrieve and set the value
-        "checkbox": checked,
-        "radio": checked,
-        miss: value
+        "checkbox": "checked",
+        "radio": "checked",
+        MISS: "value"
     });
 
     const inputEventFromType = valueElseMissDecorator({
@@ -6185,12 +6190,12 @@ const dom99 = (function () {
         "radio": "change",
         "range": "change",
         "file": "change",
-        miss: "input"
+        MISS: "input"
     });
 
     const eventFromTag = valueElseMissDecorator({
-        "select": "change",
-        miss: "input"
+        "SELECT": "change",
+        MISS: "input"
     });
 
     const options = {
@@ -6202,32 +6207,36 @@ const dom99 = (function () {
             directiveVariable: "data-vr",
             directiveElement: "data-el",
             directiveList: "data-list",
-            directiveIn: "data-in"
+            directiveIn: "data-in",
+            directiveTemplate: "data-template"
         },
 
-        variablePropertyFromTagAndType: function (tagName, type) {
-            if (tagName === "input") {
-                return propertyFromInputType(type);
+        variablePropertyFromElement: function (element) {
+            const tagName = element.tagName || element;
+            if (tagName === "INPUT") {
+                return propertyFromInputType(element.type || 'text');
             }
             return propertyFromTag(tagName);
         },
 
-        eventFromTagAndType: function (tagName, type) {
-            if (tagName === "input") {
-                return inputEventFromType(type);
+        eventNameFromElement: function (element) {
+            const tagName = element.tagName;
+            if (tagName === "INPUT") {
+                return inputEventFromType(element.type);
             }
             return eventFromTag(tagName);
         },
 
-        elementsForUserInputList: [
-            "input",
-            "textarea",
-            "select"
+        tagNamesForUserInput: [
+            "INPUT",
+            "TEXTAREA",
+            "SELECT",
+            "DETAILS"
         ]
     };
 
     const createElement2 = function (elementDescription) {
-        const element = doc.createElement(elementDescription.tagName);
+        const element = document.createElement(elementDescription.tagName);
         /*element.setAttribute(attr, value) is good to set initial attr like you do in html
         setAttribute won t change the current .value, for instance, setAttribute is the correct choice for creation
         element.attr = value is good to change the live values*/
@@ -6250,12 +6259,8 @@ const dom99 = (function () {
         }
     };
 
-    const tagFromElement = function (element) {
-        return element.tagName.toLowerCase();
-    };
-
     const customElementNameFromElement = function (element) {
-        return element.getAttribute("is") || tagFromElement(element);
+        return element.getAttribute("is") || element.tagName.toLowerCase();
     };
 
     const addEventListener = function (element, eventName, function1, useCapture = false) {
@@ -6272,62 +6277,42 @@ const dom99 = (function () {
         addEventListener(element, eventName, tempFunction, useCapture);
     };*/
 
-    const applyDirectiveFunction = function (element, hostElement, eventNames, functionNames) {
-        /*todo maybe not copyArrayFlat at each event*/
-        let functionLookUp;
-        const currentLevelPointersAccessPath = copyArrayFlat(pathIn);
-        /*functionLookUp allows us to change functions in D.fx at runtime*/
-
-        if (!eventNames || !functionNames) {
-            if (!eventNames && !functionNames) {
-                console.warn(element,
-'Use data-fx="event1,event2-functionName1,functionName2" format! or "functionName1"');
-                return;
+    const tryApplyDirectiveFunction = function (element, customAttributeValue) {
+        /* todo add warnings for syntax*/
+        customAttributeValue.split(options.listSeparator).forEach(
+            function (customAttributeValueSplit) {
+                const tokens = customAttributeValueSplit.split(options.tokenSeparator);
+                if (tokens.length === 1) {
+                    const functionName = tokens[0];
+                    const eventName = options.eventNameFromElement(element);
+                    applyDirectiveFunction(element, eventName, functionName);
+                } else {
+                    const [eventName, functionName] = tokens;
+                    applyDirectiveFunction(element, eventName, functionName);
+                }
             }
-            // used short hand syntax
-            functionNames = eventNames.split(options.listSeparator);
-            eventNames = [options.eventFromTagAndType(tagFromElement(element), element.type)];
-        } else {
-            //explicit syntax used
-            eventNames = eventNames.split(options.listSeparator);
-            functionNames = functionNames.split(options.listSeparator);
+        );
+    };
+    
+    const applyDirectiveFunction = function (element, eventName, functionName) {
+        if (!functions[functionName]) {
+            console.error(`Event listener ${functionName} not found.`);
+            return;
         }
-
-        if ((eventNames.length === 1) && (functionNames.length === 1)) {
-            /*we only have 1 event type and 1 function*/
-            const functionName = functionNames[0];
-            functionLookUp = function (event) {
-                event.dKeys = copyArrayFlat(currentLevelPointersAccessPath);
-                event.dHost = hostElement;
-                return functions[functionName](event);
-            };
-
-            addEventListener(element, eventNames[0], functionLookUp);
-
-        } else {
-            functionLookUp = function (event) {
-                let last;
-                event.dKeys = copyArrayFlat(currentLevelPointersAccessPath);
-                event.dHost = hostElement;
-                const functionLookUpChain = function (functionName) {
-                    last = functions[functionName](event);
-                };
-
-                functionNames.forEach(functionLookUpChain);
-                return last;
-            };
-
-
-            eventNames.forEach(function (eventName) {
-                addEventListener(element, eventName, functionLookUp);
-            });
-        }
+        addEventListener(element, eventName, functions[functionName]);
     };
 
-    const applyDirectiveList = function (element, variableName, elementListItem) {
+    const applyDirectiveList = function (element, customAttributeValue) {
         /* js array --> DOM list
         <ul data-list="var-li"></ul>
-        todo optimization*/
+        todo optimization
+        always throws away the entire dom list, let user of dom99 opt in in updates strategies such as
+            same length, different content
+            same content, different length
+            key based identification
+            */
+        const [variableName, elementListItem] = customAttributeValue
+            .split(options.tokenSeparator);
         let list;
         let temp;
 
@@ -6344,18 +6329,20 @@ const dom99 = (function () {
             temp = variablesPointer[variableName];
         }
         //Dom99 VaRiable Property for List items
-        element.DVRPL = options.variablePropertyFromTagAndType(elementListItem);
+        // expects an element not tagName !
+        element.DVRPL = options.variablePropertyFromElement(elementListItem.toUpperCase());
+        
 
         Object.defineProperty(variablesPointer, variableName, {
             get: function () {
                 return list;
             },
             set: function (newList) {
-                const fragment = doc.createDocumentFragment();
+                const fragment = document.createDocumentFragment();
                 list = newList;
                 element.innerHTML = "";
                 list.forEach(function (value) {
-                    const listItem = doc.createElement(elementListItem);
+                    const listItem = document.createElement(elementListItem);
                     if (isNotNullObject(value)) {
                         Object.keys(value).forEach(function (key) {
                             listItem[key] = value[key];
@@ -6388,25 +6375,25 @@ const dom99 = (function () {
         The public D.vr.a variable returns this private js variable
 
         undefined assignment are ignored, instead use empty string( more DOM friendly)*/
-        const tagName = tagFromElement(element);
-        const type = element.type;
-        let temp;
 
         if (!variableName) {
             console.warn(element, 'Use data-vr="variableName" format!');
             return;
         }
 
-        if (variablesPointer.hasOwnProperty(variableName)) {
-            temp = variablesPointer[variableName];
-        }
+
 
         //Dom99 VaRiable Property
-        element.DVRP = options.variablePropertyFromTagAndType(tagName, type);
+        element.DVRP = options.variablePropertyFromElement(element);
 
         if (variablesSubscribersPointer.hasOwnProperty(variableName)) {
             variablesSubscribersPointer[variableName].push(element);
+            element[element.DVRP] = variablesPointer[variableName]; //has latest
         } else {
+            let initialValue;
+            if (variablesPointer.hasOwnProperty(variableName)) {
+                initialValue = variablesPointer[variableName];
+            }
             const variablesSubscribersPointerReference = variablesSubscribersPointer;
             let x = ""; // holds the value
             variablesSubscribersPointer[variableName] = [element];
@@ -6416,56 +6403,49 @@ const dom99 = (function () {
                 },
                 set: function (newValue) {
                     if (newValue === undefined) {
-                        console.warn("D.vr.x= string || bool , not undefined!");
+                        console.warn("D.vr.x = string || bool , not undefined!");
+                    }
+                    if (x === newValue) {
+                        //don't overwrite the same
                         return;
                     }
-                    x = String(newValue);
+                    x = newValue;
                     variablesSubscribersPointerReference[variableName].forEach(
                         function (currentElement) {
                         /*here we change the value of the currentElement in the dom
                         */
+                        currentElement[currentElement.DVRP] = x;
 
-                        //don't overwrite the same
-                            if (String(currentElement[currentElement.DVRP]) === x) {
-                                return;
-                            }
-                        // add more than checked, use if
-                        //(booleanProperties.includes(currentElement.DVRP))
-
-                            if (currentElement.DVRP === checked) {
-                                currentElement[currentElement.DVRP] = newValue;
-                            } else {
-                                currentElement[currentElement.DVRP] = x;
-                            }
                         }
                     );
                 },
                 enumerable: true,
                 configurable: false
             });
+            
+            
+            if (initialValue !== undefined) {
+                variablesPointer[variableName] = initialValue; //calls the set once
+            }
         }
 
-        if (options.elementsForUserInputList.includes(tagName)) {
+        if (options.tagNamesForUserInput.includes(element.tagName)) {
             const variablesPointerReference = variablesPointer;
             const broadcastValue = function (event) {
                 //wil call setter to broadcast the value
                 variablesPointerReference[variableName] = event.target[event.target.DVRP];
             };
             addEventListener(element,
-                    options.eventFromTagAndType(tagName, type),
+                    options.eventNameFromElement(element),
                     broadcastValue);
         }
 
-        if (temp !== undefined) {
-            variablesPointer[variableName] = temp; //calls the set once
-        }
     };
 
-    const applyDirectiveElement = function (element,
-            elementName, customElementTargetNamePrefix,
-            customElementTargetNameAppendix) {
+    const applyDirectiveElement = function (element, customAttributeValue) {
         /* stores element for direct access !*/
-
+        const elementName = customAttributeValue;
+        
         if (!elementName) {
             console.warn(element, 'Use data-el="elementName" format!');
             return;
@@ -6473,23 +6453,34 @@ const dom99 = (function () {
 
         elementsPointer[elementName] = element;
 
-        if (customElementTargetNamePrefix && customElementTargetNameAppendix) {
-            templateElementFromCustomElementName[
-                `${customElementTargetNamePrefix}-${customElementTargetNameAppendix}`
-            ] = element;
+    };
+    
+    const applyDirectiveTemplate = function (element, customAttributeValue) {
+        /* stores a template element for later reuse !*/
+
+        
+        if (!customAttributeValue) {
+            console.warn(element, 'Use data-template="d-name" format!');
+            return;
         }
+
+        templateElementFromCustomElementName[customAttributeValue] = element;
+        
     };
 
     const cloneTemplate = (function () {
-        if ("content" in doc.createElement("template")) {
+        if ("content" in document.createElement("template")) {
             return function (templateElement) {
-                return doc.importNode(templateElement.content, true);
+                if (!templateElement) {
+                    console.error(`To use reusable template use <template data-template="d-name">Template Content</template>`);
+                }
+                return document.importNode(templateElement.content, true);
             };
         }
 
         return function (templateElement) {
             /*here we have a div too much (messes up css)*/
-            const clone = doc.createElement("div");
+            const clone = document.createElement("div");
             clone.innerHTML = templateElement.innerHTML;
             return clone;
         };
@@ -6524,12 +6515,13 @@ const dom99 = (function () {
     const leaveObject = function () {
         pathIn.pop();
 
+        // replace followPath with = previousPointer or ParentPointer
         elementsPointer = followPath(elements, pathIn);
         variablesPointer = followPath(variables, pathIn);
         variablesSubscribersPointer = followPath(variablesSubscribers, pathIn);
     };
 
-    const templateRender = function (templateElement, key, hostElement) {
+    // const templateRender = function (templateElement, key) {
     /*takes a template element as argument, usually linking to a <template>
     clones the content and returns that clone
     the content elements with "data-vr" will share a variable at
@@ -6539,11 +6531,11 @@ const dom99 = (function () {
 
     returns clone
     */
-        enterObject(key);
-        const clone = linkJsAndDom(cloneTemplate(templateElement), hostElement);
-        leaveObject();
-        return clone;
-    };
+        // enterObject(key);
+        // const clone = linkJsAndDom(cloneTemplate(templateElement));
+        // leaveObject();
+        // return clone;
+    // };
 
     const forgetKey = (function () {
         /*Removing a DOM element with .remove() or .innerHTML = "" will NOT delete
@@ -6570,10 +6562,12 @@ const dom99 = (function () {
 
         Internally we just deleted the key group for every relevant function
         (for instance binds are not key grouped)
+        
+         we cannot use Weak Maps here because it needs an object as the key not a String
+         or we need to change the API a bit
+         
+         todo optimize and make benchmarks
         */
-        // we cannot use Weak Maps here because it needs an object as the key not a String
-        // or we need to change the API a bit
-
         const followPathAndDelete = function (object1, keys) {
             let target = object1;
             let lastKey = keys.pop();
@@ -6592,11 +6586,6 @@ const dom99 = (function () {
         };
     }());
 
-    const renderCustomElement = function (customElement, templateElement, key) {
-        customElement.appendChild(templateRender(templateElement, key, customElement));
-        return customElement;
-    };
-
     const applyDirectiveIn = function (element, key) {
         /* looks for an html template to render
         also calls applyDirectiveElement with key!*/
@@ -6604,54 +6593,74 @@ const dom99 = (function () {
             console.warn(element, 'Use data-in="key" format!');
             return;
         }
-
-        renderCustomElement(element,
-                templateElementFromCustomElementName[customElementNameFromElement(element)],
-                key);
-    };
-
-    const tryApplyDirectivesCreator = function (hostElement) {
-        return function (element) {
-        /* looks if the element has dom99 specific attributes and tries to handle it*/
-            if (!element.hasAttribute) {
-                return;
-            }
-
-            directiveSyntaxFunctionPairs.forEach(function (pair) {
-                const [directiveName, applyDirective] = pair;
-
-                if (!element.hasAttribute(directiveName)) {
-                    return;
-                }
-                const customAttributeValue = element.getAttribute(directiveName);
-                if (customAttributeValue[0] === options.attributeValueDoneSign) {
-                    return;
-                }
-                if (applyDirective === applyDirectiveFunction) {
-                    applyDirective(element, hostElement,
-                            ...(customAttributeValue.split(options.tokenSeparator)));
-                } else {
-                    applyDirective(element,
-                            ...(customAttributeValue.split(options.tokenSeparator)));
-                }
-                // ensure the directive is only applied once
-                element.setAttribute(directiveName,
-                        options.attributeValueDoneSign + customAttributeValue);
-            });
-            if (element.hasAttribute(options.directives.directiveIn)) {
-                return;
-            }
-            /*using a custom element without data-in*/
-            let customElementName = customElementNameFromElement(element);
-            if (templateElementFromCustomElementName.hasOwnProperty(customElementName)) {
-                element.appendChild(
-                    cloneTemplate(templateElementFromCustomElementName[customElementName])
-                );
-            }
+        
+        const templateElement = templateElementFromCustomElementName[
+            customElementNameFromElement(element)
+        ];
+        
+        
+        enterObject(key);
+        const templateClone = linkJsAndDom(cloneTemplate(templateElement));
+        element.CONTEXT = {
+            el: elementsPointer,
+            vr: variablesPointer,
+            baseEl: element
         };
+        leaveObject();
+        element.appendChild(templateClone);
     };
 
-    const linkJsAndDom = function (startElement = doc.body, hostElement = startElement) {
+    const tryApplyDirectives = function (element) {
+        /* looks if the element has dom99 specific attributes and tries to handle it*/
+        if (!element.hasAttribute) {
+            return;
+        }
+
+        directiveSyntaxFunctionPairs.forEach(function (pair) {
+            const [directiveName, applyDirective] = pair;
+
+            if (!element.hasAttribute(directiveName)) {
+                return;
+            }
+            /* todo see if it is worth using .dataVariable instead of 
+            .getAttribute("data-variable")
+            https://jsperf.com/dataset-vs-getattribute-and-setattribute/3*/
+            const customAttributeValue = element.getAttribute(directiveName);
+            if (customAttributeValue[0] === options.attributeValueDoneSign) {
+                return;
+            }
+
+            applyDirective(element, customAttributeValue);
+            
+            // ensure the directive is only applied once
+            element.setAttribute(directiveName,
+                    options.attributeValueDoneSign + customAttributeValue);
+        });
+        if (element.hasAttribute(options.directives.directiveIn)) {
+            return;
+        }
+        /*using a custom element without data-in*/
+        let customElementName = customElementNameFromElement(element);
+        if (templateElementFromCustomElementName.hasOwnProperty(customElementName)) {
+            element.appendChild(
+                cloneTemplate(templateElementFromCustomElementName[customElementName])
+            );
+        }
+    
+    };
+    
+    const getParentContext = function (element) {
+        const parentElement = element.parentNode;
+        if (!parentElement) {
+            throw new Error("element has no parent context");
+        } else if (parentElement.hasOwnProperty("CONTEXT")) {
+            return parentElement.CONTEXT;
+        } else {
+            return getParentContext(parentElement);
+        }
+    };
+    
+    const linkJsAndDom = function (startElement = document.body) {
         //build array only once and use up to date options, they should not reset twice
         if (!directiveSyntaxFunctionPairs) {
             directiveSyntaxFunctionPairs = [
@@ -6659,12 +6668,14 @@ const dom99 = (function () {
                 we can use the just changed live variable in the bind function*/
                 [options.directives.directiveElement, applyDirectiveElement],
                 [options.directives.directiveVariable, applyDirectiveVariable],
-                [options.directives.directiveFunction, applyDirectiveFunction],
+                [options.directives.directiveFunction, tryApplyDirectiveFunction],
                 [options.directives.directiveList, applyDirectiveList],
-                [options.directives.directiveIn, applyDirectiveIn]
+                [options.directives.directiveIn, applyDirectiveIn],
+                [options.directives.directiveTemplate, applyDirectiveTemplate]
+                
             ];
         }
-        walkTheDomElements(startElement, tryApplyDirectivesCreator(hostElement));
+        walkTheDomElements(startElement, tryApplyDirectives);
         return startElement;
     };
 
@@ -6676,8 +6687,7 @@ const dom99 = (function () {
         forgetKey,
         linkJsAndDom,
         options,
-        followPath,
-        bool: booleanFromBooleanString
+        getParentContext
     };
 
     Object.defineProperty(publicInterface, "vr", {
@@ -7461,7 +7471,7 @@ Socket.prototype.filterUpgrades = function (upgrades) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./transport":19,"./transports/index":20,"component-emitter":26,"debug":27,"engine.io-parser":30,"indexof":35,"parsejson":39,"parseqs":40,"parseuri":41}],19:[function(require,module,exports){
+},{"./transport":19,"./transports/index":20,"component-emitter":26,"debug":27,"engine.io-parser":30,"indexof":34,"parsejson":38,"parseqs":39,"parseuri":40}],19:[function(require,module,exports){
 /**
  * Module dependencies.
  */
@@ -8587,7 +8597,7 @@ Polling.prototype.uri = function () {
   return schema + '://' + (ipv6 ? '[' + this.hostname + ']' : this.hostname) + port + this.path + query;
 };
 
-},{"../transport":19,"component-inherit":11,"debug":27,"engine.io-parser":30,"parseqs":40,"xmlhttprequest-ssl":25,"yeast":67}],24:[function(require,module,exports){
+},{"../transport":19,"component-inherit":11,"debug":27,"engine.io-parser":30,"parseqs":39,"xmlhttprequest-ssl":25,"yeast":66}],24:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -8876,7 +8886,7 @@ WS.prototype.check = function () {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../transport":19,"component-inherit":11,"debug":27,"engine.io-parser":30,"parseqs":40,"ws":1,"yeast":67}],25:[function(require,module,exports){
+},{"../transport":19,"component-inherit":11,"debug":27,"engine.io-parser":30,"parseqs":39,"ws":1,"yeast":66}],25:[function(require,module,exports){
 (function (global){
 // browser shim for xmlhttprequest module
 
@@ -8917,7 +8927,7 @@ module.exports = function (opts) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has-cors":34}],26:[function(require,module,exports){
+},{"has-cors":33}],26:[function(require,module,exports){
 
 /**
  * Expose `Emitter`.
@@ -10229,7 +10239,7 @@ exports.decodePayloadAsBinary = function (data, binaryType, callback) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./keys":31,"after":4,"arraybuffer.slice":5,"base64-arraybuffer":7,"blob":8,"has-binary":32,"wtf-8":66}],31:[function(require,module,exports){
+},{"./keys":31,"after":4,"arraybuffer.slice":5,"base64-arraybuffer":7,"blob":8,"has-binary":32,"wtf-8":65}],31:[function(require,module,exports){
 
 /**
  * Gets the keys for an object.
@@ -10251,68 +10261,6 @@ module.exports = Object.keys || function keys (obj){
 };
 
 },{}],32:[function(require,module,exports){
-(function (global){
-
-/*
- * Module requirements.
- */
-
-var isArray = require('isarray');
-
-/**
- * Module exports.
- */
-
-module.exports = hasBinary;
-
-/**
- * Checks for binary data.
- *
- * Right now only Buffer and ArrayBuffer are supported..
- *
- * @param {Object} anything
- * @api public
- */
-
-function hasBinary(data) {
-
-  function _hasBinary(obj) {
-    if (!obj) return false;
-
-    if ( (global.Buffer && global.Buffer.isBuffer(obj)) ||
-         (global.ArrayBuffer && obj instanceof ArrayBuffer) ||
-         (global.Blob && obj instanceof Blob) ||
-         (global.File && obj instanceof File)
-        ) {
-      return true;
-    }
-
-    if (isArray(obj)) {
-      for (var i = 0; i < obj.length; i++) {
-          if (_hasBinary(obj[i])) {
-              return true;
-          }
-      }
-    } else if (obj && 'object' == typeof obj) {
-      if (obj.toJSON) {
-        obj = obj.toJSON();
-      }
-
-      for (var key in obj) {
-        if (Object.prototype.hasOwnProperty.call(obj, key) && _hasBinary(obj[key])) {
-          return true;
-        }
-      }
-    }
-
-    return false;
-  }
-
-  return _hasBinary(data);
-}
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"isarray":36}],33:[function(require,module,exports){
 (function (global){
 
 /*
@@ -10375,7 +10323,7 @@ function hasBinary(data) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"isarray":36}],34:[function(require,module,exports){
+},{"isarray":35}],33:[function(require,module,exports){
 
 /**
  * Module exports.
@@ -10394,7 +10342,7 @@ try {
   module.exports = false;
 }
 
-},{}],35:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 
 var indexOf = [].indexOf;
 
@@ -10405,12 +10353,12 @@ module.exports = function(arr, obj){
   }
   return -1;
 };
-},{}],36:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 module.exports = Array.isArray || function (arr) {
   return Object.prototype.toString.call(arr) == '[object Array]';
 };
 
-},{}],37:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 (function (global){
 /*! JSON v3.3.2 | http://bestiejs.github.io/json3 | Copyright 2012-2014, Kit Cambridge | http://kit.mit-license.org */
 ;(function () {
@@ -11316,7 +11264,7 @@ module.exports = Array.isArray || function (arr) {
 }).call(this);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],38:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -11443,7 +11391,7 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's';
 }
 
-},{}],39:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 (function (global){
 /**
  * JSON parse.
@@ -11478,7 +11426,7 @@ module.exports = function parsejson(data) {
   }
 };
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],40:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 /**
  * Compiles a querystring
  * Returns string representation of the object
@@ -11517,7 +11465,7 @@ exports.decode = function(qs){
   return qry;
 };
 
-},{}],41:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 /**
  * Parses an URI
  *
@@ -11558,7 +11506,7 @@ module.exports = function parseuri(str) {
     return uri;
 };
 
-},{}],42:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 //  Ramda v0.21.0
 //  https://github.com/ramda/ramda
 //  (c) 2013-2016 Scott Sauyet, Michael Hurley, and David Chambers
@@ -20344,7 +20292,7 @@ module.exports = function parseuri(str) {
 
 }.call(this));
 
-},{}],43:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
  /* eslint-env node */
 'use strict';
 
@@ -20689,8 +20637,12 @@ SDPUtils.writeRtpDescription = function(kind, caps) {
     sdp += SDPUtils.writeFmtp(codec);
     sdp += SDPUtils.writeRtcpFb(codec);
   });
-  // FIXME: add headerExtensions, fecMechanismş and rtcp.
   sdp += 'a=rtcp-mux\r\n';
+
+  caps.headerExtensions.forEach(function(extension) {
+    sdp += SDPUtils.writeExtmap(extension);
+  });
+  // FIXME: write fecMechanisms.
   return sdp;
 };
 
@@ -20837,7 +20789,7 @@ SDPUtils.getDirection = function(mediaSection, sessionpart) {
 // Expose public methods.
 module.exports = SDPUtils;
 
-},{}],44:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -20948,7 +20900,7 @@ exports.connect = lookup;
 exports.Manager = require('./manager');
 exports.Socket = require('./socket');
 
-},{"./manager":45,"./socket":47,"./url":48,"debug":50,"socket.io-parser":54}],45:[function(require,module,exports){
+},{"./manager":44,"./socket":46,"./url":47,"debug":49,"socket.io-parser":53}],44:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -21510,7 +21462,7 @@ Manager.prototype.onreconnect = function () {
   this.emitAll('reconnect', attempt);
 };
 
-},{"./on":46,"./socket":47,"backo2":6,"component-bind":9,"component-emitter":49,"debug":50,"engine.io-client":16,"indexof":35,"socket.io-parser":54}],46:[function(require,module,exports){
+},{"./on":45,"./socket":46,"backo2":6,"component-bind":9,"component-emitter":48,"debug":49,"engine.io-client":16,"indexof":34,"socket.io-parser":53}],45:[function(require,module,exports){
 
 /**
  * Module exports.
@@ -21536,7 +21488,7 @@ function on (obj, ev, fn) {
   };
 }
 
-},{}],47:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -21957,7 +21909,7 @@ Socket.prototype.compress = function (compress) {
   return this;
 };
 
-},{"./on":46,"component-bind":9,"component-emitter":49,"debug":50,"has-binary":33,"socket.io-parser":54,"to-array":56}],48:[function(require,module,exports){
+},{"./on":45,"component-bind":9,"component-emitter":48,"debug":49,"has-binary":32,"socket.io-parser":53,"to-array":55}],47:[function(require,module,exports){
 (function (global){
 
 /**
@@ -22036,15 +21988,15 @@ function url (uri, loc) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"debug":50,"parseuri":41}],49:[function(require,module,exports){
+},{"debug":49,"parseuri":40}],48:[function(require,module,exports){
 arguments[4][26][0].apply(exports,arguments)
-},{"dup":26}],50:[function(require,module,exports){
+},{"dup":26}],49:[function(require,module,exports){
 arguments[4][27][0].apply(exports,arguments)
-},{"./debug":51,"_process":2,"dup":27}],51:[function(require,module,exports){
+},{"./debug":50,"_process":2,"dup":27}],50:[function(require,module,exports){
 arguments[4][28][0].apply(exports,arguments)
-},{"dup":28,"ms":52}],52:[function(require,module,exports){
+},{"dup":28,"ms":51}],51:[function(require,module,exports){
 arguments[4][29][0].apply(exports,arguments)
-},{"dup":29}],53:[function(require,module,exports){
+},{"dup":29}],52:[function(require,module,exports){
 (function (global){
 /*global Blob,File*/
 
@@ -22189,7 +22141,7 @@ exports.removeBlobs = function(data, callback) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./is-buffer":55,"isarray":36}],54:[function(require,module,exports){
+},{"./is-buffer":54,"isarray":35}],53:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -22595,7 +22547,7 @@ function error(data){
   };
 }
 
-},{"./binary":53,"./is-buffer":55,"component-emitter":10,"debug":12,"json3":37}],55:[function(require,module,exports){
+},{"./binary":52,"./is-buffer":54,"component-emitter":10,"debug":12,"json3":36}],54:[function(require,module,exports){
 (function (global){
 
 module.exports = isBuf;
@@ -22612,7 +22564,7 @@ function isBuf(obj) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],56:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 module.exports = toArray
 
 function toArray(list, index) {
@@ -22627,7 +22579,7 @@ function toArray(list, index) {
     return array
 }
 
-},{}],57:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 /*
  *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
  *
@@ -22721,7 +22673,7 @@ function toArray(list, index) {
   }
 })();
 
-},{"./chrome/chrome_shim":58,"./edge/edge_shim":60,"./firefox/firefox_shim":62,"./safari/safari_shim":64,"./utils":65}],58:[function(require,module,exports){
+},{"./chrome/chrome_shim":57,"./edge/edge_shim":59,"./firefox/firefox_shim":61,"./safari/safari_shim":63,"./utils":64}],57:[function(require,module,exports){
 
 /*
  *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
@@ -23006,7 +22958,7 @@ module.exports = {
   reattachMediaStream: chromeShim.reattachMediaStream
 };
 
-},{"../utils.js":65,"./getusermedia":59}],59:[function(require,module,exports){
+},{"../utils.js":64,"./getusermedia":58}],58:[function(require,module,exports){
 /*
  *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
  *
@@ -23197,7 +23149,7 @@ module.exports = function() {
   }
 };
 
-},{"../utils.js":65}],60:[function(require,module,exports){
+},{"../utils.js":64}],59:[function(require,module,exports){
 /*
  *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
  *
@@ -24248,7 +24200,7 @@ module.exports = {
   reattachMediaStream: edgeShim.reattachMediaStream
 };
 
-},{"../utils":65,"./getusermedia":61,"sdp":43}],61:[function(require,module,exports){
+},{"../utils":64,"./getusermedia":60,"sdp":42}],60:[function(require,module,exports){
 /*
  *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
  *
@@ -24282,7 +24234,7 @@ module.exports = function() {
   };
 };
 
-},{}],62:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 /*
  *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
  *
@@ -24453,7 +24405,7 @@ module.exports = {
   reattachMediaStream: firefoxShim.reattachMediaStream
 };
 
-},{"../utils":65,"./getusermedia":63}],63:[function(require,module,exports){
+},{"../utils":64,"./getusermedia":62}],62:[function(require,module,exports){
 /*
  *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
  *
@@ -24605,7 +24557,7 @@ module.exports = function() {
   };
 };
 
-},{"../utils":65}],64:[function(require,module,exports){
+},{"../utils":64}],63:[function(require,module,exports){
 /*
  *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
  *
@@ -24641,7 +24593,7 @@ module.exports = {
   // reattachMediaStream: safariShim.reattachMediaStream
 };
 
-},{}],65:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 /*
  *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
  *
@@ -24786,7 +24738,7 @@ module.exports = {
   extractVersion: utils.extractVersion
 };
 
-},{}],66:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/wtf8 v1.0.0 by @mathias */
 ;(function(root) {
@@ -25024,7 +24976,7 @@ module.exports = {
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],67:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 'use strict';
 
 var alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_'.split('')

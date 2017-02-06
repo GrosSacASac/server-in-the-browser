@@ -9,11 +9,16 @@ const environment = process.env.NODE_ENV || "local";
 const thisFolderLength = 6; // "server".length
 const absoluteLength = __dirname.length
 const root = `${__dirname}/`.substr(0, absoluteLength - thisFolderLength);
+
+let APP_PATH = `${root}/client/js/built/all.js`;
+if (environment === "production") {
+    APP_PATH = `${root}/client/js/built/all.min.js`
+}
 /*make sure no duplicate keys*/
 const staticFileFromUrl = {
     "/": `${root}/client/html/built/index.min.html`,
     "/favicon.png": `${root}/client/images/icons/16.png`,
-    "/app": `${root}/client/js/built/all.min.js`,    
+    "/app": APP_PATH,    
     "/css": `${root}/client/css/built/all.min.css`,  
     "/doc.css": `${root}/client/css/built/documentation.min.css`,
     "/example.zip": `${root}/client/temp.zip`,    

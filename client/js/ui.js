@@ -243,7 +243,6 @@ ui = (function () {
     };
     
     const start = function () {
-        D.linkJsAndDom();
         uiFiles.start();
         D.fx.acceptAndStart = function (event) {
             acceptConditionResolve();
@@ -254,7 +253,7 @@ ui = (function () {
         
         D.fx.changeCustom = function (event) {
                     
-            const wantedToUseCustom = D.bool(D.vr.useCustom);
+            const wantedToUseCustom = D.vr.useCustom;
             
             if (wantedToUseCustom) {
                 D.vr.useCustom = false;
@@ -265,13 +264,13 @@ ui = (function () {
         };
 
         D.fx.warnBeforeLeaveChange = function (event) {
-            localData.set("warnBeforeLeave", D.bool(D.vr.warnBeforeLeave));
+            localData.set("warnBeforeLeave", D.vr.warnBeforeLeave);
             //todo display change saved
         };
         
         D.fx.wantNotificationChange = function (event) {
             // notificationEnabled = false
-            const wantNotification = D.bool(D.vr.wantNotification);
+            const wantNotification = D.vr.wantNotification;
             let feedBackText;
             
             if (wantNotification) {
@@ -315,7 +314,7 @@ ui = (function () {
         D.fx.useCustom = function (event) {
             /*USE custom index.js as the pseudo server*/
             
-            const wantToUseCustom = D.bool(D.vr.useCustom);
+            const wantToUseCustom = D.vr.useCustom;
             
             if (wantToUseCustom) {
                 browserServer.setBrowserServerCode(D.vr.userCode);
@@ -338,7 +337,8 @@ ui = (function () {
         };
 
         D.fx.connectToUser = function (event) {
-            const selectedUserId = D.followPath(D.vr, event.dKeys).userDisplayName;
+            const selectedUserUiPiece = D.getParentContext(event.target);
+            const selectedUserId = selectedUserUiPiece.vr.userDisplayName;
             markUserAsConnecting(selectedUserId);
             wantToConnectTo = selectedUserId;
             rtc.startConnectionWith(true, selectedUserId);
@@ -346,7 +346,8 @@ ui = (function () {
         };
 
         D.fx.selectUser = function (event) {
-            const selectedUserId = D.followPath(D.vr, event.dKeys).userDisplayName;
+            const selectedUserUiPiece = D.getParentContext(event.target);
+            const selectedUserId = selectedUserUiPiece.vr.userDisplayName;
             //wantToConnectTo = selectedUserId;
             markUserAsSelected(selectedUserId);
         };
@@ -358,13 +359,10 @@ ui = (function () {
         };
         
         D.fx.idChangeRequest = function (event) {
-            /*min="4" max="25" pattern="[a-zA-Z0-9]+"*/
-            const MIN = 4;
-            const MAX = 25;
             const PATTERN = /[a-zA-Z0-9]{4,25}/;
             const newId = D.vr.newId;
             const length = newId.length;
-            if (length < MIN || length > MAX || !PATTERN.test(newId)) {
+            if (!PATTERN.test(newId)) {
                 D.vr.idChangeFeedback = UISTRINGS.BAD_ID_FORMAT;
                 return;
             }
@@ -378,7 +376,7 @@ ui = (function () {
         //todo needs server confirmation ? not important
             sockets.socket.emit(MESSAGES.LOCAL_SERVER_STATE, {
                 displayedName: localDisplayedName,
-                isServer: D.bool(D.vr.localServerAvailability)
+                isServer: D.vr.localServerAvailability
             });
         };
 
@@ -392,6 +390,7 @@ ui = (function () {
                     close websocket
                     uninstall service worker
                     */
+                    D.vr.warnBeforeLeave = false; // don't ask twice
                     location.href = location.href + "quit";
                 }
             });
@@ -400,13 +399,9 @@ ui = (function () {
             D.el[elementName].remove();
             D.forgetKey(elementName);
         };
-        removeAndForget("missingFeatures");
-        removeAndForget("missingFeatureTemplate");
         displayNonMetRequirement = undefined;
 
         D.vr.log = "Starting ...";
-        D.el.input.disabled = true;
-        D.el.send_button.disabled = true;
         D.vr.input = "";
         D.vr.output = "";
         D.vr.newId = "";
@@ -433,9 +428,10 @@ server.listen(port, hostname, () => {
 `;
 
         
-        
-        
-        
+
+        D.linkJsAndDom();
+        removeAndForget("missingFeatures");
+        removeAndForget("missingFeatureTemplate");
         
     };
     

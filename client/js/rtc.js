@@ -264,7 +264,7 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
             const originalRessourceName = headerBodyObject.header.ressource;
             if (headerBodyObject.header.method === "MESSAGE") {
                 ui.handleMessage(headerBodyObject, from);
-            } else if (!(D.bool(D.vr.localServerAvailability))) {
+            } else if (!(D.vr.localServerAvailability)) {
                 ;//do nothing
             } else {
                 headerBodyObject.header.ressource = decodeURI(headerBodyObject.header.ressource);

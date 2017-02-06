@@ -56,7 +56,7 @@
             then we prompt user if really want to leave
             https://html.spec.whatwg.org/#the-beforeunloadevent-interface says to use
             preventDefault but it does not work in a test*/
-            if (D.bool(D.vr.warnBeforeLeave)) {
+            if (D.vr.warnBeforeLeave) {
                 const message = "Are you sure you want to leave ?";
                 /*if (event.preventDefault) {
                     const answer = prompt("Are you sure you want to leave ?");

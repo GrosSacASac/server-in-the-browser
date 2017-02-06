@@ -42,7 +42,7 @@ const MAX_NOTIFICATION_TIME = 8000; // ms
 
 const R = require("ramda");
 const D = require("dom99");
-const yesNoDialog = require("dom99/components/yesNoDialog/yesNoDialog.js").yesNoDialog;
+const { yesNoDialog } = require("dom99/components/yesNoDialog/yesNoDialog.js");
 const socketIo = require("socket.io-client");
 require("webrtc-adapter");//require is enough
 

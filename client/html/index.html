@@ -44,7 +44,7 @@
                 <section data-el="generalInformation">
                     <h2>Your id: <span data-vr="your_id"></span></h2>
                     <h3>Connected users</h3>
-                    <template data-el="userItemTemplate-user-item">
+                    <template data-template="user-item">
                         <span data-vr="userDisplayName"></span>
                         <button data-vr="connectButton" data-el="connectButton" data-fx="click-connectToUser">Connect and select</button>
                         <button hidden data-vr="selectButton" data-el="selectButton" data-fx="click-selectUser">Select</button>
@@ -69,8 +69,19 @@
                         <p data-vr="lastMessage"></p>
                     </div>
                     <div>
-                        <textarea data-el="input" data-vr="input" placeholder="Click on a user, enter some text, then press Send Message." rows="4" cols="50"></textarea>
-                        <button data-fx="click-sendMessage" data-el="send_button">Send Chat Message</button>
+                        <textarea 
+                            data-el="input"
+                            data-vr="input"
+                            placeholder="Click on a user, enter some text, then press Send Message."
+                            rows="4"
+                            cols="50"
+                            disabled
+                        ></textarea>
+                        <button 
+                            data-fx="click-sendMessage"
+                            data-el="send_button"
+                            disabled
+                        >Send Chat Message</button>
                     </div>
                 </section>
             </details>
@@ -78,7 +89,7 @@
             <details >
                 <summary >Server</summary>
                 <section data-el="server">
-                    <template data-el="fileInputTemplate-file-input">
+                    <template data-template="file-input">
                         <label>Filename
                             <input data-fx="rememberFileName" data-vr="fileName">
                         </label>
@@ -123,7 +134,13 @@
                     <div>
                         <label>
                             Change your ID:
-                            <input data-vr="newId" data-el="newId" type="text" min="4" max="25" pattern="[a-zA-Z0-9]+" title="An ID is 4 to 25 characters long, and only etters from a to Z and digits from 0 to 9  are allowed">
+                            <input 
+                                data-vr="newId"
+                                data-el="newId"
+                                type="text"
+                                pattern="[a-zA-Z0-9]{4,25}"
+                                title="An ID is 4 to 25 characters long, and only etters from a to Z and digits from 0 to 9  are allowed"
+                            >
                         </label>
                         <button data-fx="click-idChangeRequest"
                             data-el="idChangeRequestButton"
@@ -155,7 +172,7 @@
         </main>
         
         <p><!--Server log --><span data-vr="serverLog"></span></p>
-        <template data-el="missingFeatureTemplate-missing-feature">
+        <template data-el="missingFeatureTemplate" data-template="missing-feature">
             <section>
                 <h3 data-vr="title"></h3>
                 <p data-vr="text"></p><p>To enable this feature, install the latest update for the browser and see</p>

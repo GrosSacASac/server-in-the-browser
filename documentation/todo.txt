@@ -1,13 +1,17 @@
 make index.js the default server programm
 
+make localData store boolean correctly
+gzip data and use a cache for static files on server
 
-make require work with custom scripts that are imported
+! after loading multiple files including a package json remove use a node program checkbox
 
-in the delete all callback, delete all the cache see https://developer.mozilla.org/en-US/docs/Web/API/Cache/delete and service_worker.js
+! make require work with custom scripts that are imported
+
+! in the delete all callback, delete all the cache see https://developer.mozilla.org/en-US/docs/Web/API/Cache/delete and service_worker.js
 
 try to guess max DataChannel brandwitdth, is it 30kbs ?
 
-enter to confirm some options
+! enter to confirm some options
 
 connecting ... make it fail faster
 
@@ -28,7 +32,7 @@ add enter to send message see fetchpostexample
 
 you have 4 places or 3 where headerBodyObject is forwarded, could you reuse some code harmonize the API make shema with arrows to see where it is forwarded, maybe good idea to use <new Header and Response ? high priority this will help large file sending (currently data is not received 100% the same)
 
-try to centralize state more
+centralize state more, probably a good idea to use redux,s
 
 more accurate connected state
 
@@ -41,7 +45,6 @@ allow uploaded node_modules require not juste standards ones
 might compress files before sending, use a cache system in node to not compress twice (index.js)
 
 
-prepare presentation
 
 advantage disadvantage running code on Domcontentloaded vs at the end of body ?
 
@@ -70,5 +73,4 @@ stateless server
 
 more examples
 
-rel="noopener noreferrer" for <a target="_blank"></a>
-
+build process faster, now it is slow because it restarts nodejs 1-5 times every time

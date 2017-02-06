@@ -37,11 +37,12 @@ let notificationEnabled = false;
     */
 window.test = window.test || false;
 
+const MAX_NOTIFICATION_TIME = 8000; // ms
 
 
 const R = require("ramda");
 const D = require("dom99");
-const yesNoDialog = require("dom99/components/yesNoDialog/yesNoDialog.js").yesNoDialog;
+const { yesNoDialog } = require("dom99/components/yesNoDialog/yesNoDialog.js");
 const socketIo = require("socket.io-client");
 require("webrtc-adapter");//require is enough
 
@@ -1533,7 +1534,6 @@ ui = (function () {
     };
     
     const start = function () {
-        D.linkJsAndDom();
         uiFiles.start();
         D.fx.acceptAndStart = function (event) {
             acceptConditionResolve();
@@ -1544,7 +1544,7 @@ ui = (function () {
         
         D.fx.changeCustom = function (event) {
                     
-            const wantedToUseCustom = D.bool(D.vr.useCustom);
+            const wantedToUseCustom = D.vr.useCustom;
             
             if (wantedToUseCustom) {
                 D.vr.useCustom = false;
@@ -1555,13 +1555,13 @@ ui = (function () {
         };
 
         D.fx.warnBeforeLeaveChange = function (event) {
-            localData.set("warnBeforeLeave", D.bool(D.vr.warnBeforeLeave));
+            localData.set("warnBeforeLeave", D.vr.warnBeforeLeave);
             //todo display change saved
         };
         
         D.fx.wantNotificationChange = function (event) {
             // notificationEnabled = false
-            const wantNotification = D.bool(D.vr.wantNotification);
+            const wantNotification = D.vr.wantNotification;
             let feedBackText;
             
             if (wantNotification) {
@@ -1605,7 +1605,7 @@ ui = (function () {
         D.fx.useCustom = function (event) {
             /*USE custom index.js as the pseudo server*/
             
-            const wantToUseCustom = D.bool(D.vr.useCustom);
+            const wantToUseCustom = D.vr.useCustom;
             
             if (wantToUseCustom) {
                 browserServer.setBrowserServerCode(D.vr.userCode);
@@ -1628,7 +1628,8 @@ ui = (function () {
         };
 
         D.fx.connectToUser = function (event) {
-            const selectedUserId = D.followPath(D.vr, event.dKeys).userDisplayName;
+            const selectedUserUiPiece = D.getParentContext(event.target);
+            const selectedUserId = selectedUserUiPiece.vr.userDisplayName;
             markUserAsConnecting(selectedUserId);
             wantToConnectTo = selectedUserId;
             rtc.startConnectionWith(true, selectedUserId);
@@ -1636,7 +1637,8 @@ ui = (function () {
         };
 
         D.fx.selectUser = function (event) {
-            const selectedUserId = D.followPath(D.vr, event.dKeys).userDisplayName;
+            const selectedUserUiPiece = D.getParentContext(event.target);
+            const selectedUserId = selectedUserUiPiece.vr.userDisplayName;
             //wantToConnectTo = selectedUserId;
             markUserAsSelected(selectedUserId);
         };
@@ -1648,13 +1650,10 @@ ui = (function () {
         };
         
         D.fx.idChangeRequest = function (event) {
-            /*min="4" max="25" pattern="[a-zA-Z0-9]+"*/
-            const MIN = 4;
-            const MAX = 25;
             const PATTERN = /[a-zA-Z0-9]{4,25}/;
             const newId = D.vr.newId;
             const length = newId.length;
-            if (length < MIN || length > MAX || !PATTERN.test(newId)) {
+            if (!PATTERN.test(newId)) {
                 D.vr.idChangeFeedback = UISTRINGS.BAD_ID_FORMAT;
                 return;
             }
@@ -1668,7 +1667,7 @@ ui = (function () {
         //todo needs server confirmation ? not important
             sockets.socket.emit(MESSAGES.LOCAL_SERVER_STATE, {
                 displayedName: localDisplayedName,
-                isServer: D.bool(D.vr.localServerAvailability)
+                isServer: D.vr.localServerAvailability
             });
         };
 
@@ -1682,6 +1681,7 @@ ui = (function () {
                     close websocket
                     uninstall service worker
                     */
+                    D.vr.warnBeforeLeave = false; // don't ask twice
                     location.href = location.href + "quit";
                 }
             });
@@ -1690,13 +1690,9 @@ ui = (function () {
             D.el[elementName].remove();
             D.forgetKey(elementName);
         };
-        removeAndForget("missingFeatures");
-        removeAndForget("missingFeatureTemplate");
         displayNonMetRequirement = undefined;
 
         D.vr.log = "Starting ...";
-        D.el.input.disabled = true;
-        D.el.send_button.disabled = true;
         D.vr.input = "";
         D.vr.output = "";
         D.vr.newId = "";
@@ -1723,9 +1719,10 @@ server.listen(port, hostname, () => {
 `;
 
         
-        
-        
-        
+
+        D.linkJsAndDom();
+        removeAndForget("missingFeatures");
+        removeAndForget("missingFeatureTemplate");
         
     };
     
@@ -2492,7 +2489,7 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
             const originalRessourceName = headerBodyObject.header.ressource;
             if (headerBodyObject.header.method === "MESSAGE") {
                 ui.handleMessage(headerBodyObject, from);
-            } else if (!(D.bool(D.vr.localServerAvailability))) {
+            } else if (!(D.vr.localServerAvailability)) {
                 ;//do nothing
             } else {
                 headerBodyObject.header.ressource = decodeURI(headerBodyObject.header.ressource);
@@ -3732,7 +3729,7 @@ serviceWorkerManager = (function () {
             then we prompt user if really want to leave
             https://html.spec.whatwg.org/#the-beforeunloadevent-interface says to use
             preventDefault but it does not work in a test*/
-            if (D.bool(D.vr.warnBeforeLeave)) {
+            if (D.vr.warnBeforeLeave) {
                 const message = "Are you sure you want to leave ?";
                 /*if (event.preventDefault) {
                     const answer = prompt("Are you sure you want to leave ?");
@@ -3779,6 +3776,7 @@ serviceWorkerManager = (function () {
                 tag: "onLine",
                 noscreen: true /* don't force turn on screen*/
             });
+            setTimeout(onLineNotification.close.bind(onLineNotification), MAX_NOTIFICATION_TIME); 
         };
         window.addEventListener("online", updateOnLineState);
         window.addEventListener("offline", updateOnLineState);
