@@ -9,9 +9,8 @@ if time make body parser closer to what it is,
 
 ! make require work with custom scripts that are imported
 
-try to guess max DataChannel brandwitdth, is it 30kbs ?
+max DataChannel brandwitdth, is it 30kbs ?
 
-! enter to confirm some options
 
 connecting ... make it fail faster
 
