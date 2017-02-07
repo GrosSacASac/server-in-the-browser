@@ -1,7 +1,7 @@
 {
   "name": "server-in-the-browser",
   "author": "author",
-  "version": "0.9.25",
+  "version": "0.9.26",
   "main": "index.js",
   "dependencies": {
     "dom99": "~2.0.0",
