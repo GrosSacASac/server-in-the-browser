@@ -33,7 +33,7 @@ https://heycam.github.io/webidl/#es-ByteString
 
 "use strict";
 
-const SERVICE_WORKER_VERSION = "0.9.23"; // updated with tools/service_worker_version.js (String)
+const SERVICE_WORKER_VERSION = "0.9.25"; // updated with tools/service_worker_version.js (String)
 const CACHE_VERSION = SERVICE_WORKER_VERSION;
 //const ressourcesToSaveInCache = ["/"];
 const HOME = "/";
@@ -272,7 +272,7 @@ self.addEventListener("fetch", function (fetchEvent) {
     if (isLocalURL(url)) {
         //Normal Fetch
 
-        if (request.method ==='POST') {
+        if (request.method === 'POST') {
             // do not handle post requests
             return;
         }

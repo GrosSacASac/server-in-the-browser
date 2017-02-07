@@ -3,11 +3,11 @@ make index.js the default server programm
 make localData store boolean correctly
 gzip data and use a cache for static files on server
 
+if time make body parser closer to what it is, 
+
 ! after loading multiple files including a package json remove use a node program checkbox
 
 ! make require work with custom scripts that are imported
-
-! in the delete all callback, delete all the cache see https://developer.mozilla.org/en-US/docs/Web/API/Cache/delete and service_worker.js
 
 try to guess max DataChannel brandwitdth, is it 30kbs ?
 

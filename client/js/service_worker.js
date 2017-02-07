@@ -272,7 +272,7 @@ self.addEventListener("fetch", function (fetchEvent) {
     if (isLocalURL(url)) {
         //Normal Fetch
 
-        if (request.method ==='POST') {
+        if (request.method === 'POST') {
             // do not handle post requests
             return;
         }

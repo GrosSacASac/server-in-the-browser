@@ -1418,7 +1418,7 @@ const MESSAGES = {
     es6, maxerr: 100, browser, devel, fudge, maxlen: 120, white, node, eval
 */
 /*global
-    ui, D, R, rtc, sockets, MESSAGES, localDisplayedName,
+    ui, D, R, rtc, sockets, MESSAGES, localDisplayedName, caches
 */
 /*could add close connection button*/
 ui = (function () {
@@ -1436,6 +1436,14 @@ ui = (function () {
         ALREADY_TAKEN_REJECTED: "The ID is already taken. Chose another ID.",
         ID_CHANGE_REQUEST_SENT: "The request to change the ID has been sent. Waiting for an answer.",
         ID_CHANGE_SUCCESS: "Your ID has been successfully changed."
+    };
+    
+    const ifEnter = function (event) {
+        /*returns true if it was not keydown event or enter pressed and shift not pressed*/
+        return (!event ||
+            !(event.type === "keydown") ||
+            ((event.keyCode === 13) && (!event.shiftKey))
+        );
     };
     
     let acceptConditionResolve = function () {};
@@ -1746,9 +1754,13 @@ ui = (function () {
         };
 
         D.fx.sendMessage = function (event) {
+            if (!ifEnter(event)) {
+                return;
+            }
             rtc.sendRtcMessage(API.selectedUserId, D.vr.input);
             displayMessage(`You to ${API.selectedUserId}:  ${D.vr.input}`);
             D.vr.input = "";
+            event.preventDefault();
         };
 
         D.fx.connectToUser = function (event) {
@@ -1774,6 +1786,9 @@ ui = (function () {
         };
         
         D.fx.idChangeRequest = function (event) {
+            if (!ifEnter(event)) {
+                return;
+            }
             const PATTERN = /[a-zA-Z0-9]{4,25}/;
             const newId = D.vr.newId;
             const length = newId.length;
@@ -1801,12 +1816,19 @@ ui = (function () {
                     localData.clearAll();
                     serviceWorkerManager.deleteServiceWorker();
                     /*also
-                    close all webrtc connection
+                    close all webrtc connection 
                     close websocket
-                    uninstall service worker
                     */
                     D.vr.warnBeforeLeave = false; // don't ask twice
-                    location.href = location.href + "quit";
+                    caches.keys().then(function (cacheVersions) {
+                        return Promise.all(
+                            cacheVersions.map(function (cacheVersion) {
+                                return caches.delete(cacheVersion);
+                            })
+                        );
+                    }).then(function (notUsed) {
+                        location.href = location.href + "quit";
+                    });
                 }
             });
         };
@@ -3272,11 +3294,8 @@ challenges
  * reuqire(http) and require express does same thing
  
  * USE browserify
- * command line easy
  * close worker
  * use web worker with messaging system
- * hmm
- * hmmm
 */
 /*jslint
     es6, maxerr: 100, browser, devel, fudge, maxlen: 120, white, node, eval
@@ -3302,7 +3321,7 @@ browserServer = (function () {
     const workerStartTimeLimit = 1000; // ms
     const workerStartTimeLimitSeconds = workerStartTimeLimit / 1000;
     let worker;
-    let workerState = states.DISABLED;/**/
+    let workerState = states.DISABLED;
     let browserServerCode = "";
     let timeoutId;
     

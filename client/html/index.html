@@ -72,6 +72,7 @@
                         <textarea 
                             data-el="input"
                             data-vr="input"
+                            data-fx="keydown-sendMessage"
                             placeholder="Click on a user, enter some text, then press Send Message."
                             rows="4"
                             cols="50"
@@ -137,6 +138,7 @@
                             <input 
                                 data-vr="newId"
                                 data-el="newId"
+                                data-fx="keydown-idChangeRequest"
                                 type="text"
                                 pattern="[a-zA-Z0-9]{4,25}"
                                 title="An ID is 4 to 25 characters long, and only etters from a to Z and digits from 0 to 9  are allowed"

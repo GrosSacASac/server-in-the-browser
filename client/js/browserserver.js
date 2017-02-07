@@ -10,11 +10,8 @@ challenges
  * reuqire(http) and require express does same thing
  
  * USE browserify
- * command line easy
  * close worker
  * use web worker with messaging system
- * hmm
- * hmmm
 */
 /*jslint
     es6, maxerr: 100, browser, devel, fudge, maxlen: 120, white, node, eval
@@ -40,7 +37,7 @@ browserServer = (function () {
     const workerStartTimeLimit = 1000; // ms
     const workerStartTimeLimitSeconds = workerStartTimeLimit / 1000;
     let worker;
-    let workerState = states.DISABLED;/**/
+    let workerState = states.DISABLED;
     let browserServerCode = "";
     let timeoutId;
     
