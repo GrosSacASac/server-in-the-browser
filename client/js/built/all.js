@@ -5070,7 +5070,7 @@ serviceWorkerManager = (function () {
     }
     ui.start();
 
-    const accepted = localData.get(MESSAGES.CONDITION_ACCEPTED);
+    const accepted = true; //localData.get(MESSAGES.CONDITION_ACCEPTED);
     
     const startServiceWorkerAndSockets = function () {
         serviceWorkerManager.start();
