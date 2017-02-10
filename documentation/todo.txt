@@ -1,6 +1,11 @@
 make index.js the default server programm
 
 make localData store boolean correctly
+
+warnBeforeLeave should be false by default
+
+http://stackoverflow.com/questions/41796027/is-there-a-browser-agnostic-way-to-increase-a-checkboxs-size-without-changing-h
+
 gzip data and use a cache for static files on server
 
 if time make body parser closer to what it is, 

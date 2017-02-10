@@ -3381,19 +3381,23 @@ uiFiles = (function () {
         };
 
         D.fx.removeRessource = function (event) {
-            const key = event.dKeys[0];
-            yesNoDialog(`Remove "${fileNameFromKey[key]}" ressource ?`, "Yes", "No, Cancel").then(function (answer) {
+            const context = D.getParentContext(event.target);
+            const name = context.vr.fileName;
+            const key = keyFromFileName(name);
+            yesNoDialog(`Remove "${name}" ressource ?`, "Yes", "No, Cancel").then(function (answer) {
                 if (answer) {
-                    event.dHost.remove();
+                    context.baseEl.remove();
                     delete fileNameFromKey[key];
-                    D.forgetKey(event.dKeys);
+                    D.forgetKey(key);
                 }
             });
         };
 
         D.fx.rememberFileName = function (event) {
-            const key = event.dKeys[0];
-            fileNameFromKey[key] =  D.followPath(D.vr, event.dKeys).fileName;
+            const context = D.getParentContext(event.target);
+            const name = context.vr.fileName;
+            const key = keyFromFileName(name);
+            fileNameFromKey[key] =  name;
         };
 
         let ressourceUiId = 0;
@@ -3414,7 +3418,7 @@ uiFiles = (function () {
                         `A ressource named "${name}" is already loaded. Overwrite old ressource with the new one ?`, "Yes, overwrite", "No, keep old"
                             ).then(function (answer) {
                             if (answer === true) {
-                                const key = keyFromFileName(name)
+                                const key = keyFromFileName(name);
                                 D.vr[key].fileBody = STRINGS.FILE_LOADED;
                                 D.el[key].fileBody.disabled = true;
                                 ressourceContentFromElement.set(D.el[key].fileBody, arrayBuffer);
