@@ -272,11 +272,13 @@ ui = (function () {
         };
 
         D.fx.warnBeforeLeaveChange = function (event) {
+            console.log(D.vr.warnBeforeLeave);
             localData.set("warnBeforeLeave", D.vr.warnBeforeLeave);
             //todo display change saved
         };
         
         D.fx.wantNotificationChange = function (event) {
+            // todo also handle the case where the user changes the setting in the browser ui (call the notification contructor, if it is dis
             // notificationEnabled = false
             const wantNotification = D.vr.wantNotification;
             let feedBackText;
@@ -427,7 +429,7 @@ ui = (function () {
         D.vr.input = "";
         D.vr.output = "";
         D.vr.newId = "";
-        D.vr.warnBeforeLeave = localData.getElseDefault("warnBeforeLeave", "false");
+        D.vr.warnBeforeLeave = localData.getElseDefault("warnBeforeLeave", false);
         D.vr.wantNotification = localData.getElseDefault("notifications", notificationEnabled);
         D.fx.wantNotificationChange();
         D.vr.useCustom = false;

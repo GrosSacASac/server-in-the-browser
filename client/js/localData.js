@@ -7,24 +7,42 @@ manages data stored in the client*/
     localStorage, localData
 */
 
-/*todo:
-maybe add support for other data types not just String
-maybe use localForage library
+/* to do:
+consider use localForage library
+decide if this place should be full of try catch of emptied of it
 */
 
 localData = (function () {
 
-
     const get = function (itemName) {
-        return localStorage.getItem(itemName);
+        let returnValue;
+        try {
+            returnValue = JSON.parse(localStorage.getItem(itemName));
+        } catch (e) {
+            /* maybe there was data stored differently before so it breaks JSON.parse
+            clear all data and returns undefined */
+            try {
+                /* this looks ugly but maybe the localStorage is not available and 
+                always throws */
+                clearAll();
+            } catch (e2) {
+                ;
+            }
+            returnValue = undefined;
+        }
+        return returnValue;
     };
     
     const getElseDefault = function (itemName, defaultValue) {
-        return get(itemName) || defaultValue;
+        const value = get(itemName);
+        if (value === null) {
+            return defaultValue;
+        }
+        return value;
     };
     
-    const set = function (itemName, stringValue) {
-        return localStorage.setItem(itemName, stringValue);
+    const set = function (itemName, value) {
+        return localStorage.setItem(itemName, JSON.stringify(value));
     };
     
     const clearAll = function () {

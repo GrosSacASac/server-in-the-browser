@@ -1,6 +1,4 @@
-make index.js the default server programm
-
-make localData store boolean correctly
+make index.js the default server program
 
 warnBeforeLeave should be false by default
 
