@@ -10,7 +10,7 @@
 uiFiles = (function () {
 
     const ressourceContentFromElement = new WeakMap();
-    const fileNameFromKey = {}; 
+    const fileNameFromKey = {}; // change
     
     const FILE_INPUT_PREFIX = "FI";
     
