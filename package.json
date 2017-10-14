@@ -1,7 +1,7 @@
 {
   "name": "server-in-the-browser",
   "author": "author",
-  "version": "0.9.30",
+  "version": "0.9.31",
   "main": "index.js",
   "dependencies": {
     "dom99": "~2.0.0",
@@ -48,7 +48,8 @@
     "html-minifier": "3.2.3",
     "markdown-it": "^8.2.2",
     "markdown-it-lazy-headers": "^0.1.3",
-    "uglify-js": "github:mishoo/UglifyJS2#harmony"
+    "uglify-js": "github:mishoo/UglifyJS2#harmony",
+    "utilsac": "^2.0.0"
   },
   "devDependenciesGlobals": {
     "installed before with -g, see readme": "true",
