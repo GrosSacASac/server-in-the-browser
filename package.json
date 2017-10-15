@@ -1,19 +1,20 @@
 {
   "name": "server-in-the-browser",
   "author": "author",
-  "version": "0.9.31",
+  "version": "0.9.32",
   "main": "index.js",
   "dependencies": {
     "dom99": "~2.0.0",
     "express": "~4.14.0",
     "ramda": "~0.21.0",
-    "socket.io": "~1.7.1",
+    "socket.io": "^2.0.3",
     "webrtc-adapter": "~1.4.0"
   },
   "engines": {
-    "node": ">=7"
+    "node": ">=8"
   },
   "scripts": {
+    "todo": "try to replace concat-files with utilsac and try to avoid restart node so many times in buildall",
     "build0jsinsertnodeemulator": "node tools/buildbrowserserverwithemulator.js",
     "build0comment": "browserserver.js + node_emulator_for_worker.js = browserserver_with_node_emulator_for_worker.js (dynamic worker creation at runtime needs a string of code)",
     "build1js": "cd client/js && concat-files declare.js external_dependencies/zip/zip_zip-ext.js ui.js uiFiles.js rtc.js bytes.js localData.js sockets.js built/browserserver_with_node_emulator_for_worker.js serviceWorkerManager.js launcher.js -o built/concat.js && cd ../..",
