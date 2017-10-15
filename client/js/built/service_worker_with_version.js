@@ -33,7 +33,7 @@ https://heycam.github.io/webidl/#es-ByteString
 
 "use strict";
 
-const SERVICE_WORKER_VERSION = "0.9.30"; // updated with tools/service_worker_version.js (String)
+const SERVICE_WORKER_VERSION = "0.9.38"; // updated with tools/service_worker_version.js (String)
 const CACHE_VERSION = SERVICE_WORKER_VERSION;
 //const ressourcesToSaveInCache = ["/"];
 const HOME = "/";
@@ -113,9 +113,10 @@ const fetchFromPeerToPeer = function (customRequestObject) {
 const logInTheUI = (function () {
     //console.log("logInTheUI function exists");
     return function (what) {
+        console.log(what);
         self.clients.matchAll().then(function(clientList) {
             clientList.forEach(function(client) {
-                client.postMessage({LOG: what});
+                client.postMessage({LOG: JSON.parse(JSON.stringify(what))});
             });
         });
     };
@@ -130,6 +131,7 @@ const fetchFromMainServer = function (request, options = {}) {
     see if statement below*/
     return fetch(request, options).then(function (fetchResponse) {
         // console.log("fetchFromMainServer:", fetchResponse.ok, fetchResponse);
+        // logInTheUI([request, options]);
         if ((!fetchResponse) || (!fetchResponse.ok)) {
             return Promise.reject("fetch failed");
         }
@@ -252,7 +254,7 @@ self.addEventListener("fetch", function (fetchEvent) {
     /* fetchEvent interface FetchEvent
     see https://www.w3.org/TR/service-workers/#fetch-event-interface
     IMPORTANT: fetchEvent.respondWith must be called inside this handler immediately 
-    syncronously fetchEvent.respondWith must be called with a response object or a 
+    synchronously fetchEvent.respondWith must be called with a response object or a 
     promise that resolves with a response object. if fetchEvent.respondWith is called 
     later in a callback the browser will take over and asks the remote server directly, do not do that
     
@@ -267,24 +269,25 @@ self.addEventListener("fetch", function (fetchEvent) {
         logLater.forEach(logInTheUI);
         logLater = undefined;
     }
-    //logInTheUI(["fetch service worker " + SERVICE_WORKER_VERSION]);
+    // logInTheUI(["fetch service worker " + SERVICE_WORKER_VERSION, fetchEvent]);
     // Needs to activate to handle fetch
     if (isLocalURL(url)) {
         //Normal Fetch
 
-        if (request.method === 'POST') {
-            // do not handle post requests
+        if (request.method === "POST") {
+            // logInTheUI(["POST ignored", request]);
             return;
         }
         
-        //logInTheUI(["Normal Fetch"]);
+        // logInTheUI(["Normal Fetch"]);
         fetchEvent.respondWith(
-            fetchFromCache(request).then(function (cacheResponse) {
+            fetchFromCache(request.clone()).then(function (cacheResponse) {
                 /* cannot use request again from here, use requestClone */
                 //console.log(request, url);
                 return cacheResponse;
             }).catch(function (reason) {
                 // We don't have it in the cache, fetch it
+                // logInTheUI(fetchEvent);
                 return fetchFromMainServer(request);
             }).then(function (mainServerResponse) {
                 if (isAppPage(url)) {
@@ -364,4 +367,6 @@ self.addEventListener("fetch", function (fetchEvent) {
             })
         );
     }
+    
+    /*here we could do more with event.waitUntil()*/
 });

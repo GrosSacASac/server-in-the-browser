@@ -1,3 +1,5 @@
+try to fix problem with socketIo
+
 make index.js the default server program
 
 warnBeforeLeave should be false by default
@@ -58,7 +60,6 @@ add socket io support
 http://danml.com/download.html for mobile download without opening a new tab
 
 
-is minfied js consiedered binary form for license ?
 
 loading experience display an erro while loading ... not good (invisble if less than 0.5 second, very bad UX otherwise)
 

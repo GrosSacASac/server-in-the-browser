@@ -9,7 +9,7 @@
 const escapeHtml = require("escape-html");
 const minify = require("html-minifier").minify;
 
-const files = require("./files.js");
+const {textFileContentPromiseFromPath, writeTextInFilePromiseFromPathAndString} = require("utilsac");
 const markdown = require("markdown-it")("default", {
     html: true,
     linkify: true,
@@ -69,8 +69,8 @@ const OPTIONS = {
 
 const buildOpenSourceNotes = function ([textPath, markdownPath]) {
     return Promise.all([
-        files.textFileContentPromiseFromPath(markdownPath),
-        files.textFileContentPromiseFromPath(textPath)
+        textFileContentPromiseFromPath(markdownPath),
+        textFileContentPromiseFromPath(textPath)
     ]).then(function ([markdownText, LicenseText]) {
         const htmlText = markdown.render(markdownText);
         const htmlTextLicense = `<pre>${escapeHtml(LicenseText)}</pre>`;
@@ -83,20 +83,20 @@ const buildOpenSourceNotes = function ([textPath, markdownPath]) {
 
 
 Promise.all([
-    files.textFileContentPromiseFromPath(BEFORE_BODY_TEMPLATE_PATH),
-    files.textFileContentPromiseFromPath(AFTER_BODY_TEMPLATE_PATH),
-    files.textFileContentPromiseFromPath(OPEN_SOURCE_PREAMBLE_MD_PATH)
+    textFileContentPromiseFromPath(BEFORE_BODY_TEMPLATE_PATH),
+    textFileContentPromiseFromPath(AFTER_BODY_TEMPLATE_PATH),
+    textFileContentPromiseFromPath(OPEN_SOURCE_PREAMBLE_MD_PATH)
 ]).then(function ([beforeBodyTemplate, afterBodyTemplate, open_source_preamble]) {
     Object.keys(OUTPUTS_FROM_INPUT_PATH).forEach(function (path) {
-        files.textFileContentPromiseFromPath(path).then(function (textFileContent) {
+        textFileContentPromiseFromPath(path).then(function (textFileContent) {
             //console.log(textFileContent);
             const htmlText = markdown.render(textFileContent);
             const minifiedHtml = minify(htmlText, OPTIONS);
             const standalone = minify((beforeBodyTemplate + minifiedHtml + afterBodyTemplate), OPTIONS);
             return Promise.all([
-                files.writeTextInFilePromiseFromPathAndString(
+                writeTextInFilePromiseFromPathAndString(
                     OUTPUTS_FROM_INPUT_PATH[path][0], minifiedHtml),
-                files.writeTextInFilePromiseFromPathAndString(
+                writeTextInFilePromiseFromPathAndString(
                     OUTPUTS_FROM_INPUT_PATH[path][1], standalone)
             ]);
         }).then(function () {
@@ -117,8 +117,8 @@ Promise.all([
         const minifiedHtml = minify(htmlTextPreamble + allHtmlNotes, OPTIONS);
         const standalone = minify((beforeBodyTemplate + minifiedHtml + afterBodyTemplate), OPTIONS);
         return Promise.all([
-            files.writeTextInFilePromiseFromPathAndString(OPEN_SOURCE_BUILT_PATH_PART, minifiedHtml),
-            files.writeTextInFilePromiseFromPathAndString(OPEN_SOURCE_BUILT_PATH, standalone)
+            writeTextInFilePromiseFromPathAndString(OPEN_SOURCE_BUILT_PATH_PART, minifiedHtml),
+            writeTextInFilePromiseFromPathAndString(OPEN_SOURCE_BUILT_PATH, standalone)
         ]);
     }).then(function () {
         //console.log("open source notes success");
