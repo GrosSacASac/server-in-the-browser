@@ -77,3 +77,5 @@ stateless server
 more examples
 
 build process faster, now it is slow because it restarts nodejs 1-5 times every time
+
+see if https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/webkitdirectory is usable instead of zip
