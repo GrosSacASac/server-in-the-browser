@@ -1,29 +1,45 @@
-try to fix problem with socketIo
-
-make index.js the default server program
-
-warnBeforeLeave should be false by default
-
-http://stackoverflow.com/questions/41796027/is-there-a-browser-agnostic-way-to-increase-a-checkboxs-size-without-changing-h
-
-gzip data and use a cache for static files on server
-
-if time make body parser closer to what it is, 
-
-! after loading multiple files including a package json remove use a node program checkbox
-
-! make require work with custom scripts that are imported
-
+# Core
+try to fix problem with socketIo HIGH PRIORITY
 max DataChannel brandwitdth, is it 30kbs ?
+allow uploaded node_modules require not juste standards ones
+get paramters with ?a=b&z=3
+add socket io support 
 
-
+# UX
+increase check box
+http://stackoverflow.com/questions/41796027/is-there-a-browser-agnostic-way-to-increase-a-checkboxs-size-without-changing-h
+make index.js the default server program
+warnBeforeLeave should be false by default
 connecting ... make it fail faster
+add enter to send message
+more accurate connected state
+provide more feedback
+http://danml.com/download.html for mobile download without opening a new tab
+oading experience display an erro while loading ... not good (invisble if less than 0.5 second, very bad UX otherwise)
 
+# Improvements
+
+gzip data and use a cache for static files on server-side
+if time make body parser closer to what it is, 
+! after loading multiple files including a package json remove use a node program checkbox
+! make require work with custom scripts that are imported
 service worker claim does not always work ?
-
 full template strings escape in tools for worker
-
 visit https://github.com/jvilk/BrowserFS
+port the next thing in node
+translate projects
+make it work without server after the first time, if there are enough users connected
+make sdp offer before needed, so that it is instant
+
+# Refactoring
+
+you have 4 places or 3 where headerBodyObject is forwarded, could you reuse some code harmonize the API make shema with arrows to see where it is forwarded, maybe good idea to use <new Header and Response ? high priority this will help large file sending (currently data is not received 100% the same)
+centralize state more
+build process faster, now it is slow because it restarts nodejs 1-5 times every time
+see if https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/webkitdirectory is usable instead of zip
+store peers info in localstorage, do not request same info twice
+
+# Docs
 
 readme upgrade
 high level overview how it works
@@ -31,51 +47,12 @@ summary/overwiew
 API Doc
 related ressources
 
-add enter to send message see fetchpostexample
-
-
-you have 4 places or 3 where headerBodyObject is forwarded, could you reuse some code harmonize the API make shema with arrows to see where it is forwarded, maybe good idea to use <new Header and Response ? high priority this will help large file sending (currently data is not received 100% the same)
-
-centralize state more, probably a good idea to use redux,s
-
-more accurate connected state
-
-port the next thing in node
-
-provide more feedback
-
-allow uploaded node_modules require not juste standards ones
-
-might compress files before sending, use a cache system in node to not compress twice (index.js)
 
 
 
-advantage disadvantage running code on Domcontentloaded vs at the end of body ?
-
-
-get paramters with ?a=b&z=3
-
-add socket io support 
-
-http://danml.com/download.html for mobile download without opening a new tab
 
 
 
-loading experience display an erro while loading ... not good (invisble if less than 0.5 second, very bad UX otherwise)
 
 
 
-translate projects
-
-
-make it work without server after the first time, if there are enough users connected
-
-store peers info in localstorage, do not request same info twice
-
-stateless server
-
-more examples
-
-build process faster, now it is slow because it restarts nodejs 1-5 times every time
-
-see if https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/webkitdirectory is usable instead of zip
