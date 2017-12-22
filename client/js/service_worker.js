@@ -1,18 +1,17 @@
 /*service_worker.js
-todo fix undefined behaviour if there is more than 1 client (active window), client claim
-todo fix, the page gets old js files sometimes, because they are loaded before the new
-todo see if service worker timeout can cause bugs 
+todo fix undefined behaviour if there is more than 1 client (active window), 
+todo the page gets old js files sometimes, because they are loaded before the new --> client claim
+todo see if service worker time-outs can cause bugs 
 
 todo how to update the cache with just 1 or 2 files an not do a request for things that didn't change. Concat css and js files still a good practice, for first visit always, but do some research for later visits with cache invalidation so that not everything has to be reloaded
 
-todo maybe swtich to µWS in the future
 
 todo split file in 2 files, service_worker_common.js and my_service_worker.js, 
 
 
 a service worker is a special kind of program, it cannot be included with a <script> tag, 
-search for service worker on mdn for more info
-service worker simplified lifecycle
+
+service worker simplified life-cycle
 install or register
 activate (if there is an old active, wait)
 service worker is active

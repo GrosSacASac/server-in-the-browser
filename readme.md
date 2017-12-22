@@ -37,6 +37,7 @@ Custom distributed computing framework with the same model, as worker, trust und
 
 ## Status
 
+PAUSED
 
 alpha version. Some bugs need to be fixed. The design and usage flow may change.
 
