@@ -10,11 +10,17 @@ todo listen to the events and make the app active/not active accordingly
     navigator
 */
 
+// true means maybe
+const serviceWorkerSupport = (
+    window.navigator &&
+    window.navigator.serviceWorker && 
+    window.navigator.serviceWorker.register
+);
 
 serviceWorkerManager = (function () {
     let serviceWorkerRegistration;
     const register = function () {
-        if (!navigator.serviceWorker) {
+        if (!serviceWorkerSupport) {
             return false;
         }
         //const options = {scope: "./"};
@@ -58,12 +64,32 @@ serviceWorkerManager = (function () {
     };
 
     const deleteServiceWorker = function () {
-        if (!serviceWorkerRegistration) {
+        if (!serviceWorkerSupport) {
             return;
         }
-        serviceWorkerRegistration.unregister().then(function(hasBeenUnregistered) {
-            ;//
-        });
+        if (navigator.serviceWorker.getRegistrations) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) {
+                    registration.unregister().then(function(event) {
+                        console.log("serviceWorker: unregistered", event);
+                    });
+                }
+            });
+        } else if (navigator.serviceWorker.getRegistration) {
+            // not plural
+            navigator.serviceWorker.getRegistration().then(function(registration) {
+                if (registration) {
+                    registration.unregister().then(function(event) {
+                        console.log("serviceWorker: unregistered", event);
+                    });
+                }
+            });
+        }
+        
+        // this could fail to remove something not yet active
+        // serviceWorkerRegistration.unregister().then(function(event) {
+            // console.log("serviceWorker: unregistered", event);
+        // });
     };
     
     

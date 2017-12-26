@@ -294,7 +294,7 @@ self.addEventListener("fetch", function (fetchEvent) {
                 if (isAppPage(url)) {
                     //if it is the landing page that is asked
                     return useOfflineAlternative();
-                    //todo if we are offline , siplay /offline directly
+                    //todo if we are offline , display /offline directly
                 }
                 return Promise.reject(reason);
             })
