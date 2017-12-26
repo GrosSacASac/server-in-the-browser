@@ -155,17 +155,8 @@ const isLocalURL = function (url) {
     return !(String(url).match("rtc"));
 };
 
-/*const fillServiceWorkerCache = function () {
-    return caches.open(CACHE_VERSION).then(function(cache) {
-        return cache.addAll(ressourcesToSaveInCache).catch(function (reason) {
-            return logInTheUIWhenActivated(["failed: " + String(reason)]);
-        });
-    });
-    
-}; */
-
 const fillServiceWorkerCache2 = function () {
-    /*It will not cache and also not reject for individual ressources that failed to be added in the cache. unlike fillServiceWorkerCache which stops caching as soon as one problem occurs. see http://stackoverflow.com/questions/41388616/what-can-cause-a-promise-rejected-with-invalidstateerror-here*/
+    /*It will not cache and also not reject for individual resources that failed to be added in the cache. unlike fillServiceWorkerCache which stops caching as soon as one problem occurs. see http://stackoverflow.com/questions/41388616/what-can-cause-a-promise-rejected-with-invalidstateerror-here*/
     return caches.open(CACHE_VERSION).then(function (cache) {
         return Promise.all(
             ressourcesToSaveInCache.map(function (url) {

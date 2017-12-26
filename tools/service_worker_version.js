@@ -1,5 +1,5 @@
 /*service_worker_version.js*/
-/*npm version patch --force
+/* npm version patch --force
  is used before, see package.json */
 "use strict";
 
@@ -12,10 +12,6 @@ const REPLACED_WITH_SERVICE_WORKER_VERSION = "REPLACED_WITH_SERVICE_WORKER_VERSI
 const SERVICE_WORKER_PATH = "client/js/service_worker.js";
 const PACKAGE_PATH = "package.json";
 const SERVICE_WORKER_WITH_VERSION_PATH = "client/js/built/service_worker_with_version.js";
-
-
-
-
 
 Promise.all([
     textFileContentPromiseFromPath(SERVICE_WORKER_PATH),
