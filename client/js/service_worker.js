@@ -162,7 +162,7 @@ const fillServiceWorkerCache2 = function () {
             ressourcesToSaveInCache.map(function (url) {
                 return cache.add(url).catch(function (reason) {
                     return logInTheUIWhenActivated([url + "failed: " + String(reason)]);
-                })
+                });
             })
         );
     });
