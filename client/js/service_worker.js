@@ -22,8 +22,9 @@ fetch
 
 https://heycam.github.io/webidl/#es-ByteString
 */
+
 /*jslint
-    es6, maxerr: 100, browser, devel, fudge, maxlen: 120, white
+    maxerr: 100, browser, devel, fudge, maxlen: 120, white
 */
 /*global
     self, fetch, caches, Response, Request, Header, 

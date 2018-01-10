@@ -4,7 +4,7 @@ registers service_worker.js
 todo listen to the events and make the app active/not active accordingly
 */
 /*jslint
-    es6, maxerr: 100, browser, devel, fudge, maxlen: 120, white
+    maxerr: 100, browser, devel, fudge, maxlen: 120, white
 */
 /*global
     navigator
@@ -34,7 +34,7 @@ serviceWorkerManager = (function () {
             }
         );
 
-        navigator.serviceWorker.addEventListener("message", function(event) {
+        navigator.serviceWorker.addEventListener("message", function (event) {
             const message = event.data;
             
             if (message.hasOwnProperty("LOG")) {
@@ -53,11 +53,11 @@ serviceWorkerManager = (function () {
             });
         });
         
-        navigator.serviceWorker.addEventListener("activate", function(event) {
+        navigator.serviceWorker.addEventListener("activate", function (event) {
             console.log("serviceWorker: activate", location.origin);
         });
         
-        navigator.serviceWorker.addEventListener("controllerchange", function(event) {
+        navigator.serviceWorker.addEventListener("controllerchange", function (event) {
             console.log("serviceWorker: controllerchange");
         });
         return true;//success
@@ -68,18 +68,18 @@ serviceWorkerManager = (function () {
             return;
         }
         if (navigator.serviceWorker.getRegistrations) {
-            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            navigator.serviceWorker.getRegistrations().then(function (registrations) {
                 for(let registration of registrations) {
-                    registration.unregister().then(function(event) {
+                    registration.unregister().then(function (event) {
                         console.log("serviceWorker: unregistered", event);
                     });
                 }
             });
         } else if (navigator.serviceWorker.getRegistration) {
             // not plural
-            navigator.serviceWorker.getRegistration().then(function(registration) {
+            navigator.serviceWorker.getRegistration().then(function (registration) {
                 if (registration) {
-                    registration.unregister().then(function(event) {
+                    registration.unregister().then(function (event) {
                         console.log("serviceWorker: unregistered", event);
                     });
                 }
