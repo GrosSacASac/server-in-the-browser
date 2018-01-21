@@ -3,11 +3,11 @@
 ## Why
 
 
-Setting up a server against the Internet to run a dynamic web app requires dedicated time investment, with upfront limitations that can go away with money. It can take even more time for beginners. With server in the browser it is possible to run ephemeral application without the cost and hassle of a traditional server. New services appeared lately to tackle those issues in different shapes and forms. Here's one more attempt as many new browser APIs are available now, it was time to explore the possibilities. 
+Setting up a server against the Internet to run a dynamic web app requires dedicated time investment, with upfront limitations that can go away with money. It can take even more time for beginners. With server in the browser it is possible to run ephemeral application without the cost and hassle of a traditional server. New services appeared lately to tackle those issues in different shapes and forms. Here's one more attempt as many new browser APIs are available now, it was time to explore the possibilities.
 
 Also, this is a first prototype to explore new forms of decentralized web. Imagine if everyone had it's own personal data locally and external services must ask for it. The owner controls who has access and who has not. Server in the browser is a first step for everyone to claim its data back under control.
 
-## What 
+## What
 
 Server in the browser is a dynamic site that allows users to serve their own dynamic site without hassle. The request are then sent from the visitors client directly to the users computer. Users have full control over the response sent to the visitors. Anyone can visit Server in the browser to display a list of available user made dynamic site. It is also possible to chat with other people connected to the site. Serving a static site requires zero configuration, only selection of files.
 
@@ -49,7 +49,7 @@ try it out locally:
 
 
  * download this repository
- * install node.js from http://nodejs.org/ **version 7** or higher
+ * install node.js from http://nodejs.org/ **version 9** or higher
  * open the node command line interface, go in the correct directory
  * `npm install`
  * `npm run start`
@@ -68,28 +68,23 @@ The app must be served over https. The server.js is meant for a heroku like envi
 
 The last build result is included for convenience.
 
- 
+
 ### only required once:
 
 
  * `npm install`
- * `npm install concat-file-array-cli@0.0.2 -g`
- * `npm install browserify@13.0.1 -g`
 
 
-### build everything 
+### build everything
 
 
  * `npm run buildall`
- 
+
 
 ### build specific files
 
 
- * `npm run buildjs`
- * `npm run buildcss`
- * `npm run buildhtml`
- * `npm run builddoc`
+ * `npm run` to get a list of available commands
 
 
 ## Tests
@@ -121,9 +116,9 @@ Some dependencies inlcuded in this project have other licenses !
 ## Contribute
 
 
-### Help 
+### Help
 
-See [todo](documentation/todo.txt) to see next steps. Before doing anything please consider [discussing with us](https://dystroy.org/miaou/3) (free Github account is required), the what, why and how. 
+See [todo](documentation/todo.txt) to see next steps. Before doing anything please consider [discussing with us](https://dystroy.org/miaou/3) (free Github account is required), the what, why and how.
 
 
 ### Report issue

@@ -9,260 +9,115 @@ const {
     writeTextInFilePromiseFromPathAndString,
     copyFile,
     concatenateFiles,
-    copyFile,
     deleteFile
 } = require("utilsac");
 
 const rollup = require('rollup');
 const rollup_babel = require('rollup-plugin-babel');
-const babel = require("babel-core");
-const UglifyJSES5 = require("uglify-js");
-const UglifyJS = require("uglify-es");
-
-
-const drop_console = false;
-const skipMinification = true;
-
+// const babel = require("babel-core");
+// const UglifyJSES5 = require("uglify-js");
+// const UglifyJS = require("uglify-es");
+//
+//
+// const drop_console = false;
+// const skipMinification = true;
+const jsDirectory = `client/js`;
 module.exports = function () {
-concatenateFiles
-"build1js": "cd client/js && concat-files declare.js external_dependencies/zip/zip_zip-ext.js ui.js uiFiles.js rtc.js bytes.js localData.js sockets.js built/browserserver_with_node_emulator_for_worker.js serviceWorkerManager.js launcher.js -o built/concat.js && cd ../..",
-    "build2js": "cd client/js && browserify built/concat.js -o built/browserified.js && concat-files external_dependencies/zip/zip_zip-ext.js built/browserified.js -o built/all.js && cd ../..",
-    "minifytest": "uglifyjs temp/uglifyjstest/u.js --mangle --compress --preamble \"//See u.js/ to see the source;\" --screw-ie8 --output temp/uglifyjstest/u.min.js",
-    "minifyjs3": "uglifyjs client/js/built/all.js --mangle --compress --preamble \"//See client/ to see the source;\" --screw-ie8 --output client/js/built/all.min.js",
-    "minifyjs3verbose": "uglifyjs client/js/built/all.js --mangle --compress --preamble \"//See client/ to see the source;\" --screw-ie8 --verbose --lint --output client/js/built/all.min.js",
-    "minifylintconclusion": "Ramda is almost not used",
-    "bumpversion": "npm version patch --force",
-    "versioninserviceworker4": "node tools/service_worker_version.js",
-    "minifyserviceworkerjs5": "uglifyjs client/js/built/service_worker_with_version.js --mangle --compress --screw-ie8 --output client/js/built/service_worker.min.js",
-// do not use those because minify mutates options
-// const uglifyES5Options = {
-    // toplevel: true, // could pass in above <script>s for max minifaction with this
-    // compress: {
-        // ie8: false, // ie8 (default false) - set to true to support IE8.
-        // drop_console
-    // },
-    // output: {
-        // beautify: false,
-        // preamble: "/*contact for source*/"
-    // }
-// };
 
-// const uglifyOptions = {
-    // ecma: 6,
-    // toplevel: true, // could pass in above <script>s for max minifaction with this
-    // compress: {
-        // ie8: false, // ie8 (default false) - set to true to support IE8.
-        // drop_console
-    // },
-    // output: {
-        // beautify: false,
-        // preamble: "/*contact for source*/"
-    // }
-// }
-// entry points
-// const files = [
-    // "main"
-// ];
+// cut/pasted from other file
+// could make better later
+// browserserver.js + node_emulator_for_worker.js = browserserver_with_node_emulator_for_worker.js
+// (dynamic worker creation at runtime needs a string of code)
+const thisName = "buildbrowserserverwithemulator.js build";
+const NODE_EMULATOR_FOR_WORKERTEXT = "NODE_EMULATOR_FOR_WORKERTEXT";//that string is in browserserver.js
+
+const BROWSERSERVER_PATH = "client/js/browserserver.js";
+const NODE_EMULATOR_FOR_WORKER_PATH = "client/js/node_emulator_for_worker.js";
+const BROWSERSERVER_WITH_NODE_EMULATOR_FOR_WORKER_PATH = "client/js/built/browserserver_with_node_emulator_for_worker.js";
+
+
+
+const putInsideTemplateStringSafe = function (jsCodeText) {
+    return ("`" + (jsCodeText
+        .replace(/  /g, "")) + "`");
+        /*later preserve ${readyCodeText}, by reinjecting ?
+        and do, use g to replace ALL can also minify emulator
+        ("`" + (jsCodeText
+        .replace(" ", "")
+        .replace("\\", "\\\\")
+        .replace("`", "\\`")
+        .replace("`", "\\`")
+        .replace("${", "\\${")
+        .replace("}", "\\}")) + "`")*/
+};
+
+
+Promise.all([
+    textFileContentPromiseFromPath(BROWSERSERVER_PATH),
+    textFileContentPromiseFromPath(NODE_EMULATOR_FOR_WORKER_PATH),
+]).then(function ([browserserverText, node_emulator_for_workerText]) {
+    const node_emulator_for_workerTemplateString = putInsideTemplateStringSafe(node_emulator_for_workerText);
+    const browserserver_with_node_emulator_for_workerText = browserserverText.replace(NODE_EMULATOR_FOR_WORKERTEXT, node_emulator_for_workerTemplateString);
+    return writeTextInFilePromiseFromPathAndString(BROWSERSERVER_WITH_NODE_EMULATOR_FOR_WORKER_PATH, browserserver_with_node_emulator_for_workerText);
+}).then(function () {
+    //console.log(thisName + " finished with success !");
+}).catch(function (reason) {
+    const errorText = thisName + " failed: " + String(reason);
+    console.log(errorText);
+    throw new Error(errorText);
+});
+
+
 
 async function rollupBundle(inputOptions, outputOptions) {
   // create a bundle
   const bundle = await rollup.rollup(inputOptions);
-  
+
   //console.log(bundle.imports); // an array of external dependencies
   const written = await bundle.write(outputOptions);
   return written;
 }
 
-// first build <script nomodule src="">
-const bundlePromise = Promise.all(files.map(function (fileName) {
-    /* rollups bundles and transpiles except node_modules imports
-    */
-    const inputOptions = {
-        input: `js/${fileName}.js`,
-        plugins: [
-            // also uses .babelrc
-            rollup_babel({
-              exclude: 'node_modules/**',
-              externalHelpers: false
-            })
-        ]
-    };
-    const outputOptions = {
-        format: "iife",
-        name: `${fileName}`,
-        file: `built/${fileName}-script.js`
-    };
-    
-    return rollupBundle(inputOptions, outputOptions)
-}));
+const inputOptions = {
+    input: `${jsDirectory}/declare.js`,
+    plugins: [
+        // also uses .
+        rollup_babel({
+          babelrc: false,
+          exclude: 'node_modules/**',
+          externalHelpers: false,
+          "plugins": [
+            "transform-object-rest-spread"
+          ],
+          "presets": [
+                // not env
+                "minify"
+            ]
+        })
+    ]
+};
+// https://rollupjs.org/#core-functionality
+const outputOptions = {
+    format: "es",
+    name: `serverInTheBrowser`,
+    file: `${jsDirectory}/built/2018-bundle.min.js`
+};
 
+const bundlePromise = rollupBundle(inputOptions, outputOptions).then(function () {
 
-bundlePromise.then(function () {
-    /* transpile the single file bundled ,
-    this will transpile node_modules imports that are inside the thing
-    then minify it*/
-    return Promise.all(files.map(function (fileName) {
-        return new Promise(function (resolve, reject) {
-                babel.transformFile(`built/${fileName}-script.js`, {}, function (err, result) {
-                if (err) {
-                    reject(err);
-                }
-                // result; // => { code, map, ast }
-                writeTextInFilePromiseFromPathAndString(
-                    `built/${fileName}-script.es5.js`,
-                    String(result.code)
-                ).then(resolve);
-            });
-        });
-    })).then(function () {
-        return Promise.all(files.map(function (fileName) {
-            return textFileContentPromiseFromPath(`built/${fileName}-script.es5.js`)
-                .then(function (content) {
-                    return [fileName, content];
-            });
+    concatenateFiles([
+        `${jsDirectory}/external_dependencies/zip/zip_zip-ext.js`,
+        `${jsDirectory}/built/2018-bundle.min.js`
 
-        })).then(function (contents) {
-            return Promise.all(contents.map(function ([fileName, code]) {
-                let resultCode;
-                if (skipMinification) {
-                    resultCode = code;
-                } else {
-                    const result = UglifyJSES5.minify(code, {
-                        toplevel: true, // could pass in above <script>s for max minifaction with this
-                        compress: {
-                            ie8: false, // ie8 (default false) - set to true to support IE8.
-                            drop_console
-                        },
-                        output: {
-                            beautify: false,
-                            preamble: "/*contact for source*/"
-                        }
-                    });
-                    if (result.error) {
-                        return Promise.reject(result.error);
-                    }
-                    resultCode = result.code;
-                }
-                return writeTextInFilePromiseFromPathAndString(
-                    `built/${fileName}-script.es5.min.js`,
-                    resultCode
-                );
-            }));
-        });
-    });
-});
+    ], `${jsDirectory}/built/all.min.js`, `\n`);
 
-// second build <script type="module" src="">
-
-const bundlePromise2 = Promise.all(files.map(function (fileName) {
-    const inputOptions = {
-        input: `js/${fileName}.js`,
-        plugins: [
-            // also uses .  
-            rollup_babel({
-              babelrc: false,
-              exclude: 'node_modules/**',
-              externalHelpers: false,
-              "plugins": [
-                "transform-object-rest-spread"
-              ],
-              "presets": [
-                    // not env
-                  
-                ]
-            })
-        ]
-    };
-    // https://rollupjs.org/#core-functionality
-    const outputOptions = {
-        format: "es",
-        name: `${fileName}`,
-        file: `built/${fileName}-es-module.js`
-    };
-    return rollupBundle(inputOptions, outputOptions);
-}));
-
-
-
-bundlePromise2.then(function () {
-    /* as every browser supporting <script type="module" src="">
-        also support es2015 we don't need to transpile italics
-        only minify it*/ 
-    return Promise.all(files.map(function (fileName) {
-        return textFileContentPromiseFromPath(`built/${fileName}-es-module.js`)
-            .then(function (content) {
-                return [fileName, content];
-        });
-
-    })).then(function (contents) {
-        return Promise.all(contents.map(function ([fileName, code]) {
-            let resultCode;
-            if (skipMinification) {
-                resultCode = code;
-            } else {
-                const result = UglifyJS.minify(code, {
-                    ecma: 6,
-                    toplevel: true, // could pass in above <script>s for max minifaction with this
-                    compress: {
-                        ie8: false, // ie8 (default false) - set to true to support IE8.
-                        drop_console
-                    },
-                    output: {
-                        beautify: false,
-                        preamble: "/*contact for source*/"
-                    }
-                });
-                if (result.error) {
-                    console.log("error:", result);
-                    return Promise.reject(result.error);
-                }
-                resultCode = result.code;
-            }
-            return writeTextInFilePromiseFromPathAndString(
-                `built/${fileName}-es-module.min.js`,
-                resultCode
-            );
-        }));
-    });
 });
 
 
+    // "bumpversion": "npm version patch --force",
+    // "versioninserviceworker4": "node tools/service_worker_version.js",
+    // "minifyserviceworkerjs5": "uglifyjs client/js/built/service_worker_with_version.js --mangle --compress --screw-ie8 --output client/js/built/service_worker.min.js",
 
-// service worker
-
-
-textFileContentPromiseFromPath(`js/service_worker/service_worker.js`)
-.then(function (content) {
-
-    let resultCode;
-    if (skipMinification) {
-        resultCode = content;
-    } else {
-        const result = UglifyJS.minify(content, {
-            ecma: 6,
-            toplevel: true, // could pass in above <script>s for max minifaction with this
-            compress: {
-                ie8: false, // ie8 (default false) - set to true to support IE8.
-                drop_console
-            },
-            output: {
-                beautify: false,
-                preamble: "/*contact for source*/"
-            }
-        });
-        if (result.error) {
-            console.log("error:", result);
-            return Promise.reject(result.error);
-        }
-        resultCode = result.code;
-    }
-
-
-    return writeTextInFilePromiseFromPathAndString(
-        `built/service_worker.min.js`,
-        resultCode
-    );
-});
 
 
 

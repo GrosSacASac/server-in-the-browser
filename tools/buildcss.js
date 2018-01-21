@@ -1,0 +1,39 @@
+/*
+
+*/
+
+"use strict";
+
+const {
+    textFileContentPromiseFromPath,
+    writeTextInFilePromiseFromPathAndString,
+    copyFile,
+    concatenateFiles,
+    deleteFile
+} = require("utilsac");
+
+const cssDirectory = `client/css`;
+module.exports = function () {
+
+concatenateFiles([
+    `${cssDirectory}/base.css`,
+    `${cssDirectory}/header.css`,
+    `${cssDirectory}/userlist.css`,
+    `${cssDirectory}/fileinput.css`,
+    `${cssDirectory}/yesNoDialog.css`
+], `${cssDirectory}/built/all.css`, `\n`);
+
+concatenateFiles([
+    `${cssDirectory}/base.css`,
+    `${cssDirectory}/header.css`,
+    `${cssDirectory}/pre.css`
+], `${cssDirectory}/built/documentation.css`, `\n`);
+
+
+// "minifycss2": "csso client/css/built/all.css  client/css/built/all.min.css",
+// "minifycss4": "csso client/css/built/documentation.css  client/css/built/documentation.min.css",
+
+
+
+
+}; // end export

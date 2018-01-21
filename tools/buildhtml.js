@@ -1,7 +1,24 @@
-/*minifyHtml.js*/
+/*
+
+*/
+
 "use strict";
-const {textFileContentPromiseFromPath, writeTextInFilePromiseFromPathAndString} = require("utilsac");
+
+const {
+    textFileContentPromiseFromPath,
+    writeTextInFilePromiseFromPathAndString,
+    copyFile
+} = require("utilsac");
+
 const minify = require("html-minifier").minify;
+
+
+// const skipMinification = false;
+
+
+
+module.exports = function () {
+
 
 const thisName = "HTML minifier";
 
@@ -27,7 +44,7 @@ Object.keys(OUTPUT_FROM_INPUT_PATH).forEach(function (path) {
     textFileContentPromiseFromPath(path).then(function (textFileContent) {
         //console.log(textFileContent);
         const minifiedHtml = minify(textFileContent, OPTIONS);
-        return writeTextInFilePromiseFromPathAndString(OUTPUT_FROM_INPUT_PATH[path], 
+        return writeTextInFilePromiseFromPathAndString(OUTPUT_FROM_INPUT_PATH[path],
             minifiedHtml);
     }).then(function () {
         //console.log(path + " minified !");
@@ -36,5 +53,8 @@ Object.keys(OUTPUT_FROM_INPUT_PATH).forEach(function (path) {
         console.log(errorText);
         throw new Error(errorText);
     });
-    
+
 });
+
+
+}; // end export

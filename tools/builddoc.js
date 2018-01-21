@@ -3,7 +3,7 @@
     es6, maxerr: 100, devel, fudge, maxlen: 120, white, node, eval
 */
 /*global
-    
+
 */
 "use strict";
 const escapeHtml = require("escape-html");
@@ -17,6 +17,7 @@ const markdown = require("markdown-it")("default", {
 }).use(require("markdown-it-lazy-headers"));
 
 
+module.exports = function () {
 const thisName = "Parse markdown and produce html";
 
 const BEFORE_BODY_TEMPLATE_PATH = "client/html/beforeBodyTemplate.part.html";
@@ -75,7 +76,7 @@ const buildOpenSourceNotes = function ([textPath, markdownPath]) {
         const htmlText = markdown.render(markdownText);
         const htmlTextLicense = `<pre>${escapeHtml(LicenseText)}</pre>`;
         const allHtmlText = htmlText + htmlTextLicense;
-        
+
         return allHtmlText;
     });
 };
@@ -128,3 +129,5 @@ Promise.all([
         throw new Error(errorText);
     });
 });
+
+}; // end export
