@@ -1,7 +1,7 @@
 {
   "name": "server-in-the-browser",
   "author": "author",
-  "version": "0.20.2",
+  "version": "0.20.3",
   "main": "index.js",
   "dependencies": {
     "dom99": "^8.2.8",
@@ -14,10 +14,10 @@
     "node": ">=9"
   },
   "scripts": {
-    "build1js": "node tools/buildall.js JS",
     "bumpversion": "npm version patch --force",
     "versioninserviceworker4": "node tools/service_worker_version.js",
     "minifyserviceworkerjs5": "uglifyjs client/js/built/service_worker_with_version.js --mangle --compress --screw-ie8 --output client/js/built/service_worker.min.js",
+    "build1js": "node tools/buildall.js JS",
     "buildjsrest": "npm run bumpversion && npm run versioninserviceworker4 && npm run minifyserviceworkerjs5",
     "buildcss1": "node tools/buildall.js CSS",
     "minifycss2": "csso client/css/built/all.css  client/css/built/all.min.css",
@@ -25,7 +25,7 @@
     "buildcssrest": "npm run minifycss2 && npm run minifycss3",
     "buildhtml": "node tools/buildall.js HTML",
     "builddoc": "node tools/buildall.js DOC",
-    "buildall": "node tools/buildall.js HTML JS CSS DOC && npm run buildjsrest && npm run buildcssrest",
+    "buildall": "npm run buildjsrest && node tools/buildall.js HTML JS CSS DOC && npm run buildcssrest",
     "start": "node index.js",
     "buildjsstart": "npm run build1js && npm run buildjsrest && npm start",
     "buildallstart": "npm run buildall && npm start",
