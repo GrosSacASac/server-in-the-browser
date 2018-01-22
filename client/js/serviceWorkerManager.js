@@ -10,14 +10,20 @@ todo listen to the events and make the app active/not active accordingly
     navigator
 */
 
+import ui from "./ui.js";
+
+
 // true means maybe
 const serviceWorkerSupport = (
     window.navigator &&
-    window.navigator.serviceWorker && 
+    window.navigator.serviceWorker &&
     window.navigator.serviceWorker.register
 );
 
-serviceWorkerManager = (function () {
+
+export { serviceWorkerManager as default };
+
+ const serviceWorkerManager = (function () {
     let serviceWorkerRegistration;
     const register = function () {
         if (!serviceWorkerSupport) {
@@ -36,12 +42,12 @@ serviceWorkerManager = (function () {
 
         navigator.serviceWorker.addEventListener("message", function (event) {
             const message = event.data;
-            
+
             if (message.hasOwnProperty("LOG")) {
                 ui.serverLog(message.LOG);
                 return;
             }
-            
+
             const requestObject = message;
             const ressource = requestObject.header.ressource;
             rtc.rtcRequest(requestObject).then(function (answer) {
@@ -52,11 +58,11 @@ serviceWorkerManager = (function () {
                 });
             });
         });
-        
+
         navigator.serviceWorker.addEventListener("activate", function (event) {
             console.log("serviceWorker: activate", location.origin);
         });
-        
+
         navigator.serviceWorker.addEventListener("controllerchange", function (event) {
             console.log("serviceWorker: controllerchange");
         });
@@ -85,20 +91,20 @@ serviceWorkerManager = (function () {
                 }
             });
         }
-        
+
         // this could fail to remove something not yet active
         // serviceWorkerRegistration.unregister().then(function(event) {
             // console.log("serviceWorker: unregistered", event);
         // });
     };
-    
-    
+
+
     const start = function () {
         if (!register()) {
             ui.displayFatalError("Service worker must be enabled");
         }
     };
-    
+
     return {
         start,
         deleteServiceWorker

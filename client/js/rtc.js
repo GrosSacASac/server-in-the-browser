@@ -14,13 +14,23 @@ include local identifier  ? for a request response pair
 catch thrown errors https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/send
 try solve problem where one user can send infinite request, by changing answer into request
 carefull with `` syntax, properly escape with \
-use navigator.onLine and others (rtc requires connection) to not run into 
+use navigator.onLine and others (rtc requires connection) to not run into
 InvalidStateError: Can't create RTCPeerConnections when the network is down
 
 use http://danml.com/download.html to download files on single page
 */
 
-rtc = (function () {
+import {MESSAGES} from "./settings/messages.js";
+import {state} from "./state.js";
+import {keyFromObjectAndValue, OutOfOrderError} from "./utilities/utilities.js";
+
+import ui from "./ui.js";
+import sockets from "./sockets.js";
+
+
+export { rtc as default };
+
+const rtc = (function () {
     const API = {
     };
 
@@ -35,9 +45,9 @@ rtc = (function () {
     const MAX_MESSAGE_SIZE = 798; //Bytes some say it should be 800
     const PREFIX_MAX_SIZE = 10; //Bytes
     const MAX_PACKET_LIFETIME = 3000; //ms
-                               
+
     const ORDERED = true;
-    
+
     const rtcPeerConnectionFromId = new Map();
     const applicationLevelSendBufferFromDataChannel = new WeakMap();
     const applicationLevelReceivePartsBufferFromDataChannel = new WeakMap();
@@ -65,24 +75,24 @@ rtc = (function () {
             { urls: "stun:stun.l.google.com:19302" }
         ]
     };
-    
+
     const M = {
         ANSWER: "answer",
         REQUEST: "request",
         GET: "GET"
     };
-    
 
-    
-    
-    
+
+
+
+
 //make connected list reappear with the map
     const handleRequestDefault = function (headerBodyObject, fromId) {
         //console.log("headerBodyObject:", headerBodyObject);
         let ressourceName = headerBodyObject.header.ressource;
         if (ressourceName === "") {
             ressourceName = "index.html";
-        } 
+        }
         let answer = uiFiles.ressourceFromRessourceName(ressourceName);
         if (answer) {
             return {
@@ -107,32 +117,32 @@ rtc = (function () {
         useCustom = use;
     };
 
-    
+
     const sendOrPutIntoSendBuffer = function (rtcSendDataChannel,
             data, forcePutIntoSendBuffer = false) {
-        /*console.log("sendOrPutIntoSendBuffer", (!forcePutIntoSendBuffer &&  
-        (rtcSendDataChannel.bufferedAmount <       
+        /*console.log("sendOrPutIntoSendBuffer", (!forcePutIntoSendBuffer &&
+        (rtcSendDataChannel.bufferedAmount <
         rtcSendDataChannel.bufferedAmountLowThreshold)));*/
-        if (!forcePutIntoSendBuffer && 
+        if (!forcePutIntoSendBuffer &&
             (rtcSendDataChannel.bufferedAmount <
             rtcSendDataChannel.bufferedAmountLowThreshold)) {
             rtcSendDataChannel.send(data);
             return false;
         } else {
             //console.log(`delayed .send() data.byteLength: ${data.byteLength}`);
-            const applicationLevelSendBuffer = 
+            const applicationLevelSendBuffer =
                 applicationLevelSendBufferFromDataChannel.get(rtcSendDataChannel);
             applicationLevelSendBuffer.push(data);
             return true;
         }
     };
-    
+
     const sendDataOverRTC = function (rtcSendDataChannel, data) {
         if (!rtcSendDataChannel || !isOpenFromDataChannel(rtcSendDataChannel)) {
             ui.displayFatalError("The connection is not open");
             return;
         }
-        
+
         const byteLength = data.byteLength;
         if (typeof data === "string" || byteLength < MAX_MESSAGE_SIZE + PREFIX_MAX_SIZE) {
             // no need to split data we can send all at once
@@ -144,20 +154,20 @@ rtc = (function () {
         }
         // need to split before send
         // todo future split up data when strings if too big if still relevant
-        
+
         const splitData = bytes.splitArrayBuffer(data, MAX_MESSAGE_SIZE);
         let forcePutIntoSendBuffer = false;
         //https://bugs.chromium.org/p/webrtc/issues/detail?id=6628
         splitData.forEach(function (dataPart) {
-            forcePutIntoSendBuffer = 
+            forcePutIntoSendBuffer =
                 sendOrPutIntoSendBuffer(rtcSendDataChannel,
                     dataPart,
                     forcePutIntoSendBuffer);
         });
-        
+
     };
 
-    
+
     const prepareSendRtcData = function (targetId, headerBodyObject) {
         //console.log("prepareSendRtcData", headerBodyObject);
         let data;
@@ -172,16 +182,16 @@ rtc = (function () {
         const rtcSendDataChannel = rtcSendDataChannelFromId.get(targetId);
         sendDataOverRTC(rtcSendDataChannel, data);
     };
-    
+
     const buildTrySendRemaining = function (targetId) {
         //close over targetId
         let trySendRemaining =  function (event) { //TrySendRemaining
             /*gets called when the send buffer is low, see
 https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamountlow*/
             const rtcSendDataChannel = rtcSendDataChannelFromId.get(targetId);
-            if (rtcSendDataChannel.bufferedAmount 
+            if (rtcSendDataChannel.bufferedAmount
                 < rtcSendDataChannel.bufferedAmountLowThreshold) {
-                const applicationLevelSendBuffer = 
+                const applicationLevelSendBuffer =
                     applicationLevelSendBufferFromDataChannel.get(rtcSendDataChannel);
                 if (applicationLevelSendBuffer.length === 0) {
                     //nothing to send
@@ -190,19 +200,19 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
                 const data = applicationLevelSendBuffer.shift();
                 if (isOpenFromDisplayName(targetId)) {
 //console.log(`TrySendRemaining  : ${data.byteLength}`);
-                    rtcSendDataChannel.send(data);    
+                    rtcSendDataChannel.send(data);
                     trySendRemaining();
 
-    //todo recall itself                
+    //todo recall itself
                 } else {
                     ui.displayFatalError("The connection is not open");
-                }  
+                }
             }
         };
         return trySendRemaining;
     };
-    
-    
+
+
     const receiveRtcData = function (event, from) {
         let data = event.data || event;
         //console.log("receiveRtcData", event, from);
@@ -214,9 +224,9 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
             headerBodyObject = JSON.parse(data);
         } else {
             /*as arrayBuffer*/
-            
+
             if (data.size) { //Blob
-            /* or blob, if data arrives as blob 
+            /* or blob, if data arrives as blob
             this block should never run*/
                 bytes.arrayBufferPromiseFromBlob(data).then(
                 function (arrayBuffer) {
@@ -229,11 +239,11 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
             }
             const prefix = bytes.internalMessagePrefixFromArrayBuffer(data);
             data = bytes.removeInternalMessagePrefixFromArrayBuffer(data);
-            
+
             /*see bytes.js PREFIX_DICTIONARY*/
             if (prefix !== "standalone") { // part
                 const rtcSendDataChannel = rtcSendDataChannelFromId.get(from);
-                const applicationLevelReceivePartsBuffer =  
+                const applicationLevelReceivePartsBuffer =
                     applicationLevelReceivePartsBufferFromDataChannel.get(
                         rtcSendDataChannel
                     );
@@ -264,7 +274,7 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
             const originalRessourceName = headerBodyObject.header.ressource;
             if (headerBodyObject.header.method === "MESSAGE") {
                 ui.handleMessage(headerBodyObject, from);
-            } else if (!(D.vr.localServerAvailability)) {
+            } else if (!(d.variables.localServerAvailability)) {
                 ;//do nothing
             } else {
                 headerBodyObject.header.ressource = decodeURI(headerBodyObject.header.ressource);
@@ -289,7 +299,7 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
                     });
                 }
             }
-            
+
         } else if (headerBodyObject.header.is === M.ANSWER) {
             const ressourceName = headerBodyObject.header.ressource;
             if (resolveFromRessource.hasOwnProperty(ressourceName)) {
@@ -318,14 +328,14 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
         rtcPeerConnection.setLocalDescription(description).then(function () {
             sockets.socket.emit(MESSAGES.SEND_DESCRIPTION, {
                 sdp: rtcPeerConnection.localDescription,
-                displayedName : localDisplayedName,
-                from: localDisplayedName,
+                displayedName : state.localDisplayedName,
+                from: state.localDisplayedName,
                 targetDisplayedName: to
             });
         }).catch(function (error) {
                 console.log("An error occured", error)
         });
-        
+
     };
 
     const startConnectionWith = function (isCaller, to) {
@@ -352,7 +362,7 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
                     //console.log("On ICE 2");
                     sockets.socket.emit(MESSAGES.SEND_ICE_CANDIDATE, {
                         ice: event.candidate,
-                        from: localDisplayedName,
+                        from: state.localDisplayedName,
                         targetDisplayedName: to
                     });
                 }
@@ -367,9 +377,9 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
             applicationLevelSendBufferFromDataChannel.set(rtcSendDataChannel, []);
             applicationLevelReceivePartsBufferFromDataChannel.set(rtcSendDataChannel, [])
             rtcSendDataChannel.onbufferedamountlow = buildTrySendRemaining(to);
-            
+
             const sendChannelStateChangeHandler = sendChannelStateChange(to);
-            
+
             rtcSendDataChannel.onopen = sendChannelStateChangeHandler;
             rtcSendDataChannel.onclose = sendChannelStateChangeHandler;
 
@@ -442,7 +452,7 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
     };
 
     const onReceiveRtcIceCandidate = function (data) {
-        if (data.from === localDisplayedName) {
+        if (data.from === state.localDisplayedName) {
             return;
         }
         let rtcPeerConnection = rtcPeerConnectionFromId.get(data.from);
@@ -469,7 +479,7 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
             prepareSendRtcData(resolveFromRessource[ressource].target, resolveFromRessource[ressource].message);
         });
     };
-    
+
     const rtcRequest = function (requestObject) {
         return new Promise(function (resolve, reject) {
             const ressource = requestObject.header.ressource;
@@ -489,20 +499,20 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
             prepareSendRtcData(ui.selectedUserId, message);
         });
     };
-    
+
     const isOpenFromDataChannel = function (dataChannel) {
         return "open" === dataChannel.readyState;
-    };    
-    
+    };
+
     const isOpenFromDisplayName = function (displayName) {
         return isOpenFromDataChannel(rtcSendDataChannelFromId.get(displayName));
     };
-    
+
     const userIdChange = function (oldId, newId) {
         if (rtcPeerConnectionFromId.has(oldId)) {
             const rtcSendDataChannel = rtcSendDataChannelFromId.get(oldId);
             const sendChannelStateChangeHandler = sendChannelStateChange(newId);
-            
+
             rtcSendDataChannel.onopen = sendChannelStateChangeHandler;
             rtcSendDataChannel.onclose = sendChannelStateChangeHandler;
             rtcPeerConnectionFromId.set(newId, rtcPeerConnectionFromId.get(oldId));
@@ -522,6 +532,6 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
         isOpenFromDisplayName,
         userIdChange
     });
-    
+
     return API;
 }());

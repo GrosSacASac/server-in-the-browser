@@ -1,18 +1,17 @@
 /*service_worker.js
-todo fix undefined behaviour if there is more than 1 client (active window), client claim
-todo fix, the page gets old js files sometimes, because they are loaded before the new
-todo see if service worker timeout can cause bugs 
+todo fix undefined behaviour if there is more than 1 client (active window),
+todo the page gets old js files sometimes, because they are loaded before the new --> client claim
+todo see if service worker time-outs can cause bugs
 
 todo how to update the cache with just 1 or 2 files an not do a request for things that didn't change. Concat css and js files still a good practice, for first visit always, but do some research for later visits with cache invalidation so that not everything has to be reloaded
 
-todo maybe swtich to µWS in the future
 
-todo split file in 2 files, service_worker_common.js and my_service_worker.js, 
+todo split file in 2 files, service_worker_common.js and my_service_worker.js,
 
 
-a service worker is a special kind of program, it cannot be included with a <script> tag, 
-search for service worker on mdn for more info
-service worker simplified lifecycle
+a service worker is a special kind of program, it cannot be included with a <script> tag,
+
+service worker simplified life-cycle
 install or register
 activate (if there is an old active, wait)
 service worker is active
@@ -23,26 +22,29 @@ fetch
 
 https://heycam.github.io/webidl/#es-ByteString
 */
+
 /*jslint
-    es6, maxerr: 100, browser, devel, fudge, maxlen: 120, white
+    maxerr: 100, browser, devel, fudge, maxlen: 120, white
 */
 /*global
-    self, fetch, caches, Response, Request, Header, 
+    self, fetch, caches, Response, Request, Header,
 */
 
 
 "use strict";
 
-const SERVICE_WORKER_VERSION = "0.9.38"; // updated with tools/service_worker_version.js (String)
+const SERVICE_WORKER_VERSION = "0.20.14"; // updated with tools/service_worker_version.js (String)
 const CACHE_VERSION = SERVICE_WORKER_VERSION;
 //const ressourcesToSaveInCache = ["/"];
 const HOME = "/";
 const OFFLINE_ALTERNATIVE = "/offline";
 /*see server/serve.js staticFileFromUrl variable*/
-const ressourcesToSaveInCache = [
-    /*"/", not included to enable the offline page support to appear, 
+const ressourcesToSaveInCache /* for dev don't use cache */ = [];
+const ressourcesToSaveInCacheProd = [
+    /*"/", not included to enable the offline page support to appear,
     todo change mechanism*/
     OFFLINE_ALTERNATIVE,
+    "/all-external.js",
     "/app",
     "/favicon.png",
     "/css",
@@ -60,7 +62,7 @@ const ressourcesToSaveInCache = [
     "/body-parser",
     "/socket.io"
 ];
-const rtcLength = 4; // "rtc/".length; 
+const rtcLength = 4; // "rtc/".length;
 const rtcFetchDelay = 10000;//ms
 const origin = location.origin;
 const answerFromRessource = {};
@@ -101,7 +103,7 @@ const fetchFromPeerToPeer = function (customRequestObject) {
             rejectFetchFromPeerToPeer(ressource, "No answer after 10 seconds");
         }, rtcFetchDelay);
     });
-    
+
     self.clients.matchAll().then(function(clientList) {
         clientList.forEach(function(client) {
             client.postMessage(customRequestObject);
@@ -156,23 +158,14 @@ const isLocalURL = function (url) {
     return !(String(url).match("rtc"));
 };
 
-/*const fillServiceWorkerCache = function () {
-    return caches.open(CACHE_VERSION).then(function(cache) {
-        return cache.addAll(ressourcesToSaveInCache).catch(function (reason) {
-            return logInTheUIWhenActivated(["failed: " + String(reason)]);
-        });
-    });
-    
-}; */
-
 const fillServiceWorkerCache2 = function () {
-    /*It will not cache and also not reject for individual ressources that failed to be added in the cache. unlike fillServiceWorkerCache which stops caching as soon as one problem occurs. see http://stackoverflow.com/questions/41388616/what-can-cause-a-promise-rejected-with-invalidstateerror-here*/
+    /*It will not cache and also not reject for individual resources that failed to be added in the cache. unlike fillServiceWorkerCache which stops caching as soon as one problem occurs. see http://stackoverflow.com/questions/41388616/what-can-cause-a-promise-rejected-with-invalidstateerror-here*/
     return caches.open(CACHE_VERSION).then(function (cache) {
         return Promise.all(
             ressourcesToSaveInCache.map(function (url) {
                 return cache.add(url).catch(function (reason) {
                     return logInTheUIWhenActivated([url + "failed: " + String(reason)]);
-                })
+                });
             })
         );
     });
@@ -193,7 +186,7 @@ const deleteServiceWorkerOldCache = function () {
                     //console.log("No change in cache");
                 } else {
                     //console.log("New SERVICE_WORKER_VERSION of cache, delete old");
-                    return caches.delete(cacheVersion);          
+                    return caches.delete(cacheVersion);
                 }
             })
         );
@@ -212,11 +205,11 @@ const isAppPage = function (url) {
 
 self.addEventListener("install", function (event) {
     /*the install event can occur while another service worker is still active
-    
-    waitUntil blocks the state (here installing) of the service worker until the 
+
+    waitUntil blocks the state (here installing) of the service worker until the
     promise is fulfilled (resolved or rejected). It is useful to make the service worker more readable and more deterministic
-    
-    save in cache some static ressources 
+
+    save in cache some static ressources
     this happens before activation */
     event.waitUntil(
         fillServiceWorkerCache2()
@@ -253,11 +246,11 @@ self.addEventListener("message", function (event) {
 self.addEventListener("fetch", function (fetchEvent) {
     /* fetchEvent interface FetchEvent
     see https://www.w3.org/TR/service-workers/#fetch-event-interface
-    IMPORTANT: fetchEvent.respondWith must be called inside this handler immediately 
-    synchronously fetchEvent.respondWith must be called with a response object or a 
-    promise that resolves with a response object. if fetchEvent.respondWith is called 
+    IMPORTANT: fetchEvent.respondWith must be called inside this handler immediately
+    synchronously fetchEvent.respondWith must be called with a response object or a
+    promise that resolves with a response object. if fetchEvent.respondWith is called
     later in a callback the browser will take over and asks the remote server directly, do not do that
-    
+
     why have fetchEvent.respondWith( and not respond with the return value of the callback function ?
     -->
     It allows to do other thing before killing the service worker, like saving stuff in cache
@@ -278,7 +271,7 @@ self.addEventListener("fetch", function (fetchEvent) {
             // logInTheUI(["POST ignored", request]);
             return;
         }
-        
+
         // logInTheUI(["Normal Fetch"]);
         fetchEvent.respondWith(
             fetchFromCache(request.clone()).then(function (cacheResponse) {
@@ -304,7 +297,7 @@ self.addEventListener("fetch", function (fetchEvent) {
                 if (isAppPage(url)) {
                     //if it is the landing page that is asked
                     return useOfflineAlternative();
-                    //todo if we are offline , siplay /offline directly
+                    //todo if we are offline , display /offline directly
                 }
                 return Promise.reject(reason);
             })
@@ -312,7 +305,7 @@ self.addEventListener("fetch", function (fetchEvent) {
     } else {
         // Peer to peer Fetch
         //console.log(SERVICE_WORKER_VERSION, "rtc fetch" url:", fetchEvent.request.url);
-        // request, url are defined 
+        // request, url are defined
         const method = request.method;
         const requestHeaders = request.headers;
 
@@ -328,7 +321,7 @@ self.addEventListener("fetch", function (fetchEvent) {
             //value, key correct order
             //is there a standard way to use Object.assign with Map like iterables ?
             //todo handle duplicates
-            //https://fetch.spec.whatwg.org/#terminology-headers            
+            //https://fetch.spec.whatwg.org/#terminology-headers
             customRequestObject.header[key] = value;
         });
 
@@ -341,7 +334,7 @@ self.addEventListener("fetch", function (fetchEvent) {
                     customRequestObject.body = bodyAsArrayBuffer;
                 }
             }).catch(function (reason) {
-                /*console.log("no body sent, a normal GET or HEAD request has no body", 
+                /*console.log("no body sent, a normal GET or HEAD request has no body",
                 reason);*/
             }).then(function (notUsed) {
                 return fetchFromPeerToPeer(customRequestObject);
@@ -351,7 +344,7 @@ self.addEventListener("fetch", function (fetchEvent) {
                     status: response.header.status || 200,
                     statusText : response.header.statusText || "OK"
                 });
-                
+
                 return responseInstance;
             }).catch(function (error) {
                 const responseInstance = new Response(`<html><p>${error}</p></html>`,
@@ -362,11 +355,11 @@ self.addEventListener("fetch", function (fetchEvent) {
                     status: 500,
                     statusText : "timedout"
                 });
-                
+
                 return responseInstance;
             })
         );
     }
-    
+
     /*here we could do more with event.waitUntil()*/
 });

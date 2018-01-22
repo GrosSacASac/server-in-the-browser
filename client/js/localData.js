@@ -12,7 +12,9 @@ consider use localForage library
 decide if this place should be full of try catch of emptied of it
 */
 
-localData = (function () {
+export { localData as default };
+
+const localData = (function () {
 
     const get = function (itemName) {
         let returnValue;
@@ -22,7 +24,7 @@ localData = (function () {
             /* maybe there was data stored differently before so it breaks JSON.parse
             clear all data and returns undefined */
             try {
-                /* this looks ugly but maybe the localStorage is not available and 
+                /* this looks ugly but maybe the localStorage is not available and
                 always throws */
                 clearAll();
             } catch (e2) {
@@ -32,7 +34,7 @@ localData = (function () {
         }
         return returnValue;
     };
-    
+
     const getElseDefault = function (itemName, defaultValue) {
         const value = get(itemName);
         if (value === null) {
@@ -40,15 +42,15 @@ localData = (function () {
         }
         return value;
     };
-    
+
     const set = function (itemName, value) {
         return localStorage.setItem(itemName, JSON.stringify(value));
     };
-    
+
     const clearAll = function () {
         localStorage.clear();
     };
-    
+
     return {
         get,
         getElseDefault,

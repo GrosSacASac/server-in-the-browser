@@ -49,6 +49,7 @@ a.disabled, [hidden], template {
 .titleversion {
   font-size : 0.5em;
 }
+
 /*header.css*/
 header {
   width: 100%;
@@ -89,6 +90,7 @@ header > nav > ul > li {
 header > nav > ul > li > a {
   color: #5565e7;
 }
+
 /*pre.css*/
 pre {
   background-color: #f0f1e9;

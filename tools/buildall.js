@@ -18,6 +18,7 @@ const builddoc = require("./builddoc.js");
 // const cleanup = require("./cleanup.js");
 
 const JS = "JS";
+
 const HTML = "HTML";
 const CSS = "CSS";
 const DOC = "DOC";
@@ -31,7 +32,7 @@ if (cli_inputs.length === 0) {
 }
 
 if (cli_inputs.includes(JS)) {
-    buildjs();
+    buildjs(cli_inputs);
 }
 if (cli_inputs.includes(CSS)) {
     buildcss();

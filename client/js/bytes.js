@@ -9,17 +9,20 @@
 about new FileReader();
 use instance properties, whenever possible
 */
-bytes = (function () {
-    
+export { bytes as default };
+import {keyFromObjectAndValue, OutOfOrderError} from "./utilities/utilities.js";
+
+ const bytes = (function () {
+
     const PREFIX_DICTIONARY = {
         standalone: 0,
         begin: 1,
         part: 2,
         endpart: 3
     };
-    
+
     const PREFIX_LENGTH = 1;
-    
+
     const copyArrayBufferIntoBiggerArrayBuffer = function (original, target, byteOffset) {
         /*console.log(`
         original ${original}, ${original.byteLength}
@@ -27,11 +30,11 @@ bytes = (function () {
         byteOffset ${byteOffset}`);*/
         new Uint8Array(target).set(new Uint8Array(original), byteOffset);
     };
-    
+
     const stringFromArrayBuffer = function (arrayBuffer, encoding = "utf-8") {
         return (new TextDecoder(encoding)).decode(new DataView(arrayBuffer));
     };
-    
+
     const addInternalMessagePrefixToArrayBuffer = function (arrayBuffer, what = "standalone") {
         /* see PREFIX_DICTIONARY
         */
@@ -43,20 +46,20 @@ bytes = (function () {
         const targetUint8View = new Uint8Array(target);
         targetUint8View[0] = PREFIX_DICTIONARY[what];
         return target;
-    };   
-    
+    };
 
-    
+
+
     const internalMessagePrefixFromArrayBuffer = function (arrayBuffer) {
         /*returns prefix string from arrayBuffer*/
         const arrayBufferUint8View = new Uint8Array(arrayBuffer);
         return keyFromObjectAndValue(PREFIX_DICTIONARY, arrayBufferUint8View[0]);
     };
-    
+
     const removeInternalMessagePrefixFromArrayBuffer = function (arrayBuffer) {
         return arrayBuffer.slice(PREFIX_LENGTH);
     };
-    
+
     const splitArrayBuffer = function (arrayBuffer, maxSize) {
         /*also adds prefixes*/
         const splitData = [];
@@ -66,11 +69,11 @@ bytes = (function () {
         while (i < splitDataLength) {
             part = arrayBuffer.slice(i * maxSize, (i + 1) * maxSize);
             if (i === 0) { // begin
-                part = addInternalMessagePrefixToArrayBuffer(part, "begin") 
+                part = addInternalMessagePrefixToArrayBuffer(part, "begin")
             } else if (i + 1 < splitDataLength) { // part
-                part = addInternalMessagePrefixToArrayBuffer(part, "part") 
+                part = addInternalMessagePrefixToArrayBuffer(part, "part")
             } else { // end
-                part = addInternalMessagePrefixToArrayBuffer(part, "endpart") 
+                part = addInternalMessagePrefixToArrayBuffer(part, "endpart")
             }
             splitData.push(part);
             i += 1;
@@ -78,7 +81,7 @@ bytes = (function () {
         //console.log("arrayBuffer split!", splitData, arrayBuffer);
         return splitData;
     };
-    
+
     const assembleArrayBuffer = function (splitData) {
         //todo put back in correct order, see if sent in correct order
         /* there is no prefix left
@@ -93,10 +96,10 @@ bytes = (function () {
         if (notOrdered) {
             throw new OutOfOrderError("splitData is in the wrong order");
             /*try to put in correct order, impossible because no  way to differtiate between parts
-            what to do when mutiple splitData overlap each other because sent after 
-            each other and received, 
+            what to do when mutiple splitData overlap each other because sent after
+            each other and received,
             example: [begin1 part1 begin2 part2 part1 end1 part2 end2]
-            let problem = false; 
+            let problem = false;
             let first;
             let last;
             splitData.forEach(function ([prefix, arrayBuffer]) {
@@ -108,7 +111,7 @@ bytes = (function () {
                 }
 
             });*/
-            
+
         }
         const assembledArrayBufferLength = splitData.reduce(function (currentTotal, [prefix, arrayBuffer]) {
             return currentTotal + arrayBuffer.byteLength;
@@ -137,7 +140,7 @@ bytes = (function () {
             reader.readAsArrayBuffer(blob);
         });
     };
-    
+
     const stringPromiseFromBlob = function (blob) {
         //argument must be blob or file Object
         return new Promise(function (resolve, reject) {
@@ -152,45 +155,45 @@ bytes = (function () {
         });
     };
 
-        
+
     const arrayBufferFromHeaderBodyObject = function (headerBodyObject) {
         /*header is an object, body is an arrayBuffer
         uses TextDecoder?, ArrayBuffer, Uint8Array
         optimization ideas: use less bytes for the strings
-        
+
         returns arrayBufferWithEverything with
         [length+header+body]*/
         const stringCharacterInBytes = Uint8Array.BYTES_PER_ELEMENT;
         const {header, body} = headerBodyObject;
-        
+
         const stringifiedHeader = JSON.stringify(header);
         const headerLength = stringifiedHeader.length; // Number
-        
+
         const stringifiedHeaderLength = String(headerLength);
         const stringifiedHeaderLengthLength = stringifiedHeaderLength.length;
-        
+
         const bodyByteLength = body.byteLength;
-        
+
         const arrayBufferWithEverythingByteLength = (
                 (stringCharacterInBytes * stringifiedHeaderLengthLength) +
                 (stringCharacterInBytes * headerLength) +
                 bodyByteLength);
 
-                
+
         const arrayBufferWithEverything = new ArrayBuffer(arrayBufferWithEverythingByteLength);
         let offset = 0;
         const arrayBufferWithEverythingUint8View = new Uint8Array(arrayBufferWithEverything);
-        
+
         stringifiedHeaderLength.split("").forEach(function (digitString) {
             arrayBufferWithEverythingUint8View[offset] = digitString.charCodeAt(0);
             offset += 1;
         });
-        
+
         stringifiedHeader.split("").forEach(function (anyCharacterString) {
             arrayBufferWithEverythingUint8View[offset] = anyCharacterString.charCodeAt(0);
             offset += 1;
         });
-        
+
         /*is there a better way to add the body at the end of offset in arrayBufferWithEverything*/
         copyArrayBufferIntoBiggerArrayBuffer(body, arrayBufferWithEverything, offset * stringCharacterInBytes);
         return arrayBufferWithEverything;
@@ -201,38 +204,38 @@ bytes = (function () {
         returns an object
         {header: header(Object),
          body: body(ArrayBuffer)} */
-        
+
         const stringCharacterInBytes = Uint8Array.BYTES_PER_ELEMENT;
-            
+
         let offset = 0;
         let isNumber = true;
         let stringifiedHeaderLength = "";
         let character = "";
         const arrayBufferWithEverythingUint8View = new Uint8Array(arrayBufferWithEverything);
-        
+
         while (isNumber) {
             stringifiedHeaderLength += character;
             character = String.fromCharCode(arrayBufferWithEverythingUint8View[offset]);
             offset += 1;
             isNumber = !isNaN(Number(character));
         }
-        
+
         offset -= 1;
         const headerLength = Number(stringifiedHeaderLength);
         const headerArrayBuffer = arrayBufferWithEverything.slice(
                 offset * stringCharacterInBytes,
                 (offset + headerLength) * stringCharacterInBytes);
-                
+
         const body = arrayBufferWithEverything.slice(
                 (offset + headerLength) * stringCharacterInBytes);//rest
-                
+
         const headerArrayBufferUint8View = new Uint8Array(headerArrayBuffer);
         const tempStringifiedHeaderArray = [];
-        
+
         headerArrayBufferUint8View.forEach(function (characterCode) {
             tempStringifiedHeaderArray.push(String.fromCharCode(characterCode));
         });
-        
+
         const stringifiedHeader = tempStringifiedHeaderArray.join("");
         let header;
         try {
@@ -244,8 +247,8 @@ bytes = (function () {
                 header = {};
             }
         }
-        
-        
+
+
         return {
             header,
             body

@@ -1,10 +1,22 @@
 //launcher.js
-(function () {
+
+import d from "../../node_modules/dom99/built/dom99Module.js";
+import {MESSAGES} from "./settings/messages.js";
+import ui from "./ui.js";
+import {state} from "./state.js";
+import serviceWorkerManager from "./serviceWorkerManager.js";
+import sockets from "./sockets.js";
+
+
+export { launcher as default };
+
+const MAX_NOTIFICATION_TIME = 8000; // ms
+const launcher = function () {
     if (window.test) {
         //console.log("test");
         return;
     }
-    /*API evaluation to detect missing features, 
+    /*API evaluation to detect missing features,
     use window. to use the wanted Error flow
     See RTCPeerConnection*/
     const minimumRequirement = {
@@ -20,7 +32,7 @@
         }
     };
 
-    
+
 
     const checkRequirements = function (requirement) {
         /**/
@@ -37,7 +49,7 @@
         }
         return false;
     };
-    
+
     const nonMetRequirement = checkRequirements(minimumRequirement);
     if (nonMetRequirement) {
         ui.displayNonMetRequirement(nonMetRequirement);
@@ -46,7 +58,7 @@
     ui.start();
 
     const accepted = true; //localData.get(MESSAGES.CONDITION_ACCEPTED);
-    
+
     const startServiceWorkerAndSockets = function () {
         serviceWorkerManager.start();
         sockets.start();
@@ -56,7 +68,7 @@
             then we prompt user if really want to leave
             https://html.spec.whatwg.org/#the-beforeunloadevent-interface says to use
             preventDefault but it does not work in a test*/
-            if (D.vr.warnBeforeLeave) {
+            if (d.variables.warnBeforeLeave) {
                 const message = "Are you sure you want to leave ?";
                 /*if (event.preventDefault) {
                     const answer = prompt("Are you sure you want to leave ?");
@@ -73,11 +85,11 @@
         }, false);
         window.addEventListener("unload", function (event) {
             /*not necessary but better*/
-            sockets.socket.emit(MESSAGES.EXIT, 
+            sockets.socket.emit(MESSAGES.EXIT,
                 {}
             );
         }, false);
-        window.addEventListener("error", function (event) {
+        /*window.addEventListener("error", function (event) {
             console.log(event);
             if (event.stopPropagation) {
                 event.stopPropagation();
@@ -85,15 +97,15 @@
             if (event.preventDefault) {
                 event.preventDefault();
             }
-        }, false);
-        
+        }, false);*/
+
         const updateOnLineState = function (event) {
-            if (!notificationEnabled) {
+            if (!state.notificationEnabled) {
                 return;
             }
-            isOnLine = navigator.onLine;
+            state.isOnLine = navigator.onLine;
             let text;
-            if (isOnLine) {
+            if (state.isOnLine) {
                 text = "Connected to the network";
             } else {
                 text = "Not connected to the network";
@@ -103,7 +115,7 @@
                 tag: "onLine",
                 noscreen: true /* don't force turn on screen*/
             });
-            setTimeout(onLineNotification.close.bind(onLineNotification), MAX_NOTIFICATION_TIME); 
+            setTimeout(onLineNotification.close.bind(onLineNotification), MAX_NOTIFICATION_TIME);
         };
         window.addEventListener("online", updateOnLineState);
         window.addEventListener("offline", updateOnLineState);
@@ -114,4 +126,4 @@
     } else {
         ui.displayLandingPage(true).then(startServiceWorkerAndSockets);
     }
-}());
+};

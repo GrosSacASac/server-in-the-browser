@@ -3,10 +3,25 @@
     es6, maxerr: 100, browser, devel, fudge, maxlen: 120, white, node, eval
 */
 /*global
-    ui, D, R, rtc, sockets, MESSAGES, localDisplayedName, caches
+    ui, d, rtc, sockets, MESSAGES, state.localDisplayedName, caches
 */
 /*could add close connection button*/
-ui = (function () {
+import {MESSAGES} from "./settings/messages.js";
+
+import d from "../../node_modules/dom99/built/dom99Module.js";
+import {yesNoDialog, textDialog} from "../../node_modules/dom99/components/yesNoDialog/yesNoDialog.js";
+import rtc from "./rtc.js";
+import uiFiles from "./uiFiles.js";
+import localData from "./localData.js";
+import {state} from "./state.js";
+import serviceWorkerManager from "./serviceWorkerManager.js";
+import sockets from "./sockets.js";
+
+export { ui as default };
+
+window.d = d;
+
+const ui = (function () {
     const API = {
         selectedUserId : ""
     };
@@ -22,7 +37,7 @@ ui = (function () {
         ID_CHANGE_REQUEST_SENT: "The request to change the ID has been sent. Waiting for an answer.",
         ID_CHANGE_SUCCESS: "Your ID has been successfully changed."
     };
-    
+
     const ifEnter = function (event) {
         /*returns true if it was not keydown event or enter pressed and shift not pressed*/
         return (!event ||
@@ -30,45 +45,48 @@ ui = (function () {
             ((event.keyCode === 13) && (!event.shiftKey))
         );
     };
-    
+
     let acceptConditionResolve = function () {};
     let wantToConnectTo = "";
     let uiIdStrings = [];
     const uiUserRelationState = {}; // 0: None 1 Connecting 2 Connected
-    
-    
-    const markUserAsConnecting = function (selectedUserId) {   
-        const uiIdString = "user_" + selectedUserId;     
-        if (selectedUserId && D.el[uiIdString]) {
-            D.el[uiIdString].connectButton.disabled = true;
-            D.vr[uiIdString].connectButton = UISTRINGS.CONNECTING;
+
+
+    const markUserAsConnecting = function (selectedUserId) {
+        const uiIdString = "user_" + selectedUserId;
+        if (selectedUserId && d.elements[uiIdString]) {
+            d.elements[`${uiIdString}>connectButton`].disabled = true;
+            d.feed(UISTRINGS.CONNECTING, `${uiIdString}>connectButton`);
             uiUserRelationState[selectedUserId] = 1;
         }
     };
-    
+
     const markUserAsConnected = function (selectedUserId, connected = true) {
     /*multiple connections can be open at once.
     It is only possible to select an user if it is connected, we need to reflect that*/
         const uiIdString = "user_" + selectedUserId;
-        if (selectedUserId && D.el[uiIdString]) {
-            D.el[uiIdString].connectButton.disabled = connected;
-            D.el[uiIdString].selectButton.disabled = !connected;
-            D.el[uiIdString].selectButton.hidden = !connected;
+        if (selectedUserId && d.elements[uiIdString]) {
+            d.elements[`${uiIdString}>connectButton`].disabled = connected;
+            d.elements[`${uiIdString}>selectButton`].disabled = !connected;
+            d.elements[`${uiIdString}>selectButton`].hidden = !connected;
             if (connected) {
-                D.vr[uiIdString].connectButton = UISTRINGS.CONNECTED;
-                D.vr[uiIdString].selectButton = UISTRINGS.SELECT;
+                d.feed({
+                    connectButton: UISTRINGS.CONNECTED,
+                    selectButton: UISTRINGS.SELECT
+                }, uiIdString);
                 uiUserRelationState[selectedUserId] = 2;
             } else {
-                D.el[uiIdString].connectButton.disabled = false;
-                D.el[uiIdString].selectButton.disabled = true;
-                D.el[uiIdString].selectButton.hidden = true;
-                D.vr[uiIdString].connectButton = UISTRINGS.CONNECT_SELECT;
+                d.elements[`${uiIdString}>connectButton`].disabled = false;
+                d.elements[`${uiIdString}>selectButton`].disabled = true;
+                d.elements[`${uiIdString}>selectButton`].hidden = true;
+                d.feed({
+                    connectButton: UISTRINGS.CONNECT_SELECT
+                }, uiIdString);
                 uiUserRelationState[selectedUserId] = 0;
-            
             }
         }
     };
-    
+
     const markUserAsSelected = function (selectedUserId, selected = true) {
         /*only 1 can be selected at a time*/
         if (uiUserRelationState[selectedUserId] !== 2) {
@@ -79,89 +97,82 @@ ui = (function () {
         const uiIdStringLastSelected = "user_" + API.selectedUserId;
 
         if (selected) {
-            if (API.selectedUserId && D.el[uiIdStringLastSelected]) {
-                D.el[uiIdStringLastSelected].selectButton.disabled = false;
-                D.vr[uiIdStringLastSelected].selectButton = UISTRINGS.SELECT;
-                D.el[uiIdStringLastSelected + "host"].className = "";
+            if (API.selectedUserId && d.elements[uiIdStringLastSelected]) {
+                d.elements[`${uiIdStringLastSelected}>selectButton`].disabled = false;
+                d.feed(UISTRINGS.SELECT, `${uiIdStringLastSelected}>selectButton`);
+
+                d.elements[uiIdStringLastSelected + "host"].className = "";
             }
-            
-            if (selectedUserId && D.el[uiIdString]) {
-                D.el[uiIdString].selectButton.disabled = true;
-                D.vr[uiIdString].selectButton = UISTRINGS.SELECTED;
-                D.el[uiIdString + "host"].className = "active";
+
+            if (selectedUserId && d.elements[uiIdString]) {
+                d.elements[`${uiIdStringLastSelected}>selectButton`].disabled = true;
+                d.feed(UISTRINGS.SELECTED, `${uiIdStringLastSelected}>selectButton`);
+                d.elements[uiIdString + "host"].className = "active";
             }
-            
+
             API.selectedUserId = selectedUserId;
             toggleCommunicationControls(selectedUserId);
         } else {
-            if (selectedUserId && D.el[uiIdString]) {
-                D.el[uiIdString].selectButton.disabled = false;
-                D.vr[uiIdString].selectButton = UISTRINGS.SELECT;
-                D.el[uiIdString + "host"].className = "";
+            if (selectedUserId && d.elements[uiIdString]) {
+                d.elements[`${uiIdStringLastSelected}>selectButton`].disabled = false;
+                d.feed(UISTRINGS.SELECT, `${uiIdStringLastSelected}>selectButton`);
+                d.elements[uiIdString + "host"].className = "";
             }
         }
     };
-    
+
     const selectAfterConnected = function (selectedUserId) {
         if (wantToConnectTo === selectedUserId) {
             markUserAsSelected(selectedUserId);
         }
     };
-    
+
     const updateUserList = function (list) {
         /*we might need to see what connection we already have*/
-        const removeSelf = R.filter((displayedName) => displayedName !== localDisplayedName);
-        const format = R.map(function (user) {
-            return user.displayedName;
-        });
-        
+
         //console.log(format, removeSelf, list);
-        const connected_users = R.pipe(format , removeSelf)(list);
-        
+        const connected_users = list.map(function (user) {
+            return user.displayedName;
+        }).filter((displayedName) => displayedName !== state.localDisplayedName);
+
         //console.log(connected_users);
-        D.el.connected_users.innerHTML = "";
+        d.elements.connected_users.innerHTML = "";
         uiIdStrings.forEach(function (uiIdString) {
-            D.forgetKey(uiIdString);
+            d.forgetContext(uiIdString);
         });
         uiIdStrings = [];
         connected_users.map(function (displayedName) {
             const uiIdString = "user_" + displayedName;
             uiIdStrings.push(uiIdString);
-            
-            const userItemElement = D.createElement2({
+
+            const userItemElement = d.createElement2({
                 "tagName": "li",
                 "is": "user-item",
-                "data-in": uiIdString,
-                "data-el": uiIdString + "host"
+                "data-inside": uiIdString,
+                "data-element": uiIdString + "host"
             });
-            /*D.vr = {
-                [uiIdString]: {
-                    userDisplayName : displayedName
-                }
-            };*/
-            D.vr[uiIdString] = {
-                userDisplayName : displayedName
-            };
-            D.linkJsAndDom(userItemElement);
-            
+            d.feed(displayedName, d.contextFromArray([uiIdString, "userDisplayName"]));
+            d.activate(userItemElement);
+
             if (rtc.rtcPeerConnectionFromId.has(displayedName) && rtc.isOpenFromDisplayName(displayedName)) {
-                D.el[uiIdString + "host"].className = "";
-                D.el[uiIdString].connectButton.disabled = true;
-                D.vr[uiIdString].connectButton = "Connected";
-                D.el[uiIdString].selectButton.disabled = false;
-                D.el[uiIdString].selectButton.hidden = false;
-                
+                d.elements[uiIdString + "host"].className = "";
+
+                d.feed(UISTRINGS.CONNECTED, `${uiIdString}>connectButton`);
+                d.elements[`${uiIdString}>connectButton`].disabled = true;
+                d.elements[`${uiIdString}>selectButton`].disabled = false;
+                d.elements[`${uiIdString}>selectButton`].hidden = false;
+
             }
             if (uiUserRelationState[displayedName] === 1) {
                 markUserAsConnecting(displayedName);
             }
-            
+
             if (uiUserRelationState[displayedName] === 2) {
                 markUserAsConnected(displayedName);
             }
-            D.el.connected_users.appendChild(userItemElement);
+            d.elements.connected_users.appendChild(userItemElement);
         });
-        
+
         //cleanup disconnected users from uiUserRelationState
         Object.keys(uiUserRelationState).forEach(function (userId) {
             if (!connected_users.includes(userId)) {
@@ -171,59 +182,59 @@ ui = (function () {
         if (API.selectedUserId) {
             markUserAsSelected(API.selectedUserId);
         }
-        
+
     };
 
-    const toggleCommunicationControls = function (displayName) {        
+    const toggleCommunicationControls = function (displayName) {
         const able = rtc.isOpenFromDisplayName(displayName);
         const hasIndex = rtc.connectedUsers.some(function (connectedUser) {
             return (connectedUser.displayedName === displayName && connectedUser.isServer);
         });
         const notAble = !able;
-        D.el.send_button.disabled = notAble;
-        D.el.input.disabled = notAble;
-        D.el.indexLink.classList.toggle("disabled", !hasIndex);
+        d.elements.send_button.disabled = notAble;
+        d.elements.input.disabled = notAble;
+        d.elements.indexLink.classList.toggle("disabled", !hasIndex);
     };
-          
+
     const displayOwnUserId = function () {
-        D.vr.your_id = localDisplayedName;
+        d.feed(state.localDisplayedName, `your_id`);
     };
-    
+
     const displayFatalError = function (error, ...more) {
-        D.vr.log = error;
+        d.feed(error, `log`);
         console.log(error);
         if (more && more.length > 0) {
             console.log(...more);
         }
     };
-    
+
     const display = function (wantToDisplay) {
         displayLandingPage(!wantToDisplay);
-        D.el.main.hidden = !wantToDisplay;
-        const previous = localData.get("localDisplayedName");
+        d.elements.main.hidden = !wantToDisplay;
+        const previous = localData.get("state.localDisplayedName");
         if (previous) {
-            D.vr.newId = previous;
-            D.fx.idChangeRequest();
+            d.feed(previous, `newId`);
+            d.functions.idChangeRequest();
         }
-        D.vr.log = "";
-        
+        d.feed("", `log`);
+
     };
-    
+
     const displayLandingPage = function (wantToDisplay = true) {
-        D.el.landingPage.hidden = !wantToDisplay;
-        D.vr.log = "";
+        d.elements.landingPage.hidden = !wantToDisplay;
+        d.feed("", `log`);
         return new Promise(function (resolve, reject) {
             acceptConditionResolve = resolve;
         });
     };
-    
+
     const serverLog = function (any) {
-        D.vr.serverLog += "\n" + JSON.stringify(any);
+        d.feed(d.variables.serverLog + "\n" + JSON.stringify(any), `serverLog`);
         console.log(any);
     };
-    
+
     let displayNonMetRequirement = function (nonMetRequirement) {
-        D.linkJsAndDom();
+        d.activate();
         let i = 0;
         const splitTextContentHref = function (link) {
             return {innerHTML: `<a href="${link}" target="_blank" rel="noopener noreferrer">${link}</a>`};
@@ -232,181 +243,181 @@ ui = (function () {
             i += 1;
             const iString = "i" + String(i);
             const requirementI = nonMetRequirement[technicalName]
-            
-            const missingFeatureElement = D.createElement2({
+
+            const missingFeatureElement = d.createElement2({
                 "tagName": "missing-feature",
                 "data-in": iString
             });
 
-            D.vr = {
-                [iString]: {
-                    title : technicalName,
-                    text : requirementI.text,
-                    links: requirementI.links.map(splitTextContentHref)
-                }
-            };
-            D.linkJsAndDom(missingFeatureElement);
-            D.el.missingFeatures.appendChild(missingFeatureElement);
+            d.feed({
+                title : technicalName,
+                text : requirementI.text,
+                links: requirementI.links.map(splitTextContentHref)
+            }, `iString`);
+
+            d.activate(missingFeatureElement);
+            d.elements.missingFeatures.appendChild(missingFeatureElement);
         });
     };
-    
+
     const start = function () {
         uiFiles.start();
-        D.fx.acceptAndStart = function (event) {
+        d.functions.acceptAndStart = function (event) {
             acceptConditionResolve();
             display(true);
             localData.set(MESSAGES.CONDITION_ACCEPTED, "true");
 
         };
-        
-        D.fx.changeCustom = function (event) {
-                    
-            const wantedToUseCustom = D.vr.useCustom;
-            
+
+        d.functions.changeCustom = function (event) {
+
+            const wantedToUseCustom = d.variables.useCustom;
+
             if (wantedToUseCustom) {
-                D.vr.useCustom = false;
-                D.vr.parsingResult = "Stopped while editing !";
+                d.feed(false, `useCustom`);
+                d.feed("Stopped while editing !", `parsingResult`);
                 rtc.useHandleRequestCustom(false);
                 browserServer.close();
             }
         };
 
-        D.fx.warnBeforeLeaveChange = function (event) {
-            console.log(D.vr.warnBeforeLeave);
-            localData.set("warnBeforeLeave", D.vr.warnBeforeLeave);
+        d.functions.warnBeforeLeaveChange = function (event) {
+            console.log(d.variables.warnBeforeLeave);
+            localData.set("warnBeforeLeave", d.variables.warnBeforeLeave);
             //todo display change saved
         };
-        
-        D.fx.wantNotificationChange = function (event) {
+
+        d.functions.wantNotificationChange = function (event) {
             // todo also handle the case where the user changes the setting in the browser ui (call the notification contructor, if it is dis
             // notificationEnabled = false
-            const wantNotification = D.vr.wantNotification;
+            const wantNotification = d.variables.wantNotification;
             let feedBackText;
-            
+
             if (wantNotification) {
                 if (!("Notification" in window)) {
                     feedBackText = "This browser does not support desktop notification, or this option has been disabled";
-                    notificationEnabled = false;
+                    state.notificationEnabled = false;
                     localData.set("notifications", notificationEnabled);
-                    D.vr.wantNotification = notificationEnabled;
+                    d.feed(notificationEnabled, `wantNotification`);
                 } else {
-                
+
                     if (Notification.permission === "granted") {
                         feedBackText = "Notifications enabled";
-                        notificationEnabled = true;
-                        localData.set("notifications", notificationEnabled);
+                        state.notificationEnabled = true;
+                        localData.set("notifications", state.notificationEnabled);
                     } else {
                         feedBackText = "Waiting for autorization";
-                        D.vr.wantNotification = false;
+                        d.feed(false, `wantNotification`);
                         Notification.requestPermission(function (permission) {
                             if (permission === "granted") {
-                                D.vr.wantNotificationFeedBack = "Notifications enabled";
-                                notificationEnabled = true;
-                                localData.set("notifications", notificationEnabled);
-                                D.vr.wantNotification = notificationEnabled;
+                                state.notificationEnabled = true;
+                                localData.set("notifications", state.notificationEnabled);
+                                d.feed("Notifications enabled", `wantNotificationFeedBack`);
+                                d.feed(state.notificationEnabled, `wantNotification`);
                             } else {
-                                D.vr.wantNotificationFeedBack = "Notifications access denied";
-                                notificationEnabled = false;
-                                localData.set("notifications", notificationEnabled);
+                                d.feed("Notifications access denied", `wantNotificationFeedBack`);
+                                state.notificationEnabled = false;
+                                localData.set("notifications", state.notificationEnabled);
                             }
                         });
-                    }                
+                    }
                 }
             } else {
                 feedBackText = "Notifications disabled";
-                notificationEnabled = false;
-                localData.set("notifications", notificationEnabled);
+                state.notificationEnabled = false;
+                localData.set("notifications", state.notificationEnabled);
             }
-            D.vr.wantNotificationFeedBack = feedBackText;
+            d.feed(feedBackText, `wantNotificationFeedBack`);
         };
-          
-        
-        D.fx.useCustom = function (event) {
+
+
+        d.functions.useCustom = function (event) {
             /*USE custom index.js as the pseudo server*/
-            
-            const wantToUseCustom = D.vr.useCustom;
-            
+
+            const wantToUseCustom = d.variables.useCustom;
+
             if (wantToUseCustom) {
-                browserServer.setBrowserServerCode(D.vr.userCode);
+                browserServer.setBrowserServerCode(d.variables.userCode);
                 browserServer.run().then(function () {
-                    D.el.parsingResult.classList.toggle("error", false);
-                    D.vr.parsingResult = "Successfully parsed";
+                    d.elements.parsingResult.classList.toggle("error", false);
+                        d.feed(state.localDisplayedName, `your_id`);
+                    d.variables.parsingResult = "Successfully parsed";
                     rtc.useHandleRequestCustom(true);
                 }).catch(lateReject);
             } else {
                 browserServer.close();
                 rtc.useHandleRequestCustom(false);
             }
-            
+
         };
 
-        D.fx.sendMessage = function (event) {
+        d.functions.sendMessage = function (event) {
             if (!ifEnter(event)) {
                 return;
             }
-            rtc.sendRtcMessage(API.selectedUserId, D.vr.input);
-            displayMessage(`You to ${API.selectedUserId}:  ${D.vr.input}`);
-            D.vr.input = "";
+            rtc.sendRtcMessage(API.selectedUserId, d.variables.input);
+            displayMessage(`You to ${API.selectedUserId}:  ${d.variables.input}`);
+            d.feed("", `input`);
             event.preventDefault();
         };
 
-        D.fx.connectToUser = function (event) {
-            const selectedUserUiPiece = D.getParentContext(event.target);
-            const selectedUserId = selectedUserUiPiece.vr.userDisplayName;
+        d.functions.connectToUser = function (event) {
+            console.log("d.contextFromEvent(event)", d.contextFromEvent(event));
+            console.log("373", d.variables[d.contextFromArray([d.contextFromEvent(event), "userDisplayName"])]);
+            const selectedUserId = d.variables[d.contextFromArray([d.contextFromEvent(event), "userDisplayName"])];
             markUserAsConnecting(selectedUserId);
             wantToConnectTo = selectedUserId;
             rtc.startConnectionWith(true, selectedUserId);
-            //when connected will call markUserAsSelected   
+            //when connected will call markUserAsSelected
         };
 
-        D.fx.selectUser = function (event) {
-            const selectedUserUiPiece = D.getParentContext(event.target);
-            const selectedUserId = selectedUserUiPiece.vr.userDisplayName;
+        d.functions.selectUser = function (event) {
+            const selectedUserId = d.variables[d.contextFromArray([d.contextFromEvent(event), "userDisplayName"])];
             //wantToConnectTo = selectedUserId;
             markUserAsSelected(selectedUserId);
         };
 
-        D.fx.debug = function (event) {
+        d.functions.debug = function (event) {
             const a = 5;
-            D.vr.log = a;
+            d.feed(a, `log`);
             console.log(a);
         };
-        
-        D.fx.idChangeRequest = function (event) {
+
+        d.functions.idChangeRequest = function (event) {
             if (!ifEnter(event)) {
                 return;
             }
             const PATTERN = /[a-zA-Z0-9]{4,25}/;
-            const newId = D.vr.newId;
+            const newId = d.variables.newId;
             const length = newId.length;
             if (!PATTERN.test(newId)) {
-                D.vr.idChangeFeedback = UISTRINGS.BAD_ID_FORMAT;
+                d.feed(UISTRINGS.BAD_ID_FORMAT, `idChangeFeedback`);
                 return;
             }
             sockets.requestIdChange(newId);
-            D.vr.idChangeFeedback = UISTRINGS.ID_CHANGE_REQUEST_SENT;
-            D.el.idChangeRequestButton.disabled = true;
-            D.el.newId.disabled = true;
+            d.feed(UISTRINGS.ID_CHANGE_REQUEST_SENT, `idChangeFeedback`);
+            d.elements.idChangeRequestButton.disabled = true;
+            d.elements.newId.disabled = true;
         };
-    
-        D.fx.changeLocalServerAvailability = function (event) {
+
+        d.functions.changeLocalServerAvailability = function (event) {
         //todo needs server confirmation ? not important
             sockets.socket.emit(MESSAGES.LOCAL_SERVER_STATE, {
-                displayedName: localDisplayedName,
-                isServer: D.vr.localServerAvailability
+                displayedName: state.localDisplayedName,
+                isServer: d.variables.localServerAvailability
             });
         };
 
-        D.fx.deleteAll = function (event) {
+        d.functions.deleteAll = function (event) {
             yesNoDialog(`Delete all local data and quit ?`, "Yes", "No, Cancel").then(function (answer) {
                 if (answer) {
                     localData.clearAll();
                     serviceWorkerManager.deleteServiceWorker();
                     /*also
-                    close all webrtc connection 
+                    close all webrtc connection
                     close websocket
                     */
-                    D.vr.warnBeforeLeave = false; // don't ask twice
+                    d.feed(false, `warnBeforeLeave`);
                     caches.keys().then(function (cacheVersions) {
                         return Promise.all(
                             cacheVersions.map(function (cacheVersion) {
@@ -420,62 +431,63 @@ ui = (function () {
             });
         };
         const removeAndForget = function (elementName) {
-            D.el[elementName].remove();
-            D.forgetKey(elementName);
+            d.elements[elementName].remove();
+            d.forgetContext(elementName);
         };
         displayNonMetRequirement = undefined;
 
-        D.vr.log = "Starting ...";
-        D.vr.input = "";
-        D.vr.output = "";
-        D.vr.newId = "";
-        D.vr.warnBeforeLeave = localData.getElseDefault("warnBeforeLeave", false);
-        D.vr.wantNotification = localData.getElseDefault("notifications", notificationEnabled);
-        D.fx.wantNotificationChange();
-        D.vr.useCustom = false;
-        D.vr.your_id = "not yet connected";
-        D.vr.localServerAvailability = false;
-        //needs to be same as handleRequestDefault
-        D.vr.userCode = `const http = require("http");
-const hostname = "127.0.0.1";
-const port = 3000;
+        d.feed({
+            log: "Starting ...",
+            input: "",
+            output: "",
+            newId: "",
+            warnBeforeLeave: localData.getElseDefault("warnBeforeLeave", false),
+            wantNotification: localData.getElseDefault("notifications", state.notificationEnabled)
+        });
+        d.functions.wantNotificationChange();
+        d.feed({
+            useCustom: false,
+            your_id: "not yet connected",
+            localServerAvailability: false,
+            userCode: `const http = require("http");
+    const hostname = "127.0.0.1";
+    const port = 3000;
 
-const server = http.createServer((req, res) => {
-  res.statusCode = 200;
-  res.setHeader("Content-Type", "text/plain");
-  res.end("Hello World\\n");
-});
+    const server = http.createServer((req, res) => {
+      res.statusCode = 200;
+      res.setHeader("Content-Type", "text/plain");
+      res.end("Hello World\\n");
+    });
 
-server.listen(port, hostname, () => {
-  console.log(\`Server running at http://\${hostname}:\${port}/\`);
-});
-`;
+    server.listen(port, hostname, () => {
+      console.log(\`Server running at http://\${hostname}:\${port}/\`);
+    });
+    `
+        });
 
-        
-
-        D.linkJsAndDom();
+        d.activate();
         removeAndForget("missingFeatures");
         removeAndForget("missingFeatureTemplate");
-        
+
     };
-    
+
     const messageElementList = [];
     const displayMessage = function (text) {
         const beforeLastMessageCopyElement = document.createElement("p");
-        beforeLastMessageCopyElement.textContent = D.vr.lastMessage;
-        D.el.allButLastMessages.appendChild(beforeLastMessageCopyElement);
+        beforeLastMessageCopyElement.textContent = d.variables.lastMessage;
+        d.elements.allButLastMessages.appendChild(beforeLastMessageCopyElement);
         messageElementList.push(beforeLastMessageCopyElement);
-        D.vr.lastMessage = text;
+        d.feed(text, `lastMessage`);
         if (messageElementList.length > MAX_MESSAGES) {
             messageElementList.shift().remove();
         }
     };
-    
+
     const handleMessage = function (headerBodyObject, fromId) {
         displayMessage(`From ${fromId}:  ${headerBodyObject.body}`);
         return; // undefined
     };
-    
+
     const handleChangeIdResponse = function (message, data) {
         if (message === MESSAGES.USER_ID_CHANGE || message === MESSAGES.CONFIRM_ID_CHANGE) {
             const {newId, oldId} = data;
@@ -486,13 +498,15 @@ server.listen(port, hostname, () => {
                 }
             });
             if (message === MESSAGES.CONFIRM_ID_CHANGE) {
-            
-                D.vr.newId = "";
-                D.vr.your_id = newId;
-                localDisplayedName = newId;
-                D.vr.idChangeFeedback = UISTRINGS.ID_CHANGE_SUCCESS;
-                localData.set("localDisplayedName", newId);
-                
+
+                state.localDisplayedName = newId;
+                localData.set("state.localDisplayedName", newId);
+                d.feed({
+                    newId: "",
+                    your_id: newId,
+                    idChangeFeedback: UISTRINGS.ID_CHANGE_SUCCESS
+                });
+
             } else if (message === MESSAGES.USER_ID_CHANGE) {
                 if (wantToConnectTo === oldId) {
                     wantToConnectTo = newId;
@@ -507,27 +521,27 @@ server.listen(port, hostname, () => {
                 rtc.userIdChange(oldId, newId);
                 updateUserList(rtc.connectedUsers);
                 return;
-                
+
             }
         } else if (message === MESSAGES.BAD_ID_FORMAT_REJECTED) {
-            D.vr.idChangeFeedback = UISTRINGS.BAD_ID_FORMAT;
+            d.feed(UISTRINGS.BAD_ID_FORMAT, `idChangeFeedback`);
         } else if (message === MESSAGES.ALREADY_TAKEN_REJECTED) {
-            D.vr.idChangeFeedback = UISTRINGS.ALREADY_TAKEN_REJECTED;
+            d.feed(UISTRINGS.ALREADY_TAKEN_REJECTED, `idChangeFeedback`);
         }
-        D.el.idChangeRequestButton.disabled = false;
-        D.el.newId.disabled = false;
+        d.elements.idChangeRequestButton.disabled = false;
+        d.elements.newId.disabled = false;
     };
-    
+
     const lateReject = function (reason) {
         /*error in the worker, that handles requests, see browserserver.js
         browserServer has been  closed with browserServer.close() at this point*/
-        D.vr.useCustom = false;
-        D.el.parsingResult.classList.toggle("error", true);
-        D.vr.parsingResult = reason;
+        d.elements.parsingResult.classList.toggle("error", true);
+        d.feed(reason, `parsingResult`);
+        d.feed(false, `useCustom`);
         rtc.useHandleRequestCustom(false);
 
     };
-    
+
     Object.assign(API, {
         start,
         updateUserList,
@@ -544,6 +558,6 @@ server.listen(port, hostname, () => {
         displayNonMetRequirement,
         lateReject
     });
-    
+
     return API;
 }());

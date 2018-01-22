@@ -8,7 +8,7 @@ challenges
  * refuse variable access
  * similar all around
  * reuqire(http) and require express does same thing
- 
+
  * USE browserify
  * close worker
  * use web worker with messaging system
@@ -19,9 +19,9 @@ challenges
 /*global
     window, URL, Blob, Worker
 */
+export { browserServer as default };
 
-
-browserServer = (function () {
+const browserServer = (function () {
 
     const states = {
         DISABLED: 0,
@@ -40,9 +40,9 @@ browserServer = (function () {
     let workerState = states.DISABLED;
     let browserServerCode = "";
     let timeoutId;
-    
+
     const LENGTHBEFORE = 140;
-     
+
     const setBrowserServerCode = function (readyCodeText) {
         /*a web worker needs direct source code becuase it has a new separate
         execution context. Below gets injected readyCodeText*/
@@ -56,7 +56,7 @@ browserServer = (function () {
             return;
         }
         close();
-        
+
         if (timeoutId) {
             window.clearTimeout(timeoutId);
         }
@@ -127,7 +127,7 @@ browserServer = (function () {
                         staticFileObject.error = "No file";
                     }
                     worker.postMessage(staticFileObject);
-                    
+
                 } else if (message.hasOwnProperty("ERROR")) {
                     const errorInformation = message.ERROR;
                     const errorString = `${errorInformation.name}: "${errorInformation.message}" at line ${errorInformation.line}`;
@@ -141,20 +141,20 @@ browserServer = (function () {
                 }
             }, false);
             //the worker starts with the first postMessage
-            worker.postMessage({ 
+            worker.postMessage({
                 [COMMANDS.COMMAND]: COMMANDS.START,
                 [COMMANDS.URLSTART]: COMMANDS.URLSTARTVALUE
             });
         });
     };
-    
+
     const resultFromRequest = function (headerBodyObject) {
         if (!worker) {
             return;
-        }        
+        }
         worker.postMessage(headerBodyObject);
-    };    
-    
+    };
+
     let promiseId = 1;
     const resolveFromPromiseId = {};
     const answerObjectPromiseFromRequest = function (headerBodyObject) {
@@ -170,7 +170,7 @@ browserServer = (function () {
             worker.postMessage({headerBodyObject});
         });
     };
-    
+
     const close = function () {
         if (!worker) {
             return;
@@ -180,7 +180,7 @@ browserServer = (function () {
         worker.terminate(); // forced close don t let finish last task
         worker = undefined;
     };
-    
+
     return {
         setBrowserServerCode,
         resultFromRequest,
@@ -189,5 +189,3 @@ browserServer = (function () {
         close
     };
 }());
-
-

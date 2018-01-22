@@ -3,7 +3,9 @@ try to fix problem with socketIo HIGH PRIORITY
 max DataChannel brandwitdth, is it 30kbs ?
 allow uploaded node_modules require not juste standards ones
 get paramters with ?a=b&z=3
-add socket io support 
+add socket io support
+re-enable window.addEventListener("error" if necessary for worker error catching
+change d.variables assignment to feed where necessary
 
 # UX
 increase check box
@@ -20,7 +22,7 @@ oading experience display an erro while loading ... not good (invisble if less t
 # Improvements
 
 gzip data and use a cache for static files on server-side
-if time make body parser closer to what it is, 
+if time make body parser closer to what it is,
 ! after loading multiple files including a package json remove use a node program checkbox
 ! make require work with custom scripts that are imported
 service worker claim does not always work ?
@@ -30,6 +32,7 @@ port the next thing in node
 translate projects
 make it work without server after the first time, if there are enough users connected
 make sdp offer before needed, so that it is instant
+cache external_dependencies ?
 
 # Refactoring
 
@@ -46,13 +49,3 @@ high level overview how it works
 summary/overwiew
 API Doc
 related ressources
-
-
-
-
-
-
-
-
-
-
