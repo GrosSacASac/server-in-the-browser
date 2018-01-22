@@ -85,7 +85,7 @@ if (inputs.includes(OWN)) {
     }
 
     const inputOptions = {
-        input: `${jsDirectory}/declare.js`,
+        input: `${jsDirectory}/launcher.js`,
         plugins: [
             // also uses .
             rollup_babel({

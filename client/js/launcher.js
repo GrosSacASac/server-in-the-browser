@@ -8,10 +8,21 @@ import serviceWorkerManager from "./serviceWorkerManager.js";
 import sockets from "./sockets.js";
 
 
-export { launcher as default };
 
 const MAX_NOTIFICATION_TIME = 8000; // ms
 const launcher = function () {
+
+    if (location.protocol === "http:" && location.href !== "http://localhost:8080/") {
+    /*should be useless , use server redirect
+    see
+    http://stackoverflow.com/questions/7185074/heroku-nodejs-http-to-https-ssl-forced-redirect
+    */
+        location.href = "https" + location.href.slice(4);
+    }
+    const startErrorElement = document.getElementById("starterror");
+    (startErrorElement && startErrorElement.remove());
+
+    window.test = window.test || false;
     if (window.test) {
         //console.log("test");
         return;
@@ -127,3 +138,4 @@ const launcher = function () {
         ui.displayLandingPage(true).then(startServiceWorkerAndSockets);
     }
 };
+launcher();
