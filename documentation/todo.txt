@@ -3,9 +3,10 @@ try to fix problem with socketIo HIGH PRIORITY
 max DataChannel brandwitdth, is it 30kbs ?
 allow uploaded node_modules require not juste standards ones
 get paramters with ?a=b&z=3
-add socket io support
+add socket io support (inside browser server)
 re-enable window.addEventListener("error" if necessary for worker error catching
-change d.variables assignment to feed where necessary
+change + host to the new paradigm
+
 
 # UX
 increase check box

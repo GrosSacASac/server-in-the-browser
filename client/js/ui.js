@@ -22,9 +22,6 @@ export { ui as default };
 window.d = d;
 
 const ui = (function () {
-    const API = {
-        selectedUserId : ""
-    };
     const MAX_MESSAGES = 50;
     const UISTRINGS = {
         CONNECTING: "Connecting",
@@ -54,7 +51,7 @@ const ui = (function () {
 
     const markUserAsConnecting = function (selectedUserId) {
         const uiIdString = "user_" + selectedUserId;
-        if (selectedUserId && d.elements[uiIdString]) {
+        if (selectedUserId) {
             d.elements[`${uiIdString}>connectButton`].disabled = true;
             d.feed(UISTRINGS.CONNECTING, `${uiIdString}>connectButton`);
             uiUserRelationState[selectedUserId] = 1;
@@ -65,7 +62,8 @@ const ui = (function () {
     /*multiple connections can be open at once.
     It is only possible to select an user if it is connected, we need to reflect that*/
         const uiIdString = "user_" + selectedUserId;
-        if (selectedUserId && d.elements[uiIdString]) {
+        // console.log(selectedUserId);
+        if (selectedUserId) {
             d.elements[`${uiIdString}>connectButton`].disabled = connected;
             d.elements[`${uiIdString}>selectButton`].disabled = !connected;
             d.elements[`${uiIdString}>selectButton`].hidden = !connected;
@@ -93,31 +91,37 @@ const ui = (function () {
             //non connected, means we cannot select it
             selected = false;
         }
-        const uiIdString = "user_" + selectedUserId;
-        const uiIdStringLastSelected = "user_" + API.selectedUserId;
+
+        toggleCommunicationControls(selectedUserId);
+
+        state.uiIdStringLastSelected = "user_" + state.selectedUserId;
+        state.lastSelectedUserId = state.selectedUserId;
+        if (state.lastSelectedUserId) {
+
+            // console.log("previously selected", state.selectedUserId);
+            if (selected) {
+                d.elements[`${state.uiIdStringLastSelected}>selectButton`].disabled = false;
+                d.feed(UISTRINGS.SELECT, `${state.uiIdStringLastSelected}>selectButton`);
+                d.elements[state.uiIdStringLastSelected + "host"].className = "";
+            }
+
+        } else {
+            // console.log("previously nothing selected");
+        }
 
         if (selected) {
-            if (API.selectedUserId && d.elements[uiIdStringLastSelected]) {
-                d.elements[`${uiIdStringLastSelected}>selectButton`].disabled = false;
-                d.feed(UISTRINGS.SELECT, `${uiIdStringLastSelected}>selectButton`);
+            state.selectedUserId = selectedUserId;
+            const uiIdString = "user_" + state.selectedUserId;
+            d.elements[`${uiIdString}>selectButton`].disabled = true;
+            d.feed(UISTRINGS.SELECTED, `${uiIdString}>selectButton`);
+            d.elements[uiIdString + "host"].className = "active";
 
-                d.elements[uiIdStringLastSelected + "host"].className = "";
-            }
-
-            if (selectedUserId && d.elements[uiIdString]) {
-                d.elements[`${uiIdStringLastSelected}>selectButton`].disabled = true;
-                d.feed(UISTRINGS.SELECTED, `${uiIdStringLastSelected}>selectButton`);
-                d.elements[uiIdString + "host"].className = "active";
-            }
-
-            API.selectedUserId = selectedUserId;
-            toggleCommunicationControls(selectedUserId);
         } else {
-            if (selectedUserId && d.elements[uiIdString]) {
-                d.elements[`${uiIdStringLastSelected}>selectButton`].disabled = false;
-                d.feed(UISTRINGS.SELECT, `${uiIdStringLastSelected}>selectButton`);
-                d.elements[uiIdString + "host"].className = "";
-            }
+            state.selectedUserId = "";
+            const uiIdString = "user_" + selectedUserId;
+            d.elements[`${uiIdString}>selectButton`].disabled = false;
+            d.feed(UISTRINGS.SELECT, `${uiIdString}>selectButton`);
+            d.elements[uiIdString + "host"].className = "";
         }
     };
 
@@ -179,8 +183,8 @@ const ui = (function () {
                 delete uiUserRelationState[userId];
             }
         });
-        if (API.selectedUserId) {
-            markUserAsSelected(API.selectedUserId);
+        if (state.selectedUserId) {
+            markUserAsSelected(state.selectedUserId);
         }
 
     };
@@ -246,7 +250,7 @@ const ui = (function () {
 
             const missingFeatureElement = d.createElement2({
                 "tagName": "missing-feature",
-                "data-in": iString
+                "data-inside": iString
             });
 
             d.feed({
@@ -340,8 +344,7 @@ const ui = (function () {
                 browserServer.setBrowserServerCode(d.variables.userCode);
                 browserServer.run().then(function () {
                     d.elements.parsingResult.classList.toggle("error", false);
-                        d.feed(state.localDisplayedName, `your_id`);
-                    d.variables.parsingResult = "Successfully parsed";
+                    d.feed("Successfully parsed", `parsingResult`);
                     rtc.useHandleRequestCustom(true);
                 }).catch(lateReject);
             } else {
@@ -355,15 +358,13 @@ const ui = (function () {
             if (!ifEnter(event)) {
                 return;
             }
-            rtc.sendRtcMessage(API.selectedUserId, d.variables.input);
-            displayMessage(`You to ${API.selectedUserId}:  ${d.variables.input}`);
+            rtc.sendRtcMessage(state.selectedUserId, d.variables.input);
+            displayMessage(`You to ${state.selectedUserId}:  ${d.variables.input}`);
             d.feed("", `input`);
             event.preventDefault();
         };
 
         d.functions.connectToUser = function (event) {
-            console.log("d.contextFromEvent(event)", d.contextFromEvent(event));
-            console.log("373", d.variables[d.contextFromArray([d.contextFromEvent(event), "userDisplayName"])]);
             const selectedUserId = d.variables[d.contextFromArray([d.contextFromEvent(event), "userDisplayName"])];
             markUserAsConnecting(selectedUserId);
             wantToConnectTo = selectedUserId;
@@ -511,8 +512,8 @@ const ui = (function () {
                 if (wantToConnectTo === oldId) {
                     wantToConnectTo = newId;
                 }
-                if (API.selectedUserId === oldId) {
-                    API.selectedUserId = newId;
+                if (state.selectedUserId === oldId) {
+                    state.selectedUserId = newId;
                 }
                 if (uiUserRelationState[oldId]) {
                     uiUserRelationState[newId] = uiUserRelationState[oldId];
@@ -542,7 +543,7 @@ const ui = (function () {
 
     };
 
-    Object.assign(API, {
+    return {
         start,
         updateUserList,
         displayOwnUserId,
@@ -557,7 +558,5 @@ const ui = (function () {
         handleChangeIdResponse,
         displayNonMetRequirement,
         lateReject
-    });
-
-    return API;
+    };
 }());

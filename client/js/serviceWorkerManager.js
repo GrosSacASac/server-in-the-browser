@@ -11,7 +11,7 @@ todo listen to the events and make the app active/not active accordingly
 */
 
 import ui from "./ui.js";
-
+import rtc from "./rtc.js";
 
 // true means maybe
 const serviceWorkerSupport = (

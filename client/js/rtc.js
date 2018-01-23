@@ -23,8 +23,9 @@ use http://danml.com/download.html to download files on single page
 import {MESSAGES} from "./settings/messages.js";
 import {state} from "./state.js";
 import {keyFromObjectAndValue, OutOfOrderError} from "./utilities/utilities.js";
-
+import bytes from "./bytes.js";
 import ui from "./ui.js";
+import uiFiles from "./uiFiles.js";
 import sockets from "./sockets.js";
 
 
@@ -139,7 +140,12 @@ const rtc = (function () {
 
     const sendDataOverRTC = function (rtcSendDataChannel, data) {
         if (!rtcSendDataChannel || !isOpenFromDataChannel(rtcSendDataChannel)) {
-            ui.displayFatalError("The connection is not open");
+            console.log(rtcSendDataChannel);
+            console.log(isOpenFromDataChannel(rtcSendDataChannel));
+            console.log("if or");
+            console.log(!rtcSendDataChannel);
+            console.log(!isOpenFromDataChannel(rtcSendDataChannel));
+            ui.displayFatalError("The connection is not open or is it 1");
             return;
         }
 
@@ -205,7 +211,7 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
 
     //todo recall itself
                 } else {
-                    ui.displayFatalError("The connection is not open");
+                    ui.displayFatalError("The connection is not open 2 or is it ?");
                 }
             }
         };
@@ -495,8 +501,8 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
             };
             //requestObject has more info in requestObject.header we could Object.assign to get it all
             resolveFromRessource[ressource].message = message; // resendAllRtcRequests
-            resolveFromRessource[ressource].target = ui.selectedUserId;
-            prepareSendRtcData(ui.selectedUserId, message);
+            resolveFromRessource[ressource].target = state.selectedUserId;
+            prepareSendRtcData(state.selectedUserId, message);
         });
     };
 

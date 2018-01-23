@@ -9,5 +9,10 @@ const state = {
         */
     notificationEnabled: false,
     localDisplayedName: "",
-    isOnLine: true
+    isOnLine: true,
+    selectedUserId : "",
+    lastSelectedUserId: "",
+    uiIdStringLastSelected: "" // same with "_user"
 };
+
+window.state = state;

@@ -32,7 +32,7 @@ const uiFiles = (function () {
     const fileInputDescription = {
         "tagName": "input",
         "type": "file",
-        "data-fx": "xReadFileStart",
+        "data-function": "xReadFileStart",
         "multiple": "multiple"
     };
 
@@ -182,10 +182,10 @@ const uiFiles = (function () {
 
         return {
             header: {
-                "Content-Type": d.variables[key].fileMime
+                "Content-Type": d.variables[d.contextFromArray([key, `fileMime`])]
             },
-            body: ressourceContentFromElement.get(d.elements[key].fileBody) ||
-                    d.variables[key].fileBody
+            body: ressourceContentFromElement.get(d.elements[d.contextFromArray([key, `fileBody`])]) ||
+                    d.variables[d.contextFromArray([key, `fileBody`])]
         };
     };
 
@@ -221,8 +221,8 @@ const uiFiles = (function () {
 
         d.functions.removeRessource = function (event) {
             const context = d.contextFromEvent(event);
-            console.log(context);
-            console.log(d.variables[d.contextFromArray([context, "fileName"])]);
+            console.log("224 ", context);
+            console.log("224 ", d.variables[d.contextFromArray([context, "fileName"])]);
 
             const name = d.variables[d.contextFromArray([context, "fileName"])];
             const key = keyFromFileName(name);
@@ -235,14 +235,17 @@ const uiFiles = (function () {
             });
         };
 
-        d.functions.rememberFileName = function (event) {
-            const context = d.contextFromEvent(event.target);
-            console.log("240", context);
-            console.log("240", d.variables[d.contextFromArray([context, "fileName"])]);
-            const name = d.variables[d.contextFromArray([context, "fileName"])];
-            const key = keyFromFileName(name);
-            fileNameFromKey[key] =  name;
-        };
+            const rememberFileName = function (key, name) {
+                fileNameFromKey[key] =  name;
+            };
+            d.functions.rememberFileName = function (event) {
+                const context = d.contextFromEvent(event.target);
+                console.log("240", context);
+                console.log("240", d.variables[d.contextFromArray([context, "fileName"])]);
+                const name = d.variables[d.contextFromArray([context, "fileName"])];
+                const key = keyFromFileName(name);
+                rememberFileName(key, name);
+            };
 
         let ressourceUiId = 0;
         d.functions.addRessource = function (event) {
@@ -263,10 +266,12 @@ const uiFiles = (function () {
                             ).then(function (answer) {
                             if (answer === true) {
                                 const key = keyFromFileName(name);
-                                d.variables[key].fileBody = STRINGS.FILE_LOADED;
-                                d.elements[key].fileBody.disabled = true;
-                                ressourceContentFromElement.set(d.elements[key].fileBody, arrayBuffer);
-                                d.variables[key].fileMime = mime;
+                                d.elements[d.contextFromArray([key, `fileBody`])].disabled = true;
+                                d.feed({
+                                    "fileBody" : STRINGS.FILE_LOADED,
+                                    fileMime: mime
+                                }, key);
+                                ressourceContentFromElement.set(d.elements[d.contextFromArray([key, `fileBody`])], arrayBuffer);
                             } else if (answer === false) {
                                 ;//do nothing
                             }
@@ -279,24 +284,22 @@ const uiFiles = (function () {
 
                     const fileInputElement = d.createElement2({
                         tagName: "file-input",
-                        "data-in": ressourceUiIdString
+                        "data-inside": ressourceUiIdString
                     });
-                    d.variables = {
-                        [ressourceUiIdString]: {
-                            fileName: name,
-                            fileBody: STRINGS.FILE_LOADED,
-                            fileMime: mime
-                        }
-                    };
+
+                    d.feed({
+                        "fileName" : name,
+                        "fileBody" : STRINGS.FILE_LOADED,
+                        fileMime: mime
+                    }, ressourceUiIdString);
                     d.activate(fileInputElement);
-                    d.elements[ressourceUiIdString].fileBody.disabled = true;
-                    //d.elements[ressourceUiIdString].fileBody.classList.toggle("hiddenvalue", true);
+                    d.elements[d.contextFromArray([ressourceUiIdString, `fileBody`])].disabled = true;
                     ressourceContentFromElement.set(
-                        d.elements[ressourceUiIdString].fileBody,
+                        d.elements[d.contextFromArray([ressourceUiIdString, `fileBody`])],
                         arrayBuffer
                     );
                     d.elements.ressourcesContainer.appendChild(fileInputElement);
-                    d.functions.rememberFileName({dKeys:[ressourceUiIdString]});
+                    rememberFileName(ressourceUiIdString, name);
                 });
 
                 Promise.all(dialogs).then(function (notUsedValues) {
@@ -314,13 +317,13 @@ const uiFiles = (function () {
                         if (serverArrayBuffer) {
                             const serverString = bytes.stringFromArrayBuffer(serverArrayBuffer);
                             //console.log("serverString",serverString);
-                            d.variables.userCode = serverString;
+                            d.feed(serverString, `userCode`);
                             // console.log("d.variables.userCode",d.variables.userCode);
                         }
                     }
                 });
             }).catch(function (reason) {
-                d.variables.log = "Could not load file: " + reason;
+                d.feed("Could not load file: " + reason, `log`);
             });
         };
 
@@ -331,15 +334,13 @@ const uiFiles = (function () {
 
             const fileInputElement = d.createElement2({
                 "tagName": "file-input",
-                "data-in": ressourceUiIdString
+                "data-inside": ressourceUiIdString
             });
-            d.variables = {
-                [ressourceUiIdString]: {
-                    "fileName" : "",
-                    "fileBody" : "",
-                    fileMime: ""
-                }
-            };
+            d.feed({
+                "fileName" : "",
+                "fileBody" : "",
+                fileMime: ""
+            }, ressourceUiIdString);
             d.activate(fileInputElement);
             d.elements.ressourcesContainer.appendChild(fileInputElement);
         };
@@ -355,9 +356,11 @@ const uiFiles = (function () {
                 yesNoDialog(`"${name}" already exists. Overwrite it ?`, "Yes", "No, Cancel").then(function (answer) {
                     if (answer) {
                         const key = keyFromFileName(name)
-                        d.variables[key].fileBody = indexHtmlString;
-                        d.elements[key].fileBody.disabled = false;
-                        d.variables[key].fileMime = mime;
+                        d.elements[d.contextFromArray([key, "fileBody"])].disabled = false;
+                        d.feed({
+                            "fileBody" : indexHtmlString,
+                            fileMime: mime
+                        }, key);
                         ressourceContentFromElement.delete(d.elements[key].fileBody);
                     }
                 });
@@ -367,18 +370,18 @@ const uiFiles = (function () {
 
                 const fileInputElement = d.createElement2({
                     "tagName": "file-input",
-                    "data-in": ressourceUiIdString
+                    "data-inside": ressourceUiIdString
                 });
-                d.variables = {
-                    [ressourceUiIdString]: {
-                        "fileName" : name,
-                        "fileBody" : indexHtmlString,
-                        fileMime: mime
-                    }
-                };
+                d.feed({
+                    "fileName" : name,
+                    "fileBody" : indexHtmlString,
+                    fileMime: mime
+                }, ressourceUiIdString);
                 d.activate(fileInputElement);
                 d.elements.ressourcesContainer.appendChild(fileInputElement);
-                d.functions.rememberFileName({dKeys:[ressourceUiIdString]});
+
+                rememberFileName(ressourceUiIdString, name);
+
             }
         };
     };
