@@ -27,7 +27,7 @@ import bytes from "./bytes.js";
 import ui from "./ui.js";
 import uiFiles from "./uiFiles.js";
 import sockets from "./sockets.js";
-
+import browserServer from "./built/browserserver_with_node_emulator_for_worker.js";
 
 export { rtc as default };
 
@@ -284,7 +284,7 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
                 ;//do nothing
             } else {
                 headerBodyObject.header.ressource = decodeURI(headerBodyObject.header.ressource);
-                //console.log("browserServer.answerObjectPromiseFromRequest");
+
                 const sendAnswerObject = function (answerObject) {
                     //console.log("sendAnswerObject", answerObject);
                     if (answerObject) {

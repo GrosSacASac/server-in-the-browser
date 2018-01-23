@@ -58,19 +58,13 @@ if (inputs.includes(OWN)) {
     };
 
 
-    Promise.all([
+    const part1 = Promise.all([
         textFileContentPromiseFromPath(BROWSERSERVER_PATH),
         textFileContentPromiseFromPath(NODE_EMULATOR_FOR_WORKER_PATH),
     ]).then(function ([browserserverText, node_emulator_for_workerText]) {
         const node_emulator_for_workerTemplateString = putInsideTemplateStringSafe(node_emulator_for_workerText);
         const browserserver_with_node_emulator_for_workerText = browserserverText.replace(NODE_EMULATOR_FOR_WORKERTEXT, node_emulator_for_workerTemplateString);
         return writeTextInFilePromiseFromPathAndString(BROWSERSERVER_WITH_NODE_EMULATOR_FOR_WORKER_PATH, browserserver_with_node_emulator_for_workerText);
-    }).then(function () {
-        //console.log(thisName + " finished with success !");
-    }).catch(function (reason) {
-        const errorText = thisName + " failed: " + String(reason);
-        console.log(errorText);
-        throw new Error(errorText);
     });
 
 
@@ -109,7 +103,13 @@ if (inputs.includes(OWN)) {
         file: `${jsDirectory}/built/all.min.js`
     };
 
-    const bundlePromise = rollupBundle(inputOptions, outputOptions);
+    part1.then(function () {
+        const bundlePromise = rollupBundle(inputOptions, outputOptions);
+    }).catch(function (reason) {
+        const errorText = thisName + " failed: " + String(reason);
+        console.log(errorText);
+        throw new Error(errorText);
+    });;
 }
 if (inputs.includes(EXTERNAL)) {
     // imported via a separate <script>

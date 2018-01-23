@@ -20,7 +20,7 @@ challenges
     window, URL, Blob, Worker
 */
 export { browserServer as default };
-import uiFiles from "./uiFiles.js";
+import uiFiles from "../uiFiles.js"; // path relative from built becuase of how the build works
 
 const browserServer = (function () {
 

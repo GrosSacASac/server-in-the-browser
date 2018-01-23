@@ -16,7 +16,7 @@ import localData from "./localData.js";
 import {state} from "./state.js";
 import serviceWorkerManager from "./serviceWorkerManager.js";
 import sockets from "./sockets.js";
-
+import browserServer from "./built/browserserver_with_node_emulator_for_worker.js";
 export { ui as default };
 
 window.d = d;

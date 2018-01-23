@@ -33,7 +33,7 @@ https://heycam.github.io/webidl/#es-ByteString
 
 "use strict";
 
-const SERVICE_WORKER_VERSION = "0.20.26"; // updated with tools/service_worker_version.js (String)
+const SERVICE_WORKER_VERSION = "0.20.27"; // updated with tools/service_worker_version.js (String)
 const CACHE_VERSION = SERVICE_WORKER_VERSION;
 //const ressourcesToSaveInCache = ["/"];
 const HOME = "/";
