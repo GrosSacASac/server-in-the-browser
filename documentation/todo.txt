@@ -5,9 +5,11 @@ allow uploaded node_modules require not juste standards ones
 get paramters with ?a=b&z=3
 add socket io support (inside browser server)
 re-enable window.addEventListener("error" if necessary for worker error catching
+browserServer seems to work fine but not static files
 
 
 # UX
+improve UX
 increase check box
 http://stackoverflow.com/questions/41796027/is-there-a-browser-agnostic-way-to-increase-a-checkboxs-size-without-changing-h
 make index.js the default server program
@@ -17,6 +19,7 @@ more accurate connected state
 provide more feedback
 http://danml.com/download.html for mobile download without opening a new tab
 loading experience display an erro while loading ... not good (invisble if less than 0.5 second, very bad UX otherwise)
+
 
 # Improvements
 
