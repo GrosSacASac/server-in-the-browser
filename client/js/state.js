@@ -12,7 +12,14 @@ const state = {
     isOnLine: true,
     selectedUserId : "",
     lastSelectedUserId: "",
-    uiIdStringLastSelected: "" // same with "_user"
+    uiIdStringLastSelected: "", // same with "_user"
+    files: [/*
+        {
+            name,
+            body,
+            mime,
+            uiLink
+    }*/]
 };
 
 window.state = state;

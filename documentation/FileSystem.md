@@ -1,10 +1,10 @@
-#File upload system
+# File upload system
 
 
-##File stored on disk and in RAM
+## File stored on disk and in RAM
 
 
-###Defintions
+### Defintions
 
 
 Disk storage here is used as a general term for all kind of storage with a long lifecycle. The memory is not cleared when power is shut down. Examples: SSD, USB, hard disk, CD etc.
@@ -12,7 +12,7 @@ Disk storage here is used as a general term for all kind of storage with a long 
 The RAM here is used as a general term for short term memory, that is used to store variables in computer programs.
 
 
-###Action for Uploading files Button in this software
+### Action for Uploading files Button in this software
 
 
 Loading is more correct term. Algorithm:
@@ -21,7 +21,7 @@ Loading is more correct term. Algorithm:
  * For each file name
     * Check if a ressource with a similar name is already loaded
         * If yes prompt pause and ask the user
-            * Overwrite the old ressource 
+            * Overwrite the old ressource
                 * and do the same for all the others not yet implemented
             * Do not overwrite the old ressource
             * Overwrite only this one not yet implemented
@@ -35,10 +35,9 @@ Loading is more correct term. Algorithm:
         * ...
  * Display finished
 
- 
+
 Not yet implemented
 
-##See also
+## See also
 
 uiFiles.js
-

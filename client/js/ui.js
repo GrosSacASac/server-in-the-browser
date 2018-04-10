@@ -68,18 +68,18 @@ const ui = (function () {
             d.elements[`${uiIdString}>selectButton`].disabled = !connected;
             d.elements[`${uiIdString}>selectButton`].hidden = !connected;
             if (connected) {
-                d.feed({
+                d.feed(uiIdString, {
                     connectButton: UISTRINGS.CONNECTED,
                     selectButton: UISTRINGS.SELECT
-                }, uiIdString);
+                });
                 uiUserRelationState[selectedUserId] = 2;
             } else {
                 d.elements[`${uiIdString}>connectButton`].disabled = false;
                 d.elements[`${uiIdString}>selectButton`].disabled = true;
                 d.elements[`${uiIdString}>selectButton`].hidden = true;
-                d.feed({
+                d.feed(uiIdString, {
                     connectButton: UISTRINGS.CONNECT_SELECT
-                }, uiIdString);
+                });
                 uiUserRelationState[selectedUserId] = 0;
             }
         }
@@ -155,7 +155,7 @@ const ui = (function () {
                 "data-inside": uiIdString,
                 "data-element": uiIdString + "host"
             });
-            d.feed("userDisplayName"]), displayedName, d.contextFromArray([uiIdString);
+            d.feed(d.contextFromArray([uiIdString, "userDisplayName"]), displayedName);
             d.activate(userItemElement);
 
             if (rtc.rtcPeerConnectionFromId.has(displayedName) && rtc.isOpenFromDisplayName(displayedName)) {
@@ -245,7 +245,7 @@ const ui = (function () {
         };
         Object.keys(nonMetRequirement).forEach(function (technicalName) {
             i += 1;
-            const iString = "i" + String(i);
+            const iString = `i${i}`;
             const requirementI = nonMetRequirement[technicalName]
 
             const missingFeatureElement = d.createElement2({
@@ -253,11 +253,11 @@ const ui = (function () {
                 "data-inside": iString
             });
 
-            d.feed({
+            d.feed(iString, {
                 title : technicalName,
                 text : requirementI.text,
                 links: requirementI.links.map(splitTextContentHref)
-            }, `iString`);
+            });
 
             d.activate(missingFeatureElement);
             d.elements.missingFeatures.appendChild(missingFeatureElement);

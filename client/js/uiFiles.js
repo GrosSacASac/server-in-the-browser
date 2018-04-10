@@ -13,13 +13,13 @@ import {yesNoDialog, textDialog} from "../../node_modules/dom99/components/yesNo
 import {keyFromObjectAndValue, OutOfOrderError} from "./utilities/utilities.js";
 import rtc from "./rtc.js";
 import bytes from "./bytes.js";
+import {state} from "./state.js";
 /* import "./external_dependencies/zip/zip_zip-ext.js"; with file concatenation*/
 
 export { uiFiles as default };
 
 const uiFiles = (function () {
 
-    const ressourceContentFromElement = new WeakMap();
     const fileNameFromKey = {}; // change
 
     const FILE_INPUT_PREFIX = "FI";
@@ -165,27 +165,26 @@ const uiFiles = (function () {
         });
     };
 
-    const keyFromFileName = function (fileName) {
-        return keyFromObjectAndValue(fileNameFromKey, fileName);
-    };
-
     const getFileNameList = function () {
-        return Object.values(fileNameFromKey);
+        return state.files.map(function (file) {
+            return file.name;
+        });
     };
 
     const ressourceFromRessourceName = function (fileName) {
-        // console.log(fileName);
-        const key = keyFromFileName(fileName)
-        if (!d.variables.hasOwnProperty(key)) {
+        const file = state.files.find(function (file) {
+            return file.name === fileName;
+        });
+
+        if (file === undefined) {
             return; // undefined
         }
 
         return {
             header: {
-                "Content-Type": d.variables[d.contextFromArray([key, `fileMime`])]
+                "Content-Type": file[`mime`]
             },
-            body: ressourceContentFromElement.get(d.elements[d.contextFromArray([key, `fileBody`])]) ||
-                    d.variables[d.contextFromArray([key, `fileBody`])]
+            body: file[`body`]
         };
     };
 
@@ -221,31 +220,22 @@ const uiFiles = (function () {
 
         d.functions.removeRessource = function (event) {
             const context = d.contextFromEvent(event);
-            console.log("224 ", context);
-            console.log("224 ", d.variables[d.contextFromArray([context, "fileName"])]);
-
-            const name = d.variables[d.contextFromArray([context, "fileName"])];
-            const key = keyFromFileName(name);
-            yesNoDialog(`Remove "${name}" ressource ?`, "Yes", "No, Cancel").then(function (answer) {
+            const oldFile = state.files.find(function (oldFile) {
+                return oldFile.uiLink === context;
+            });
+            yesNoDialog(`Remove "${oldFile.name}" ressource ?`, "Yes", "No, Cancel").then(function (answer) {
                 if (answer) {
                     d.elements[d.contextFromArray([context, "baseEl"])].remove();
-                    delete fileNameFromKey[key];
-                    d.forgetContext(key);
+                    d.forgetContext(context);
+                    state.files.splice(state.files.indexOf(oldFile), 1);
                 }
             });
         };
 
-            const rememberFileName = function (key, name) {
-                fileNameFromKey[key] =  name;
-            };
-            d.functions.rememberFileName = function (event) {
-                const context = d.contextFromEvent(event.target);
-                console.log("240", context);
-                console.log("240", d.variables[d.contextFromArray([context, "fileName"])]);
-                const name = d.variables[d.contextFromArray([context, "fileName"])];
-                const key = keyFromFileName(name);
-                rememberFileName(key, name);
-            };
+
+        d.functions.rememberFileName = function (event) {
+            console.log(`not yet implemented`);
+        };
 
         let ressourceUiId = 0;
         d.functions.addRessource = function (event) {
@@ -254,24 +244,29 @@ const uiFiles = (function () {
                     files: [array],
                     ?package: {object}
                 }*/
-                const oldFileNames = getFileNameList();
+                const oldFiles = state.files;
                 const dialogs = [];
                 files.files.forEach(function (fileObject) {
                     const {arrayBuffer, mime, name} = fileObject;
-                    if (oldFileNames.includes(name)) {
+                    const oldFileWithSameName = oldFiles.find(function (oldFile) {
+                            return oldFile.name === name;
+                    });
+                    if (oldFileWithSameName) {
                         /*todo add more options see FileSystem.md
                         do not process package.json before this is finished*/
                         dialogs.push(yesNoDialog(
                         `A ressource named "${name}" is already loaded. Overwrite old ressource with the new one ?`, "Yes, overwrite", "No, keep old"
                             ).then(function (answer) {
                             if (answer === true) {
-                                const key = keyFromFileName(name);
-                                d.elements[d.contextFromArray([key, `fileBody`])].disabled = true;
-                                d.feed({
+                                const uiLink = oldFileWithSameName.uiLink;
+                                d.elements[
+                                    d.contextFromArray([uiLink, `fileBody`])
+                                ].disabled = true;
+                                d.feed(uiLink, {
                                     "fileBody" : STRINGS.FILE_LOADED,
                                     fileMime: mime
-                                }, key);
-                                ressourceContentFromElement.set(d.elements[d.contextFromArray([key, `fileBody`])], arrayBuffer);
+                                });
+                                oldFileWithSameName.body = arrayBuffer;
                             } else if (answer === false) {
                                 ;//do nothing
                             }
@@ -287,19 +282,20 @@ const uiFiles = (function () {
                         "data-inside": ressourceUiIdString
                     });
 
-                    d.feed({
+                    d.feed(ressourceUiIdString, {
                         "fileName" : name,
                         "fileBody" : STRINGS.FILE_LOADED,
                         fileMime: mime
-                    }, ressourceUiIdString);
+                    });
                     d.activate(fileInputElement);
                     d.elements[d.contextFromArray([ressourceUiIdString, `fileBody`])].disabled = true;
-                    ressourceContentFromElement.set(
-                        d.elements[d.contextFromArray([ressourceUiIdString, `fileBody`])],
-                        arrayBuffer
-                    );
+                    state.files.push({
+                        name,
+                        body: arrayBuffer,
+                        mime,
+                        uiLink: ressourceUiIdString
+                    })
                     d.elements.ressourcesContainer.appendChild(fileInputElement);
-                    rememberFileName(ressourceUiIdString, name);
                 });
 
                 Promise.all(dialogs).then(function (notUsedValues) {
@@ -336,11 +332,11 @@ const uiFiles = (function () {
                 "tagName": "file-input",
                 "data-inside": ressourceUiIdString
             });
-            d.feed({
+            d.feed(ressourceUiIdString, {
                 "fileName" : "",
                 "fileBody" : "",
                 fileMime: ""
-            }, ressourceUiIdString);
+            });
             d.activate(fileInputElement);
             d.elements.ressourcesContainer.appendChild(fileInputElement);
         };
@@ -352,37 +348,44 @@ const uiFiles = (function () {
             const fileNameList = getFileNameList();
             const indexHtmlString = generateIndex(fileNameList);
 
-            if (ressourceFromRessourceName(name)) {
+            const oldFileWithSameName = state.files.find(function (oldFile) {
+                return oldFile.name === name;
+            });
+            if (oldFileWithSameName) {
                 yesNoDialog(`"${name}" already exists. Overwrite it ?`, "Yes", "No, Cancel").then(function (answer) {
                     if (answer) {
-                        const key = keyFromFileName(name)
-                        d.elements[d.contextFromArray([key, "fileBody"])].disabled = false;
-                        d.feed({
+                        const uiLink = oldFileWithSameName.uiLink;
+                        d.elements[d.contextFromArray([uiLink, "fileBody"])].disabled = false;
+                        d.feed(uiLink, {
                             "fileBody" : indexHtmlString,
                             fileMime: mime
-                        }, key);
-                        ressourceContentFromElement.delete(d.elements[key].fileBody);
+                        });
+                        oldFileWithSameName.body = indexHtmlString;
+                        oldFileWithSameName.mime = mime;
                     }
                 });
-            } else {
-                const ressourceUiIdString = FILE_INPUT_PREFIX + String(ressourceUiId);
-                ressourceUiId += 1;
-
-                const fileInputElement = d.createElement2({
-                    "tagName": "file-input",
-                    "data-inside": ressourceUiIdString
-                });
-                d.feed({
-                    "fileName" : name,
-                    "fileBody" : indexHtmlString,
-                    fileMime: mime
-                }, ressourceUiIdString);
-                d.activate(fileInputElement);
-                d.elements.ressourcesContainer.appendChild(fileInputElement);
-
-                rememberFileName(ressourceUiIdString, name);
-
+                return;
             }
+            const ressourceUiIdString = FILE_INPUT_PREFIX + String(ressourceUiId);
+            ressourceUiId += 1;
+
+            const fileInputElement = d.createElement2({
+                "tagName": "file-input",
+                "data-inside": ressourceUiIdString
+            });
+            d.feed(ressourceUiIdString, {
+                "fileName" : name,
+                "fileBody" : indexHtmlString,
+                fileMime: mime
+            });
+            d.activate(fileInputElement);
+            d.elements.ressourcesContainer.appendChild(fileInputElement);
+            state.files.push({
+                name,
+                body: indexHtmlString,
+                mime,
+                uiLink: ressourceUiIdString
+            });
         };
     };
 

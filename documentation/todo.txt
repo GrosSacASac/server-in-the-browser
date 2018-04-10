@@ -1,11 +1,11 @@
 # Core
-try to fix problem with socketIo HIGH PRIORITY or is it just console messages
+
 max DataChannel brandwitdth, is it 30kbs ?
 allow uploaded node_modules require not juste standards ones
 get paramters with ?a=b&z=3
 add socket io support (inside browser server)
 re-enable window.addEventListener("error" if necessary for worker error catching
-browserServer seems to work fine but not static files
+
 
 
 # UX
