@@ -1,6 +1,6 @@
-#Help
+# Help
 
-##How to share (static) files ?
+## How to share (static) files ?
 
  1. Open the Server panel
  2. Click the "Load from file" Button.
@@ -9,7 +9,7 @@
  5. Click "Generate Index"
  6. Enable "Make local server available"
 
-##How to view shared files from others ?
+## How to view shared files from others ?
 
  1. Open the Connection panel
  2. Select a connected user in the list. Click "Connect and select" or "Select"
@@ -18,7 +18,7 @@
  5. Click on a filename to view it
 
 
-##How to host a static website ?
+## How to host a static website ?
 
  1. Also See "How to share (static) files ?"
  2. Load all necessary files for your website
@@ -27,7 +27,7 @@
  5. Enable "Make local server available"
 
 
-##How to host a dynamic website ?
+## How to host a dynamic website ?
 
 
 Server in the browser runs a handported Nodejs environment, the port is not finished yet. Only small parts of express, http and body-parser have been ported. Download /example.zip to see an example. In your package.json make the following change:
@@ -39,9 +39,9 @@ Add a new key-value pair as follow, where "index.js" is the entry point of your 
     "serverinthebrowser" : {
         "server": "index.js"
     }
-    
 
-###package.json Example:
+
+### package.json Example:
 
 
     {
@@ -65,17 +65,17 @@ Alternatively, it is also possible to manually copy paste the server program in 
  5. To update individual files, reupload a new entire zip.
 
 
-##How to change name ?
+## How to change name ?
 
 
 Open the setting Panel, and make a request to change name.
 
 
-##How to delete all data and exit ?
+## How to delete all data and exit ?
 
 Open the setting Panel, and click "Delete all data and quit". Then close every tab related to Server in the browser.
 
 
-##How to report an issue ?
+## How to report an issue ?
 
 To report an issue , [it is over here](https://github.com/GrosSacASac/server-in-the-browser/issues).

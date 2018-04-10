@@ -53,7 +53,7 @@ const ui = (function () {
         const uiIdString = "user_" + selectedUserId;
         if (selectedUserId) {
             d.elements[`${uiIdString}>connectButton`].disabled = true;
-            d.feed(UISTRINGS.CONNECTING, `${uiIdString}>connectButton`);
+            d.feed(`${uiIdString}>connectButton`, UISTRINGS.CONNECTING);
             uiUserRelationState[selectedUserId] = 1;
         }
     };
@@ -101,7 +101,7 @@ const ui = (function () {
             // console.log("previously selected", state.selectedUserId);
             if (selected) {
                 d.elements[`${state.uiIdStringLastSelected}>selectButton`].disabled = false;
-                d.feed(UISTRINGS.SELECT, `${state.uiIdStringLastSelected}>selectButton`);
+                d.feed(`${state.uiIdStringLastSelected}>selectButton`, UISTRINGS.SELECT);
                 d.elements[state.uiIdStringLastSelected + "host"].className = "";
             }
 
@@ -113,14 +113,14 @@ const ui = (function () {
             state.selectedUserId = selectedUserId;
             const uiIdString = "user_" + state.selectedUserId;
             d.elements[`${uiIdString}>selectButton`].disabled = true;
-            d.feed(UISTRINGS.SELECTED, `${uiIdString}>selectButton`);
+            d.feed(`${uiIdString}>selectButton`, UISTRINGS.SELECTED);
             d.elements[uiIdString + "host"].className = "active";
 
         } else {
             state.selectedUserId = "";
             const uiIdString = "user_" + selectedUserId;
             d.elements[`${uiIdString}>selectButton`].disabled = false;
-            d.feed(UISTRINGS.SELECT, `${uiIdString}>selectButton`);
+            d.feed(`${uiIdString}>selectButton`, UISTRINGS.SELECT);
             d.elements[uiIdString + "host"].className = "";
         }
     };
@@ -155,13 +155,13 @@ const ui = (function () {
                 "data-inside": uiIdString,
                 "data-element": uiIdString + "host"
             });
-            d.feed(displayedName, d.contextFromArray([uiIdString, "userDisplayName"]));
+            d.feed("userDisplayName"]), displayedName, d.contextFromArray([uiIdString);
             d.activate(userItemElement);
 
             if (rtc.rtcPeerConnectionFromId.has(displayedName) && rtc.isOpenFromDisplayName(displayedName)) {
                 d.elements[uiIdString + "host"].className = "";
 
-                d.feed(UISTRINGS.CONNECTED, `${uiIdString}>connectButton`);
+                d.feed(`${uiIdString}>connectButton`, UISTRINGS.CONNECTED);
                 d.elements[`${uiIdString}>connectButton`].disabled = true;
                 d.elements[`${uiIdString}>selectButton`].disabled = false;
                 d.elements[`${uiIdString}>selectButton`].hidden = false;
@@ -201,11 +201,11 @@ const ui = (function () {
     };
 
     const displayOwnUserId = function () {
-        d.feed(state.localDisplayedName, `your_id`);
+        d.feed(`your_id`, state.localDisplayedName);
     };
 
     const displayFatalError = function (error, ...more) {
-        d.feed(error, `log`);
+        d.feed(`log`, error);
         console.log(error);
         if (more && more.length > 0) {
             console.log(...more);
@@ -217,23 +217,23 @@ const ui = (function () {
         d.elements.main.hidden = !wantToDisplay;
         const previous = localData.get("state.localDisplayedName");
         if (previous) {
-            d.feed(previous, `newId`);
+            d.feed(`newId`, previous);
             d.functions.idChangeRequest();
         }
-        d.feed("", `log`);
+        d.feed(`log`, "");
 
     };
 
     const displayLandingPage = function (wantToDisplay = true) {
         d.elements.landingPage.hidden = !wantToDisplay;
-        d.feed("", `log`);
+        d.feed(`log`, "");
         return new Promise(function (resolve, reject) {
             acceptConditionResolve = resolve;
         });
     };
 
     const serverLog = function (any) {
-        d.feed(d.variables.serverLog + "\n" + JSON.stringify(any), `serverLog`);
+        d.feed(`serverLog`, d.variables.serverLog + "\n" + JSON.stringify(any));
         console.log(any);
     };
 
@@ -278,8 +278,8 @@ const ui = (function () {
             const wantedToUseCustom = d.variables.useCustom;
 
             if (wantedToUseCustom) {
-                d.feed(false, `useCustom`);
-                d.feed("Stopped while editing !", `parsingResult`);
+                d.feed(`useCustom`, false);
+                d.feed(`parsingResult`, "Stopped while editing !");
                 rtc.useHandleRequestCustom(false);
                 browserServer.close();
             }
@@ -302,7 +302,7 @@ const ui = (function () {
                     feedBackText = "This browser does not support desktop notification, or this option has been disabled";
                     state.notificationEnabled = false;
                     localData.set("notifications", notificationEnabled);
-                    d.feed(notificationEnabled, `wantNotification`);
+                    d.feed(`wantNotification`, notificationEnabled);
                 } else {
 
                     if (Notification.permission === "granted") {
@@ -311,15 +311,15 @@ const ui = (function () {
                         localData.set("notifications", state.notificationEnabled);
                     } else {
                         feedBackText = "Waiting for autorization";
-                        d.feed(false, `wantNotification`);
+                        d.feed(`wantNotification`, false);
                         Notification.requestPermission(function (permission) {
                             if (permission === "granted") {
                                 state.notificationEnabled = true;
                                 localData.set("notifications", state.notificationEnabled);
-                                d.feed("Notifications enabled", `wantNotificationFeedBack`);
-                                d.feed(state.notificationEnabled, `wantNotification`);
+                                d.feed(`wantNotificationFeedBack`, "Notifications enabled");
+                                d.feed(`wantNotification`, state.notificationEnabled);
                             } else {
-                                d.feed("Notifications access denied", `wantNotificationFeedBack`);
+                                d.feed(`wantNotificationFeedBack`, "Notifications access denied");
                                 state.notificationEnabled = false;
                                 localData.set("notifications", state.notificationEnabled);
                             }
@@ -331,7 +331,7 @@ const ui = (function () {
                 state.notificationEnabled = false;
                 localData.set("notifications", state.notificationEnabled);
             }
-            d.feed(feedBackText, `wantNotificationFeedBack`);
+            d.feed(`wantNotificationFeedBack`, feedBackText);
         };
 
 
@@ -344,7 +344,7 @@ const ui = (function () {
                 browserServer.setBrowserServerCode(d.variables.userCode);
                 browserServer.run().then(function () {
                     d.elements.parsingResult.classList.toggle("error", false);
-                    d.feed("Successfully parsed", `parsingResult`);
+                    d.feed(`parsingResult`, "Successfully parsed");
                     rtc.useHandleRequestCustom(true);
                 }).catch(lateReject);
             } else {
@@ -360,7 +360,7 @@ const ui = (function () {
             }
             rtc.sendRtcMessage(state.selectedUserId, d.variables.input);
             displayMessage(`You to ${state.selectedUserId}:  ${d.variables.input}`);
-            d.feed("", `input`);
+            d.feed(`input`, "");
             event.preventDefault();
         };
 
@@ -380,7 +380,7 @@ const ui = (function () {
 
         d.functions.debug = function (event) {
             const a = 5;
-            d.feed(a, `log`);
+            d.feed(`log`, a);
             console.log(a);
         };
 
@@ -392,11 +392,11 @@ const ui = (function () {
             const newId = d.variables.newId;
             const length = newId.length;
             if (!PATTERN.test(newId)) {
-                d.feed(UISTRINGS.BAD_ID_FORMAT, `idChangeFeedback`);
+                d.feed(`idChangeFeedback`, UISTRINGS.BAD_ID_FORMAT);
                 return;
             }
             sockets.requestIdChange(newId);
-            d.feed(UISTRINGS.ID_CHANGE_REQUEST_SENT, `idChangeFeedback`);
+            d.feed(`idChangeFeedback`, UISTRINGS.ID_CHANGE_REQUEST_SENT);
             d.elements.idChangeRequestButton.disabled = true;
             d.elements.newId.disabled = true;
         };
@@ -418,7 +418,7 @@ const ui = (function () {
                     close all webrtc connection
                     close websocket
                     */
-                    d.feed(false, `warnBeforeLeave`);
+                    d.feed(`warnBeforeLeave`, false);
                     caches.keys().then(function (cacheVersions) {
                         return Promise.all(
                             cacheVersions.map(function (cacheVersion) {
@@ -478,7 +478,7 @@ server.listen(port, hostname, () => {
         beforeLastMessageCopyElement.textContent = d.variables.lastMessage;
         d.elements.allButLastMessages.appendChild(beforeLastMessageCopyElement);
         messageElementList.push(beforeLastMessageCopyElement);
-        d.feed(text, `lastMessage`);
+        d.feed(`lastMessage`, text);
         if (messageElementList.length > MAX_MESSAGES) {
             messageElementList.shift().remove();
         }
@@ -525,9 +525,9 @@ server.listen(port, hostname, () => {
 
             }
         } else if (message === MESSAGES.BAD_ID_FORMAT_REJECTED) {
-            d.feed(UISTRINGS.BAD_ID_FORMAT, `idChangeFeedback`);
+            d.feed(`idChangeFeedback`, UISTRINGS.BAD_ID_FORMAT);
         } else if (message === MESSAGES.ALREADY_TAKEN_REJECTED) {
-            d.feed(UISTRINGS.ALREADY_TAKEN_REJECTED, `idChangeFeedback`);
+            d.feed(`idChangeFeedback`, UISTRINGS.ALREADY_TAKEN_REJECTED);
         }
         d.elements.idChangeRequestButton.disabled = false;
         d.elements.newId.disabled = false;
@@ -537,8 +537,8 @@ server.listen(port, hostname, () => {
         /*error in the worker, that handles requests, see browserserver.js
         browserServer has been  closed with browserServer.close() at this point*/
         d.elements.parsingResult.classList.toggle("error", true);
-        d.feed(reason, `parsingResult`);
-        d.feed(false, `useCustom`);
+        d.feed(`parsingResult`, reason);
+        d.feed(`useCustom`, false);
         rtc.useHandleRequestCustom(false);
 
     };

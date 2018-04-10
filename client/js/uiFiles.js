@@ -317,13 +317,13 @@ const uiFiles = (function () {
                         if (serverArrayBuffer) {
                             const serverString = bytes.stringFromArrayBuffer(serverArrayBuffer);
                             //console.log("serverString",serverString);
-                            d.feed(serverString, `userCode`);
+                            d.feed(`userCode`, serverString);
                             // console.log("d.variables.userCode",d.variables.userCode);
                         }
                     }
                 });
             }).catch(function (reason) {
-                d.feed("Could not load file: " + reason, `log`);
+                d.feed(`log`, "Could not load file: " + reason);
             });
         };
 

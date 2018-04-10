@@ -7,7 +7,7 @@
 
 const express = require("express");
 const app = express();
-const http = require("http"); // is http needed when express is there ?
+const http = require("http");
 const server = http.Server(app);
 const socketio = require("socket.io")(server);
 
