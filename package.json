@@ -1,7 +1,7 @@
 {
   "name": "server-in-the-browser",
   "author": "author",
-  "version": "0.20.31",
+  "version": "0.20.32",
   "main": "index.js",
   "dependencies": {
     "dom99": "^11.1.0",
@@ -14,10 +14,10 @@
   },
   "scripts": {
     "bumpversion": "npm version patch --force",
-    "versioninserviceworker4": "node tools/service_worker_version.js",
-    "minifyserviceworkerjs5": "uglifyjs client/js/built/service_worker_with_version.js --mangle --compress --screw-ie8 --output client/js/built/service_worker.min.js",
+    "versioninserviceworker": "node tools/service_worker_version.js",
+    "minifyserviceworkerjs": "uglifyjs client/js/built/service_worker_with_version.js --mangle --compress --screw-ie8 --output client/js/built/service_worker.min.js",
     "build1js": "node tools/buildall.js JS OWN",
-    "buildjsrest": "npm run bumpversion && npm run versioninserviceworker4 && npm run minifyserviceworkerjs5",
+    "buildjsrest": "npm run bumpversion && npm run versioninserviceworker && npm run minifyserviceworkerjs",
     "buildjsexternaldependencies": "node tools/buildall.js JS EXTERNAL",
     "buildcss1": "node tools/buildall.js CSS",
     "minifycss2": "csso client/css/built/all.css  client/css/built/all.min.css",
