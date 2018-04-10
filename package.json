@@ -1,10 +1,10 @@
 {
   "name": "server-in-the-browser",
   "author": "author",
-  "version": "0.20.28",
+  "version": "0.20.29",
   "main": "index.js",
   "dependencies": {
-    "dom99": "^8.2.8",
+    "dom99": "^11.1.0",
     "express": "^4.16.2",
     "socket.io": "^2.0.4",
     "webrtc-adapter": "^6.1.0"
