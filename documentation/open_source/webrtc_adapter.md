@@ -1,4 +1,4 @@
-###WebRTC adapter - WebRTC project
+### WebRTC adapter - WebRTC project
 
 https://webrtc.github.io/adapter/adapter-latest.js
 

@@ -1,4 +1,4 @@
-###zip.js - Gildas Lormeau
+### zip.js - Gildas Lormeau
 
 http://gildas-lormeau.github.io/zip.js/
 
