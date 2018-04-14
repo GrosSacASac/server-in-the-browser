@@ -5,6 +5,7 @@ allow uploaded node_modules require not juste standards ones
 get paramters with ?a=b&z=3
 add socket io support (inside browser server)
 re-enable window.addEventListener("error" if necessary for worker error catching
+create blank file then edit name creates error
 
 
 
