@@ -233,9 +233,29 @@ const uiFiles = (function () {
         };
 
 
-        d.functions.rememberFileName = function (event) {
-            console.log(`not yet implemented`);
-        };
+            d.functions.rememberFileName = function (event) {
+                const context = d.contextFromEvent(event);
+                const oldFile = state.files.find(function (oldFile) {
+                    return oldFile.uiLink === context;
+                });
+                oldFile.name = d.variables[d.contextFromArray([context, `fileName`])];
+            };
+
+            d.functions.rememberFileBody = function (event) {
+                const context = d.contextFromEvent(event);
+                const oldFile = state.files.find(function (oldFile) {
+                    return oldFile.uiLink === context;
+                });
+                oldFile.body = d.variables[d.contextFromArray([context, `fileBody`])];
+            };
+            
+            d.functions.rememberMime = function (event) {
+                const context = d.contextFromEvent(event);
+                const oldFile = state.files.find(function (oldFile) {
+                    return oldFile.uiLink === context;
+                });
+                oldFile.mime = d.variables[d.contextFromArray([context, `fileMime`])];
+            };
 
         let ressourceUiId = 0;
         d.functions.addRessource = function (event) {

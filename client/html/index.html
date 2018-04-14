@@ -25,7 +25,7 @@
         <p id="starterror">There was an error in the program, please download the latest <a target="_blank" rel="noopener noreferrer" href="https://www.mozilla.org/en-US/firefox/new/?scene=2" >firefox or chrome version</a>.</p>
         <p id="requirementerror"></p>
         <p data-function="click-debug"><span data-variable="log" id="log"></span></p>
-        
+
         <div class="yes-no-dialog" data-inside="yesNoDialog" role="dialog">
             <p class="yes-no-dialog-text" data-variable="question">QUESTION</p>
             <div data-element="confirm" hidden>
@@ -102,11 +102,25 @@
                 <section data-element="server">
                     <template data-template="file-input">
                         <label>Filename
-                            <input data-function="rememberFileName" data-variable="fileName">
+                            <input
+                                data-function="rememberFileName" data-variable="fileName"
+                                placeholder="filename"
+                            >
                         </label>
-                        <textarea data-variable="fileBody" data-element="fileBody" rows="2" cols="22"></textarea>
+                        <textarea
+                            data-variable="fileBody"
+                            data-element="fileBody"
+                            data-function="rememberFileBody"
+                            rows="2"
+                            cols="22"
+                        ></textarea>
                         <label>MIME:
-                            <input data-variable="fileMime" data-element="fileMime" placeholder="leave blank for guess with file extension">
+                            <input
+                                data-variable="fileMime"
+                                data-element="fileMime"
+                                data-function="rememberMime"
+                                placeholder="Leave blank for guess with file extension"
+                            >
                         </label>
                         <button data-function="click-removeRessource">[X]</button>
                     </template>
