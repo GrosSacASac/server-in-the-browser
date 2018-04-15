@@ -33,14 +33,14 @@ https://heycam.github.io/webidl/#es-ByteString
 
 "use strict";
 
-const SERVICE_WORKER_VERSION = "0.20.36"; // updated with tools/service_worker_version.js (String)
+const SERVICE_WORKER_VERSION = "0.20.38"; // updated with tools/service_worker_version.js (String)
 const CACHE_VERSION = SERVICE_WORKER_VERSION;
-//const ressourcesToSaveInCache = ["/"];
+//const fileNamesToSaveInCache = ["/"];
 const HOME = "/";
 const OFFLINE_ALTERNATIVE = "/offline";
 /*see server/serve.js staticFileFromUrl variable*/
-const ressourcesToSaveInCache /* for dev don't use cache */ = [];
-const ressourcesToSaveInCacheProd = [
+const fileNamesToSaveInCache /* for dev don't use cache */ = [];
+const fileNamesToSaveInCacheProd = [
     /*"/", not included to enable the offline page support to appear,
     todo change mechanism*/
     OFFLINE_ALTERNATIVE,
@@ -65,42 +65,42 @@ const ressourcesToSaveInCacheProd = [
 const rtcLength = 4; // "rtc/".length;
 const rtcFetchDelay = 10000;//ms
 const origin = location.origin;
-const answerFromRessource = {};
-const resolveFromRessource = {};
-const rejectFromRessource = {};
-const timeOutIdFromRessource = {};
+const answerFromfileName = {};
+const resolveFromfileName = {};
+const rejectFromfileName = {};
+const timeOutIdFromfileName = {};
 let logLater = [];
 // todo put all into single container
 
-const resolveFetchFromPeerToPeer = function (ressource) {
-    clearTimeout(timeOutIdFromRessource[ressource]);
-    resolveFromRessource[ressource](answerFromRessource[ressource]);
-    delete answerFromRessource[ressource];//stop listening
-    delete resolveFromRessource[ressource];
-    delete rejectFromRessource[ressource];
+const resolveFetchFromPeerToPeer = function (fileName) {
+    clearTimeout(timeOutIdFromfileName[fileName]);
+    resolveFromfileName[fileName](answerFromfileName[fileName]);
+    delete answerFromfileName[fileName];//stop listening
+    delete resolveFromfileName[fileName];
+    delete rejectFromfileName[fileName];
 };
 
-const rejectFetchFromPeerToPeer = function (ressource, reason) {
-    if (rejectFromRessource[ressource]) {
-        rejectFromRessource[ressource](reason);
-        delete resolveFromRessource[ressource];
-        delete rejectFromRessource[ressource];
+const rejectFetchFromPeerToPeer = function (fileName, reason) {
+    if (rejectFromfileName[fileName]) {
+        rejectFromfileName[fileName](reason);
+        delete resolveFromfileName[fileName];
+        delete rejectFromfileName[fileName];
     }
 };
 
 const fetchFromPeerToPeer = function (customRequestObject) {
-    /*asks all page for a ressource*/
+    /*asks all page for a fileName*/
 
-    const ressource = customRequestObject.header.ressource;
+    const fileName = customRequestObject.header.fileName;
 
     const promise = new Promise(function (resolve, reject) {
-        resolveFromRessource[ressource] = resolve;
-        rejectFromRessource[ressource] = reject;
-        if (answerFromRessource.hasOwnProperty(ressource)) {
-            resolveFetchFromPeerToPeer(ressource);
+        resolveFromfileName[fileName] = resolve;
+        rejectFromfileName[fileName] = reject;
+        if (answerFromfileName.hasOwnProperty(fileName)) {
+            resolveFetchFromPeerToPeer(fileName);
         }
-        timeOutIdFromRessource[ressource] = setTimeout(function() {
-            rejectFetchFromPeerToPeer(ressource, "No answer after 10 seconds");
+        timeOutIdFromfileName[fileName] = setTimeout(function() {
+            rejectFetchFromPeerToPeer(fileName, "No answer after 10 seconds");
         }, rtcFetchDelay);
     });
 
@@ -162,7 +162,7 @@ const fillServiceWorkerCache2 = function () {
     /*It will not cache and also not reject for individual resources that failed to be added in the cache. unlike fillServiceWorkerCache which stops caching as soon as one problem occurs. see http://stackoverflow.com/questions/41388616/what-can-cause-a-promise-rejected-with-invalidstateerror-here*/
     return caches.open(CACHE_VERSION).then(function (cache) {
         return Promise.all(
-            ressourcesToSaveInCache.map(function (url) {
+            fileNamesToSaveInCache.map(function (url) {
                 return cache.add(url).catch(function (reason) {
                     return logInTheUIWhenActivated([url + "failed: " + String(reason)]);
                 });
@@ -209,7 +209,7 @@ self.addEventListener("install", function (event) {
     waitUntil blocks the state (here installing) of the service worker until the
     promise is fulfilled (resolved or rejected). It is useful to make the service worker more readable and more deterministic
 
-    save in cache some static ressources
+    save in cache some static fileNames
     this happens before activation */
     event.waitUntil(
         fillServiceWorkerCache2()
@@ -234,12 +234,12 @@ self.addEventListener("message", function (event) {
         return;
     }
     */
-    const ressource = message.ressource;
+    const fileName = message.fileName;
     const answer = message.answer;
-    answerFromRessource[ressource] = answer;
-    //console.log(ressource, answer, resolveFromRessource);
-    if (resolveFromRessource.hasOwnProperty(ressource)) {//
-        resolveFetchFromPeerToPeer(ressource);
+    answerFromfileName[fileName] = answer;
+    //console.log(fileName, answer, resolveFromfileName);
+    if (resolveFromfileName.hasOwnProperty(fileName)) {//
+        resolveFetchFromPeerToPeer(fileName);
     }
 });
 
@@ -312,7 +312,7 @@ self.addEventListener("fetch", function (fetchEvent) {
         //logInTheUI(["Special Fetch"]);
         const customRequestObject = {
             header: {
-                ressource: url.substring(url.indexOf("rtc/") + rtcLength),
+                fileName: url.substring(url.indexOf("rtc/") + rtcLength),
                 method
             },
             body: ""

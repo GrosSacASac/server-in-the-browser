@@ -23,8 +23,8 @@ let _customFunction;
     /*store local reference*/
     const postMessage = self.postMessage;
     const addEventListener = self.addEventListener;
-    
-    
+
+
     const listeners = [];
     const staticFilesResolves = {};
     const COMMANDS = {
@@ -33,7 +33,7 @@ let _customFunction;
         COMMAND: "COMMAND",
         URLSTART: "URLSTART"
     };
-    
+
     let state = 0;
     let urlStart = "";
 
@@ -54,7 +54,7 @@ let _customFunction;
             }});
         }
     };
-    
+
     addEventListener("message", function(event) {
         const message = event.data;
         if (message[COMMANDS.COMMAND] === COMMANDS.START) {
@@ -66,14 +66,14 @@ let _customFunction;
             state = 0;
             self.close();
         } else if (state) {
-            
+
             if (message.hasOwnProperty("headerBodyObject")) {
                 const headerBodyObject = message.headerBodyObject;//it s a copy
-                headerBodyObject.header.url = "/" + headerBodyObject.header.ressource;
-                
+                headerBodyObject.header.url = "/" + headerBodyObject.header.fileName;
+
                 tryCatchUserCode(function () {
                     listeners.forEach(function (listener) {
-                        
+
                         listener(headerBodyObject);
                     });
                 });
@@ -90,7 +90,7 @@ let _customFunction;
                         rejectFunction) {
                         rejectFunction(errorMessage);
                     });
-                    
+
                 } else {
                     staticFilesResolves[staticFileName].resolve.forEach(function (
                         resolveFunction) {
@@ -101,7 +101,7 @@ let _customFunction;
             }
         }
     }, false);
-    
+
             //remove access for the rest
     const removeAccess = function (anObject, propertyName) {
         Object.defineProperty(anObject, propertyName, {
@@ -115,9 +115,9 @@ let _customFunction;
     hiddenAccessList.forEach(function (propertyName) {
         removeAccess(self, propertyName);
     });
-    
 
-    
+
+
     /*cleanUp = function () {
         ;
     };*/
@@ -185,11 +185,11 @@ let _customFunction;
             currentExportSingleValue = undefined;
             currentModuleObject = {};
             currentExportSingleValueUsed = false;
-            
+
             const requiredUrl = urlStart + requiredName;
             importScripts(requiredUrl); //downloads and execute
-            
-            let returnValue; 
+
+            let returnValue;
             if (currentExportSingleValueUsed) {
                 returnValue = currentExportSingleValue;
             } else {
@@ -204,25 +204,25 @@ let _customFunction;
     process = {
         env: {}
     };
-    
+
     __dirname = "";
-    
+
     listenForRequest = function (afunction) {
         listeners.push(afunction);
     };
-    
+
     respondToRequest = function (headerBodyObject) {
         //console.log("the worker is responding to a request with", headerBodyObject);
         postMessage({headerBodyObject});
     };
-    
+
     readStaticFile = function (staticFileName) {
         /*reads a static file from the main thread
         returns a promise that resolves with an Object
         {staticFile: staticFileName,
         body: *the body*,
         "Content-Type": "string"}
-        or 
+        or
         (reject)
         {staticFile: staticFileName,
         body: undefined,
@@ -242,7 +242,7 @@ let _customFunction;
             postMessage({staticFile: staticFileName});
         });
     };
-    
+
     /*could still access hiddenAccessList with trow catch error.trace.object*/
     //self = undefined;//cannot assign to self
 }());

@@ -65,7 +65,7 @@ const rtc = (function () {
             return dataChannel;
         }
     };
-    const resolveFromRessource = {};
+    const resolveFromfileName = {};
     let resendAllRtcRequestsCount = 0;
 
     /* RTCConfiguration Dictionary see
@@ -90,16 +90,16 @@ const rtc = (function () {
 //make connected list reappear with the map
     const handleRequestDefault = function (headerBodyObject, fromId) {
         //console.log("headerBodyObject:", headerBodyObject);
-        let ressourceName = headerBodyObject.header.ressource;
-        if (ressourceName === "") {
-            ressourceName = "index.html";
+        let fileName = headerBodyObject.header.fileName;
+        if (fileName === "") {
+            fileName = "index.html";
         }
-        let answer = uiFiles.ressourceFromRessourceName(ressourceName);
+        let answer = uiFiles.fileFromFileName(fileName);
         if (answer) {
             return {
                 header: {
                     "Content-Type": answer.header["Content-Type"] ||
-                                    uiFiles.contentTypeFromRessourceName(ressourceName)
+                                    uiFiles.contentTypeFromFileName(fileName)
                 },
                 body: answer.body
             };
@@ -110,7 +110,7 @@ const rtc = (function () {
                 status: 404,
                 statusText : "NOT FOUND"
             },
-            body: `<html><p>Connection Successful ! But /${headerBodyObject.header.ressource} Not found (404)</p></html>`
+            body: `<html><p>Connection Successful ! But /${headerBodyObject.header.fileName} Not found (404)</p></html>`
         };
     };
 
@@ -277,19 +277,19 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
         }
         //console.log(headerBodyObject);
         if (headerBodyObject.header.is === M.REQUEST) {
-            const originalRessourceName = headerBodyObject.header.ressource;
+            const originalfileName = headerBodyObject.header.fileName;
             if (headerBodyObject.header.method === "MESSAGE") {
                 ui.handleMessage(headerBodyObject, from);
             } else if (!(d.variables.localServerAvailability)) {
                 ;//do nothing
             } else {
-                headerBodyObject.header.ressource = decodeURI(headerBodyObject.header.ressource);
+                headerBodyObject.header.fileName = decodeURI(headerBodyObject.header.fileName);
 
                 const sendAnswerObject = function (answerObject) {
                     //console.log("sendAnswerObject", answerObject);
                     if (answerObject) {
                         answerObject.header.is = M.ANSWER;
-                        answerObject.header.ressource = originalRessourceName;
+                        answerObject.header.fileName = originalfileName;
                         prepareSendRtcData(from, answerObject);
                     }
                 };
@@ -307,10 +307,10 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
             }
 
         } else if (headerBodyObject.header.is === M.ANSWER) {
-            const ressourceName = headerBodyObject.header.ressource;
-            if (resolveFromRessource.hasOwnProperty(ressourceName)) {
-                resolveFromRessource[ressourceName](headerBodyObject);
-                delete resolveFromRessource[ressourceName];
+            const fileName = headerBodyObject.header.fileName;
+            if (resolveFromfileName.hasOwnProperty(fileName)) {
+                resolveFromfileName[fileName](headerBodyObject);
+                delete resolveFromfileName[fileName];
             }
         }
     };
@@ -481,27 +481,27 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
             resendAllRtcRequestsCount = 0;
             return;
         }
-        Object.keys(resolveFromRessource).forEach(function (ressource) {
-            prepareSendRtcData(resolveFromRessource[ressource].target, resolveFromRessource[ressource].message);
+        Object.keys(resolveFromfileName).forEach(function (fileName) {
+            prepareSendRtcData(resolveFromfileName[fileName].target, resolveFromfileName[fileName].message);
         });
     };
 
     const rtcRequest = function (requestObject) {
         return new Promise(function (resolve, reject) {
-            const ressource = requestObject.header.ressource;
-            resolveFromRessource[ressource] = resolve;
+            const fileName = requestObject.header.fileName;
+            resolveFromfileName[fileName] = resolve;
             const message = {
                 header: {
                     is: M.REQUEST,
                     method: requestObject.header.method || M.GET,
                     "Content-Type": "",
-                    ressource
+                    fileName
                 },
                 body: requestObject.body || ""
             };
             //requestObject has more info in requestObject.header we could Object.assign to get it all
-            resolveFromRessource[ressource].message = message; // resendAllRtcRequests
-            resolveFromRessource[ressource].target = state.selectedUserId;
+            resolveFromfileName[fileName].message = message; // resendAllRtcRequests
+            resolveFromfileName[fileName].target = state.selectedUserId;
             prepareSendRtcData(state.selectedUserId, message);
         });
     };

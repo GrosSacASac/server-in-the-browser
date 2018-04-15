@@ -49,11 +49,11 @@ export { serviceWorkerManager as default };
             }
 
             const requestObject = message;
-            const ressource = requestObject.header.ressource;
+            const fileName = requestObject.header.fileName;
             rtc.rtcRequest(requestObject).then(function (answer) {
-                //console.log("We have answer for", ressource, " answer", answer);
+                //console.log("We have answer for", fileName, " answer", answer);
                 navigator.serviceWorker.controller.postMessage({
-                    ressource, //is the key, todo change and give internal id
+                    fileName, //is the key, todo change and give internal id
                     answer
                 });
             });

@@ -19,11 +19,11 @@ Loading is more correct term. Algorithm:
 
  * Display a progress bar to give user feedback
  * For each file name
-    * Check if a ressource with a similar name is already loaded
+    * Check if a fileName with a similar name is already loaded
         * If yes prompt pause and ask the user
-            * Overwrite the old ressource
+            * Overwrite the old fileName
                 * and do the same for all the others not yet implemented
-            * Do not overwrite the old ressource
+            * Do not overwrite the old fileName
             * Overwrite only this one not yet implemented
             * Ignore this new file and continue not yet implemented
             * Cancel everything not yet implemented

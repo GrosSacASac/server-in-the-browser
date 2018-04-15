@@ -48,4 +48,4 @@ readme upgrade
 high level overview how it works
 summary/overwiew
 API Doc
-related ressources
+related resources

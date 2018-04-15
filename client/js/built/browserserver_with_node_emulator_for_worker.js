@@ -118,7 +118,7 @@ self.close();
 
 if (message.hasOwnProperty("headerBodyObject")) {
 const headerBodyObject = message.headerBodyObject;//it s a copy
-headerBodyObject.header.url = "/" + headerBodyObject.header.ressource;
+headerBodyObject.header.url = "/" + headerBodyObject.header.fileName;
 
 tryCatchUserCode(function () {
 listeners.forEach(function (listener) {
@@ -238,7 +238,7 @@ currentExportSingleValueUsed = false;
 const requiredUrl = urlStart + requiredName;
 importScripts(requiredUrl); //downloads and execute
 
-let returnValue; 
+let returnValue;
 if (currentExportSingleValueUsed) {
 returnValue = currentExportSingleValue;
 } else {
@@ -271,7 +271,7 @@ returns a promise that resolves with an Object
 {staticFile: staticFileName,
 body: *the body*,
 "Content-Type": "string"}
-or 
+or
 (reject)
 {staticFile: staticFileName,
 body: undefined,
@@ -373,7 +373,7 @@ ${readyCodeText};
                     /*            */
                     const staticFileName = message.staticFile;
                     //console.log();
-                    let answer = uiFiles.ressourceFromRessourceName(staticFileName);
+                    let answer = uiFiles.fileFromFileName(staticFileName);
                     let staticFileObject = {
                         body: undefined,
                         staticFile: staticFileName
@@ -381,7 +381,7 @@ ${readyCodeText};
                     if (answer) {
                         staticFileObject.body = answer.body
                         staticFileObject["Content-Type"] = answer.header["Content-Type"] ||
-                            uiFiles.contentTypeFromRessourceName(staticFileName);
+                            uiFiles.contentTypeFromFileName(staticFileName);
 
                     } else {
                         staticFileObject.error = "No file";

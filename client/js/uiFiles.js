@@ -78,8 +78,9 @@ const uiFiles = (function () {
             }
             d.elements.fileProgress.hidden = true;
 
-            //all loaded
-            all = all.filter(function (fileInformation) {//remove empty things
+            // all loaded
+            all = all.filter(function (fileInformation) {
+                // remove empty things
                 return fileInformation.arrayBuffer.byteLength !== 0;
             });
             removeCommonPrefix(all, detectCommonPrefix(all));
@@ -171,7 +172,7 @@ const uiFiles = (function () {
         });
     };
 
-    const ressourceFromRessourceName = function (fileName) {
+    const fileFromFileName = function (fileName) {
         const file = state.files.find(function (file) {
             return file.name === fileName;
         });
@@ -218,14 +219,14 @@ const uiFiles = (function () {
             }
         };
 
-        d.functions.removeRessource = function (event) {
+        d.functions.removeFile = function (event) {
             const context = d.contextFromEvent(event);
             const oldFile = state.files.find(function (oldFile) {
                 return oldFile.uiLink === context;
             });
-            yesNoDialog(`Remove "${oldFile.name}" ressource ?`, "Yes", "No, Cancel").then(function (answer) {
+            yesNoDialog(`Remove "${oldFile.name}" file ?`, "Yes", "No, Cancel").then(function (answer) {
                 if (answer) {
-                    d.elements[d.contextFromArray([context, "baseEl"])].remove();
+                    d.elements[context].remove();
                     d.forgetContext(context);
                     state.files.splice(state.files.indexOf(oldFile), 1);
                 }
@@ -257,8 +258,8 @@ const uiFiles = (function () {
                 oldFile.mime = d.variables[d.contextFromArray([context, `fileMime`])];
             };
 
-        let ressourceUiId = 0;
-        d.functions.addRessource = function (event) {
+        let fileUiIdCounter = 0;
+        d.functions.addFile = function (event) {
             readFiles().then(function (files) {
                 /*files = {
                     files: [array],
@@ -275,7 +276,7 @@ const uiFiles = (function () {
                         /*todo add more options see FileSystem.md
                         do not process package.json before this is finished*/
                         dialogs.push(yesNoDialog(
-                        `A ressource named "${name}" is already loaded. Overwrite old ressource with the new one ?`, "Yes, overwrite", "No, keep old"
+                        `A file named "${name}" is already loaded. Overwrite old file with the new one ?`, "Yes, overwrite", "No, keep old"
                             ).then(function (answer) {
                             if (answer === true) {
                                 const uiLink = oldFileWithSameName.uiLink;
@@ -293,29 +294,30 @@ const uiFiles = (function () {
                         }));
                         return;
                     }
-                    const ressourceUiIdString = FILE_INPUT_PREFIX + String(ressourceUiId);
-                    ressourceUiId += 1;
+                    const fileId = FILE_INPUT_PREFIX + String(fileUiIdCounter);
+                    fileUiIdCounter += 1;
                     //todo remove duplicate code
 
                     const fileInputElement = d.createElement2({
                         tagName: "file-input",
-                        "data-inside": ressourceUiIdString
+                        "data-inside": fileId,
+                        "data-element": fileId
                     });
 
-                    d.feed(ressourceUiIdString, {
+                    d.feed(fileId, {
                         "fileName" : name,
                         "fileBody" : STRINGS.FILE_LOADED,
                         fileMime: mime
                     });
                     d.activate(fileInputElement);
-                    d.elements[d.contextFromArray([ressourceUiIdString, `fileBody`])].disabled = true;
+                    d.elements[d.contextFromArray([fileId, `fileBody`])].disabled = true;
                     state.files.push({
                         name,
                         body: arrayBuffer,
                         mime,
-                        uiLink: ressourceUiIdString
+                        uiLink: fileId
                     })
-                    d.elements.ressourcesContainer.appendChild(fileInputElement);
+                    d.elements.filesContainer.appendChild(fileInputElement);
                 });
 
                 Promise.all(dialogs).then(function (notUsedValues) {
@@ -328,7 +330,7 @@ const uiFiles = (function () {
                     console.log("serverinthebrowser field detected",                    serverinthebrowser);
                     const server = serverinthebrowser.server;
                     if (server) {
-                        const serverArrayBuffer = ressourceFromRessourceName(server).body;
+                        const serverArrayBuffer = fileFromFileName(server).body;
                         //console.log("serverArrayBuffer", serverArrayBuffer);
                         if (serverArrayBuffer) {
                             const serverString = bytes.stringFromArrayBuffer(serverArrayBuffer);
@@ -343,27 +345,28 @@ const uiFiles = (function () {
             });
         };
 
-        d.functions.addRessourceEmpty = function (event) {
+        d.functions.addFileEmpty = function (event) {
 
-            const ressourceUiIdString = FILE_INPUT_PREFIX + String(ressourceUiId);
-            ressourceUiId += 1;
+            const fileId = FILE_INPUT_PREFIX + String(fileUiIdCounter);
+            fileUiIdCounter += 1;
 
             const fileInputElement = d.createElement2({
                 "tagName": "file-input",
-                "data-inside": ressourceUiIdString
+                "data-inside": fileId,
+                "data-element": fileId
             });
-            d.feed(ressourceUiIdString, {
-                "fileName" : "",
-                "fileBody" : "",
+            d.feed(fileId, {
+                fileName : "",
+                fileBody : "",
                 fileMime: ""
             });
             d.activate(fileInputElement);
-            d.elements.ressourcesContainer.appendChild(fileInputElement);
+            d.elements.filesContainer.appendChild(fileInputElement);
             state.files.push({
                 name : ``,
                 body: ``,
                 mime: ``,
-                uiLink: ressourceUiIdString
+                uiLink: fileId
             });
         };
 
@@ -392,34 +395,35 @@ const uiFiles = (function () {
                 });
                 return;
             }
-            const ressourceUiIdString = FILE_INPUT_PREFIX + String(ressourceUiId);
-            ressourceUiId += 1;
+            const fileId = FILE_INPUT_PREFIX + String(fileUiIdCounter);
+            fileUiIdCounter += 1;
 
             const fileInputElement = d.createElement2({
                 "tagName": "file-input",
-                "data-inside": ressourceUiIdString
+                "data-inside": fileId,
+                "data-element": fileId
             });
-            d.feed(ressourceUiIdString, {
+            d.feed(fileId, {
                 "fileName" : name,
                 "fileBody" : indexHtmlString,
                 fileMime: mime
             });
             d.activate(fileInputElement);
-            d.elements.ressourcesContainer.appendChild(fileInputElement);
+            d.elements.filesContainer.appendChild(fileInputElement);
             state.files.push({
                 name,
                 body: indexHtmlString,
                 mime,
-                uiLink: ressourceUiIdString
+                uiLink: fileId
             });
         };
     };
 
-    const generateIndex = function (ressourceList) {
-        const htmlLinks = ressourceList.filter(function (ressource) {
-            return ressource !== "index.html";
-        }).map(function (ressource) {
-            return `<li><a href="${encodeURI(ressource)}">${ressource}</a></li>`;
+    const generateIndex = function (fileNameList) {
+        const htmlLinks = fileNameList.filter(function (fileName) {
+            return fileName !== "index.html";
+        }).map(function (fileName) {
+            return `<li><a href="${encodeURI(fileName)}">${fileName}</a></li>`;
         }).join("");
         const indexHtml = `<!doctype html>
 <html>
@@ -446,15 +450,15 @@ const uiFiles = (function () {
         "json": "application/json"
     };
 
-    const contentTypeFromRessourceName = function (ressourceName) {
-        const parts = ressourceName.split(".");
+    const contentTypeFromFileName = function (fileName) {
+        const parts = fileName.split(".");
         const lastPart = parts[parts.length - 1];
         return contentTypeFromFileExtension[lastPart.toLowerCase()] || "octet/stream";
     };
 
     return {
-        ressourceFromRessourceName,
+        fileFromFileName,
         start,
-        contentTypeFromRessourceName
+        contentTypeFromFileName
     };
 }());

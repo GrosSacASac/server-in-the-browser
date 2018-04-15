@@ -114,7 +114,7 @@ const browserServer = (function () {
                     /*            */
                     const staticFileName = message.staticFile;
                     //console.log();
-                    let answer = uiFiles.ressourceFromRessourceName(staticFileName);
+                    let answer = uiFiles.fileFromFileName(staticFileName);
                     let staticFileObject = {
                         body: undefined,
                         staticFile: staticFileName
@@ -122,7 +122,7 @@ const browserServer = (function () {
                     if (answer) {
                         staticFileObject.body = answer.body
                         staticFileObject["Content-Type"] = answer.header["Content-Type"] ||
-                            uiFiles.contentTypeFromRessourceName(staticFileName);
+                            uiFiles.contentTypeFromFileName(staticFileName);
 
                     } else {
                         staticFileObject.error = "No file";
