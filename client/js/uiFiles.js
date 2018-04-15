@@ -248,7 +248,7 @@ const uiFiles = (function () {
                 });
                 oldFile.body = d.variables[d.contextFromArray([context, `fileBody`])];
             };
-            
+
             d.functions.rememberMime = function (event) {
                 const context = d.contextFromEvent(event);
                 const oldFile = state.files.find(function (oldFile) {
@@ -359,6 +359,12 @@ const uiFiles = (function () {
             });
             d.activate(fileInputElement);
             d.elements.ressourcesContainer.appendChild(fileInputElement);
+            state.files.push({
+                name : ``,
+                body: ``,
+                mime: ``,
+                uiLink: ressourceUiIdString
+            });
         };
 
 
