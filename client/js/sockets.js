@@ -12,73 +12,82 @@ import {MESSAGES} from "./settings/messages.js";
 import ui from "./ui.js";
 import rtc from "./rtc.js";
 
-export { sockets as default };
+export { sockets as default, start, socket, requestIdChange };
 
-const sockets = (function () {
-
-    const API = {
-        socket : undefined
-    };
+let open = false;
+let socket;
 
 
-    const start = function () {
-        API.socket = io();
-        const socket = API.socket;
-        socket.on(MESSAGES.WELCOME, (data) => {
-            //console.log("welcome received", data);
-            state.localDisplayedName = data.displayedName;
-            ui.displayOwnUserId(state.localDisplayedName);
-            rtc.connectedUsers = data.connectedUsers;
-            ui.updateUserList(data.connectedUsers);
-        });
+const start = function () {
+    const webSocketLocation = `ws://${location.hostname}:8081/`;
+    socket = new WebSocket(webSocketLocation);
 
-        socket.on(MESSAGES.LOADING_USER_LIST, function (data) {
-            rtc.connectedUsers = data.connectedUsers;
-            ui.updateUserList(data.connectedUsers);
-        });
+    const handlers = {};
 
-        socket.on(MESSAGES.RECEIVE_DESCRIPTION, data => {
-            rtc.onReceiveRtcConnectionDescription(data);
-        })
-
-        socket.on(MESSAGES.RECEIVE_ICE_CANDIDATE, data => {
-            rtc.onReceiveRtcIceCandidate(data);
-        })
-
-        socket.on(MESSAGES.SERVERLOG, data => {
-            ui.serverLog(data);
-        })
-
-        socket.on(MESSAGES.BAD_ID_FORMAT_REJECTED, data => {
-            ui.handleChangeIdResponse(MESSAGES.BAD_ID_FORMAT_REJECTED);
-        })
-
-        socket.on(MESSAGES.ALREADY_TAKEN_REJECTED, data => {
-            ui.handleChangeIdResponse(MESSAGES.ALREADY_TAKEN_REJECTED);
-        })
-
-        socket.on(MESSAGES.CONFIRM_ID_CHANGE, data => {
-            ui.handleChangeIdResponse(MESSAGES.CONFIRM_ID_CHANGE, data);
-        });
-
-        socket.on(MESSAGES.USER_ID_CHANGE, data => {
-            ui.handleChangeIdResponse(MESSAGES.USER_ID_CHANGE, data);
-        });
-
-
-    };
-
-    const requestIdChange = function (newId) {
-
-        API.socket.emit(MESSAGES.ID_CHANGE_REQUEST, {
-            newId
-        });
-    };
-
-    Object.assign(API, {
-        start,
-        requestIdChange
+    handlers[MESSAGES.WELCOME] = (data) => {
+        //console.log("welcome received", data);
+        state.localDisplayedName = data.displayedName;
+        ui.displayOwnUserId(state.localDisplayedName);
+        rtc.connectedUsers = data.connectedUsers;
+        ui.updateUserList(data.connectedUsers);
     });
 
-    return API;
-}());
+    handlers[MESSAGES.LOADING_USER_LIST] = (data) => {
+        rtc.connectedUsers = data.connectedUsers;
+        ui.updateUserList(data.connectedUsers);
+    });
+
+    handlers[MESSAGES.RECEIVE_DESCRIPTION] = (data) => {
+        rtc.onReceiveRtcConnectionDescription(data);
+    });
+
+    handlers[MESSAGES.RECEIVE_ICE_CANDIDATE] = (data) => {
+        rtc.onReceiveRtcIceCandidate(data);
+    });
+
+    handlers[MESSAGES.SERVERLOG] = (data) => {
+        ui.serverLog(data);
+    });
+
+    handlers[MESSAGES.BAD_ID_FORMAT_REJECTED] = (data) => {
+        ui.handleChangeIdResponse(MESSAGES.BAD_ID_FORMAT_REJECTED);
+    });
+
+    handlers[MESSAGES.ALREADY_TAKEN_REJECTED] = (data) => {
+        ui.handleChangeIdResponse(MESSAGES.ALREADY_TAKEN_REJECTED);
+    });
+
+    handlers[MESSAGES.CONFIRM_ID_CHANGE] = (data) => {
+        ui.handleChangeIdResponse(MESSAGES.CONFIRM_ID_CHANGE, data);
+    });
+
+    handlers[MESSAGES.USER_ID_CHANGE] = (data) => {
+        ui.handleChangeIdResponse(MESSAGES.USER_ID_CHANGE, data);
+    });
+
+    socket.addEventListener(`message`, function (event) {
+        const object = JSON.parse(event.data);
+        if (object.action && handlers[object.action]) {
+            handlers[object.action](object);
+        }
+    });
+    
+    socket.addEventListener(`error`, function (error) {
+         console.log(`error`, error);
+     });
+
+     const socketSend = function (message) {
+         socket.send(JSON.stringify(message));
+     };
+
+     socket.addEventListener(`open`, function (event) {
+         open = true;
+     });
+};
+
+const requestIdChange = function (newId) {
+
+    socket.emit(MESSAGES.ID_CHANGE_REQUEST, {
+        newId
+    });
+};
