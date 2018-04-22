@@ -117,8 +117,7 @@ if (inputs.includes(EXTERNAL)) {
 
 
         `${jsDirectory}/external_dependencies/zip/zip_zip-ext.js`,
-        `node_modules/webrtc-adapter/out/adapter.js`,
-        `node_modules/socket.io-client/dist/socket.io.slim.js`
+        `node_modules/webrtc-adapter/out/adapter.js`
 
     ], `${jsDirectory}/built/all-external.js`, `\n`);
 }
