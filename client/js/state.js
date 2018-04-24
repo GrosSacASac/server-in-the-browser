@@ -7,12 +7,14 @@ const state = {
         permission granted,
         and activated
         */
+    id: ``,
     notificationEnabled: false,
     localDisplayedName: "",
     isOnLine: true,
     selectedUserId : "",
     lastSelectedUserId: "",
     uiIdStringLastSelected: "", // same with "_user"
+    connectedUsers: []
     files: [/*
         {
             name,

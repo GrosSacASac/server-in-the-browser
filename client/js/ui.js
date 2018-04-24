@@ -3,7 +3,7 @@
     es6, maxerr: 100, browser, devel, fudge, maxlen: 120, white, node, eval
 */
 /*global
-    ui, d, rtc, sockets, MESSAGES, state.localDisplayedName, caches
+    caches
 */
 /*could add close connection button*/
 import {MESSAGES} from "./settings/messages.js";
@@ -15,7 +15,7 @@ import uiFiles from "./uiFiles.js";
 import localData from "./localData.js";
 import {state} from "./state.js";
 import serviceWorkerManager from "./serviceWorkerManager.js";
-import sockets from "./sockets.js";
+import {socketSendAction} from "./sockets.js";;
 import browserServer from "./built/browserserver_with_node_emulator_for_worker.js";
 export { ui as default };
 
@@ -31,7 +31,7 @@ const ui = (function () {
         CONNECT_SELECT: "Connect and select",
         BAD_ID_FORMAT: "The ID didn't match the following requirement. An ID is 4 to 25 characters long, and only etters from a to Z and digits from 0 to 9  are allowed.",
         ALREADY_TAKEN_REJECTED: "The ID is already taken. Chose another ID.",
-        ID_CHANGE_REQUEST_SENT: "The request to change the ID has been sent. Waiting for an answer.",
+        NAME_CHANGE_REQUEST_SENT: "The request to change the ID has been sent. Waiting for an answer.",
         ID_CHANGE_SUCCESS: "Your ID has been successfully changed."
     };
 
@@ -189,10 +189,10 @@ const ui = (function () {
 
     };
 
-    const toggleCommunicationControls = function (displayName) {
-        const able = rtc.isOpenFromDisplayName(displayName);
-        const hasIndex = rtc.connectedUsers.some(function (connectedUser) {
-            return (connectedUser.displayedName === displayName && connectedUser.isServer);
+    const toggleCommunicationControls = function (id) {
+        const able = rtc.isOpenFromDisplayName(id);
+        const hasIndex = state.connectedUsers.some(function (connectedUser) {
+            return (connectedUser.id === id && connectedUser.isServer);
         });
         const notAble = !able;
         d.elements.send_button.disabled = notAble;
@@ -365,8 +365,11 @@ const ui = (function () {
         };
 
         d.functions.connectToUser = function (event) {
-            const selectedUserId = d.variables[d.contextFromArray([d.contextFromEvent(event), "userDisplayName"])];
-            markUserAsConnecting(selectedUserId);
+            const selectedUserName = d.variables[d.contextFromArray([d.contextFromEvent(event), "userDisplayName"])];
+            markUserAsConnecting(selectedUserName);
+            const selectedUserId = state.connectedUsers.find(function (user) {
+                return user.displayedName = selectedUserName;
+            });
             wantToConnectTo = selectedUserId;
             rtc.startConnectionWith(true, selectedUserId);
             //when connected will call markUserAsSelected
@@ -395,15 +398,17 @@ const ui = (function () {
                 d.feed(`idChangeFeedback`, UISTRINGS.BAD_ID_FORMAT);
                 return;
             }
-            sockets.requestIdChange(newId);
-            d.feed(`idChangeFeedback`, UISTRINGS.ID_CHANGE_REQUEST_SENT);
+            socketSendAction(MESSAGES.NAME_CHANGE_REQUEST, {
+                newId
+            });
+            d.feed(`idChangeFeedback`, UISTRINGS.NAME_CHANGE_REQUEST_SENT);
             d.elements.idChangeRequestButton.disabled = true;
             d.elements.newId.disabled = true;
         };
 
         d.functions.changeLocalServerAvailability = function (event) {
         //todo needs server confirmation ? not important
-            sockets.socket.emit(MESSAGES.LOCAL_SERVER_STATE, {
+            socketSendAction(MESSAGES.LOCAL_SERVER_STATE, {
                 displayedName: state.localDisplayedName,
                 isServer: d.variables.localServerAvailability
             });
@@ -490,36 +495,26 @@ server.listen(port, hostname, () => {
     };
 
     const handleChangeIdResponse = function (message, data) {
-        if (message === MESSAGES.USER_ID_CHANGE || message === MESSAGES.CONFIRM_ID_CHANGE) {
-            const {newId, oldId} = data;
+        if (message === MESSAGES.NAME_CHANGE_REQUEST || message === MESSAGES.CONFIRM_ID_CHANGE) {
+            const {newName, oldId} = data;
             rtc.connectedUsers.some(function (userObject) {
                 if (userObject.displayedName === oldId) {
-                    userObject.displayedName = newId;
+                    userObject.displayedName = newName;
                     return true;
                 }
             });
             if (message === MESSAGES.CONFIRM_ID_CHANGE) {
 
-                state.localDisplayedName = newId;
-                localData.set("state.localDisplayedName", newId);
+                state.localDisplayedName = newName;
+                localData.set("state.localDisplayedName", newName);
                 d.feed({
-                    newId: "",
-                    your_id: newId,
+                    newName: "",
+                    your_id: newName,
                     idChangeFeedback: UISTRINGS.ID_CHANGE_SUCCESS
                 });
 
-            } else if (message === MESSAGES.USER_ID_CHANGE) {
-                if (wantToConnectTo === oldId) {
-                    wantToConnectTo = newId;
-                }
-                if (state.selectedUserId === oldId) {
-                    state.selectedUserId = newId;
-                }
-                if (uiUserRelationState[oldId]) {
-                    uiUserRelationState[newId] = uiUserRelationState[oldId];
-                    delete uiUserRelationState[oldId];
-                }
-                rtc.userIdChange(oldId, newId);
+            } else if (message === MESSAGES.NAME_CHANGE_REQUEST) {
+                rtc.userIdChange(oldId, newName);
                 updateUserList(rtc.connectedUsers);
                 return;
 
@@ -530,7 +525,7 @@ server.listen(port, hostname, () => {
             d.feed(`idChangeFeedback`, UISTRINGS.ALREADY_TAKEN_REJECTED);
         }
         d.elements.idChangeRequestButton.disabled = false;
-        d.elements.newId.disabled = false;
+        d.elements.newName.disabled = false;
     };
 
     const lateReject = function (reason) {

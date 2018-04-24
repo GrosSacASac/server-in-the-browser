@@ -12,9 +12,10 @@ import {MESSAGES} from "./settings/messages.js";
 import ui from "./ui.js";
 import rtc from "./rtc.js";
 
-export { sockets as default, start, socket, requestIdChange };
+export {start, socketSendAction};
 
 let open = false;
+let queue = [];
 let socket;
 
 
@@ -27,14 +28,15 @@ const start = function () {
     handlers[MESSAGES.WELCOME] = (data) => {
         //console.log("welcome received", data);
         state.localDisplayedName = data.displayedName;
+        state.id = data.id;
         ui.displayOwnUserId(state.localDisplayedName);
-        rtc.connectedUsers = data.connectedUsers;
-        ui.updateUserList(data.connectedUsers);
+        state.connectedUsers = data.connectedUsers;
+        ui.updateUserList(state.connectedUsers);
     });
 
     handlers[MESSAGES.LOADING_USER_LIST] = (data) => {
-        rtc.connectedUsers = data.connectedUsers;
-        ui.updateUserList(data.connectedUsers);
+        state.connectedUsers = data.connectedUsers;
+        ui.updateUserList(state.connectedUsers);
     });
 
     handlers[MESSAGES.RECEIVE_DESCRIPTION] = (data) => {
@@ -61,33 +63,49 @@ const start = function () {
         ui.handleChangeIdResponse(MESSAGES.CONFIRM_ID_CHANGE, data);
     });
 
-    handlers[MESSAGES.USER_ID_CHANGE] = (data) => {
-        ui.handleChangeIdResponse(MESSAGES.USER_ID_CHANGE, data);
+    handlers[MESSAGES.NAME_CHANGE_REQUEST] = (data) => {
+        ui.handleChangeIdResponse(MESSAGES.NAME_CHANGE_REQUEST, data);
     });
 
     socket.addEventListener(`message`, function (event) {
         const object = JSON.parse(event.data);
-        if (object.action && handlers[object.action]) {
-            handlers[object.action](object);
+        if (object.action) {
+            if (handlers[object.action]) {
+                handlers[object.action](object.data);
+            } else {
+                console.warn(`action "${object.action}" not implemented yet`);
+            }
+        } else {
+            console.error(`message from socket does not have action property`);
         }
     });
-    
+
     socket.addEventListener(`error`, function (error) {
          console.log(`error`, error);
      });
 
-     const socketSend = function (message) {
-         socket.send(JSON.stringify(message));
-     };
-
-     socket.addEventListener(`open`, function (event) {
-         open = true;
-     });
-};
-
-const requestIdChange = function (newId) {
-
-    socket.emit(MESSAGES.ID_CHANGE_REQUEST, {
-        newId
+    socket.addEventListener(`open`, function (event) {
+        open = true;
+        queue.forEach(function (toSend) {
+          socketSend(toSend);
+        });
+        queue = undefined;
     });
+
+    const socketSend = function (toSend) {
+        socket.send(toSend);
+    };
+
+    const socketSendAction = function (action, message) {
+        let stringMessage = JSON.stringify({
+            action,
+            data: message
+        };
+        if (!open) {
+            queue.push(stringMessage)
+        } else {
+            socketSend(stringMessage);
+        }
+    };
+
 };

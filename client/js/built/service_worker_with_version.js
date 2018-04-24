@@ -59,8 +59,7 @@ const fileNamesToSaveInCacheProd = [
     /*not sure if we let this stay here or move it closer to the application layer*/
     "/http",
     "/express",
-    "/body-parser",
-    "/socket.io"
+    "/body-parser"
 ];
 const rtcLength = 4; // "rtc/".length;
 const rtcFetchDelay = 10000;//ms

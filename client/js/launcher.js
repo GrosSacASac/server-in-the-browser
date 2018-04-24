@@ -5,7 +5,7 @@ import {MESSAGES} from "./settings/messages.js";
 import ui from "./ui.js";
 import {state} from "./state.js";
 import serviceWorkerManager from "./serviceWorkerManager.js";
-import sockets from "./sockets.js";
+import {start as socketStart, socketSendAction} from "./sockets.js";
 
 
 
@@ -72,7 +72,7 @@ const launcher = function () {
 
     const startServiceWorkerAndSockets = function () {
         serviceWorkerManager.start();
-        sockets.start();
+        socketStart();
         window.addEventListener("beforeunload", function (event) {
             /*https://developer.mozilla.org/en-US/docs/Web/Events/beforeunload
             if the setting warnBeforeLeave is true
@@ -96,9 +96,7 @@ const launcher = function () {
         }, false);
         window.addEventListener("unload", function (event) {
             /*not necessary but better*/
-            sockets.socket.emit(MESSAGES.EXIT,
-                {}
-            );
+            socketSendAction(MESSAGES.EXIT, undefined);
         }, false);
         /*window.addEventListener("error", function (event) {
             console.log(event);

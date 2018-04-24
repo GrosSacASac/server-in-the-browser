@@ -36,8 +36,7 @@ const staticFileFromUrl = {
     /*experimental, could also put that into service worker or already include it in the inject ready worker*/
     "/http": `${root}/client/js/node/http.js`,
     "/express": `${root}/client/js/node/express.js`,
-    "/body-parser": `${root}/client/js/node/body-parser.js`,
-    "/socket.io": `${root}/client/js/node/socket.io.js`,
+    "/body-parser": `${root}/client/js/node/body-parser.js`
 };
 
 

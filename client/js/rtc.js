@@ -26,7 +26,7 @@ import {keyFromObjectAndValue, OutOfOrderError} from "./utilities/utilities.js";
 import bytes from "./bytes.js";
 import ui from "./ui.js";
 import uiFiles from "./uiFiles.js";
-import sockets from "./sockets.js";
+import {socketSendAction} from "./sockets.js";
 import browserServer from "./built/browserserver_with_node_emulator_for_worker.js";
 
 export { rtc as default };
@@ -49,19 +49,19 @@ const rtc = (function () {
 
     const ORDERED = true;
 
-    const rtcPeerConnectionFromId = new Map();
+    const rtcPeerConnectionFromId = {};
     const applicationLevelSendBufferFromDataChannel = new WeakMap();
     const applicationLevelReceivePartsBufferFromDataChannel = new WeakMap();
     const rtcSendDataChannelFromRtcPeerConnection = new WeakMap();
     const rtcSendDataChannelFromId = {//PROXY
         get: function (id) {
-            return rtcSendDataChannelFromRtcPeerConnection.get(rtcPeerConnectionFromId.get(id));
+            return rtcSendDataChannelFromRtcPeerConnection.get(rtcPeerConnectionFromId[id]);
         },
         has: function (id) {
-            return rtcSendDataChannelFromRtcPeerConnection.has(rtcPeerConnectionFromId.get(id));
+            return rtcSendDataChannelFromRtcPeerConnection.has(rtcPeerConnectionFromId[id]);
         },
         set: function (id, dataChannel) {
-            rtcSendDataChannelFromRtcPeerConnection.set(rtcPeerConnectionFromId.get(id), dataChannel);
+            rtcSendDataChannelFromRtcPeerConnection.set(rtcPeerConnectionFromId[id], dataChannel);
             return dataChannel;
         }
     };
@@ -327,12 +327,12 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
     };
 
     const createdDescription = function (description, to) {
-        if (!rtcPeerConnectionFromId.has(to)) {
+        if (!rtcPeerConnectionFromId[to]) {
             return;
         }
-        const rtcPeerConnection = rtcPeerConnectionFromId.get(to);
+        const rtcPeerConnection = rtcPeerConnectionFromId[to];
         rtcPeerConnection.setLocalDescription(description).then(function () {
-            sockets.socket.emit(MESSAGES.SEND_DESCRIPTION, {
+            ssocketSendAction(MESSAGES.SEND_DESCRIPTION, {
                 sdp: rtcPeerConnection.localDescription,
                 displayedName : state.localDisplayedName,
                 from: state.localDisplayedName,
@@ -347,7 +347,7 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
     const startConnectionWith = function (isCaller, to) {
         let rtcPeerConnection;
         let rtcSendDataChannel;
-        if (!rtcPeerConnectionFromId.has(to)) {
+        if (!rtcPeerConnectionFromId[to]) {
             try {
                 rtcPeerConnection = new RTCPeerConnection(RTC_CONFIGURATION);
             } catch (error) {
@@ -366,10 +366,10 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
             rtcPeerConnection.onicecandidate = function (event) {
                 if (event.candidate) {
                     //console.log("On ICE 2");
-                    sockets.socket.emit(MESSAGES.SEND_ICE_CANDIDATE, {
+                    socketSendAction(MESSAGES.SEND_ICE_CANDIDATE, {
                         ice: event.candidate,
                         from: state.localDisplayedName,
-                        targetDisplayedName: to
+                        targetId: to
                     });
                 }
             };
@@ -401,10 +401,10 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
                 console.log("Receive data from rtcSendDataChannel", event.data);
             };
 
-            rtcPeerConnectionFromId.set(to, rtcPeerConnection);
+            rtcPeerConnectionFromId[to] = rtcPeerConnection;
             rtcSendDataChannelFromId.set(to, rtcSendDataChannel);
         } else {
-            rtcPeerConnection = rtcPeerConnectionFromId.get(to);
+            rtcPeerConnection = rtcPeerConnectionFromId[to];
         }
 
         if (isCaller) {
@@ -431,11 +431,11 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
     };
 
     const onReceiveRtcConnectionDescription = function (data) {
-        if (!rtcPeerConnectionFromId.has(data.from)) {
+        if (!rtcPeerConnectionFromId[data.from])) {
             startConnectionWith(false, data.from);
         }
 
-        const rtcPeerConnection = rtcPeerConnectionFromId.get(data.from);
+        const rtcPeerConnection = rtcPeerConnectionFromId[data.from];
         if (rtcPeerConnection) {
             rtcPeerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp))
             .then(function () {
@@ -461,7 +461,7 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
         if (data.from === state.localDisplayedName) {
             return;
         }
-        let rtcPeerConnection = rtcPeerConnectionFromId.get(data.from);
+        let rtcPeerConnection = rtcPeerConnectionFromId[data.from];
         if (rtcPeerConnection) {
             rtcPeerConnection.addIceCandidate(new RTCIceCandidate(data.ice))
             .then(function (x) {
@@ -510,18 +510,18 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
         return "open" === dataChannel.readyState;
     };
 
-    const isOpenFromDisplayName = function (displayName) {
-        return isOpenFromDataChannel(rtcSendDataChannelFromId.get(displayName));
+    const isOpenFromDisplayName = function (id) {
+        return isOpenFromDataChannel(rtcSendDataChannelFromId.get(id));
     };
 
     const userIdChange = function (oldId, newId) {
-        if (rtcPeerConnectionFromId.has(oldId)) {
-            const rtcSendDataChannel = rtcSendDataChannelFromId.get(oldId);
+        if (rtcPeerConnectionFromId[oldId]) {
+            const rtcSendDataChannel = rtcPeerConnectionFromId[oldId];
             const sendChannelStateChangeHandler = sendChannelStateChange(newId);
 
             rtcSendDataChannel.onopen = sendChannelStateChangeHandler;
             rtcSendDataChannel.onclose = sendChannelStateChangeHandler;
-            rtcPeerConnectionFromId.set(newId, rtcPeerConnectionFromId.get(oldId));
+            rtcPeerConnectionFromId.set(newId, rtcPeerConnectionFromId[oldId]);
             rtcPeerConnectionFromId.delete(oldId);
             //rtcSendDataChannelFromId uses rtcPeerConnectionFromId so it is also updated
         }
