@@ -332,7 +332,7 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
         }
         const rtcPeerConnection = rtcPeerConnectionFromId[to];
         rtcPeerConnection.setLocalDescription(description).then(function () {
-            ssocketSendAction(MESSAGES.SEND_DESCRIPTION, {
+            socketSendAction(MESSAGES.SEND_DESCRIPTION, {
                 sdp: rtcPeerConnection.localDescription,
                 displayedName : state.localDisplayedName,
                 from: state.localDisplayedName,
@@ -431,7 +431,7 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
     };
 
     const onReceiveRtcConnectionDescription = function (data) {
-        if (!rtcPeerConnectionFromId[data.from])) {
+        if (!rtcPeerConnectionFromId[data.from]) {
             startConnectionWith(false, data.from);
         }
 
