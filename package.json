@@ -1,7 +1,7 @@
 {
   "name": "server-in-the-browser",
   "author": "author",
-  "version": "0.20.40",
+  "version": "0.3.0",
   "main": "index.js",
   "dependencies": {
     "dom99": "^11.1.8",
@@ -13,7 +13,7 @@
     "node": ">=9"
   },
   "scripts": {
-    "bumpversion": "npm version patch --force",
+    "bumpversion": "npm version patch --no-git-tag",
     "versioninserviceworker": "node tools/service_worker_version.js",
     "minifyserviceworkerjs": "uglifyjs client/js/built/service_worker_with_version.js --mangle --compress --screw-ie8 --output client/js/built/service_worker.min.js",
     "build1js": "node tools/buildall.js JS OWN",
