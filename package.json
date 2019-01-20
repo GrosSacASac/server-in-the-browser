@@ -46,7 +46,6 @@
     "rollup": "^0.58.1",
     "rollup-plugin-babel": "^3.0.3",
     "terser": "^3.14.1",
-    "uglify-js": "github:mishoo/UglifyJS2#harmony",
     "utilsac": "^6.0.0"
   },
   "devDependenciesGlobals": {
