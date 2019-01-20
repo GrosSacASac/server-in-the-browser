@@ -32,40 +32,40 @@ const start = function () {
         ui.displayOwnUserId(state.localDisplayedName);
         state.connectedUsers = data.connectedUsers;
         ui.updateUserList(state.connectedUsers);
-    });
+    };
 
     handlers[MESSAGES.LOADING_USER_LIST] = (data) => {
         state.connectedUsers = data.connectedUsers;
         ui.updateUserList(state.connectedUsers);
-    });
+    };
 
     handlers[MESSAGES.RECEIVE_DESCRIPTION] = (data) => {
         rtc.onReceiveRtcConnectionDescription(data);
-    });
+    };
 
     handlers[MESSAGES.RECEIVE_ICE_CANDIDATE] = (data) => {
         rtc.onReceiveRtcIceCandidate(data);
-    });
+    };
 
     handlers[MESSAGES.SERVERLOG] = (data) => {
         ui.serverLog(data);
-    });
+    };
 
     handlers[MESSAGES.BAD_ID_FORMAT_REJECTED] = (data) => {
         ui.handleChangeIdResponse(MESSAGES.BAD_ID_FORMAT_REJECTED);
-    });
+    };
 
     handlers[MESSAGES.ALREADY_TAKEN_REJECTED] = (data) => {
         ui.handleChangeIdResponse(MESSAGES.ALREADY_TAKEN_REJECTED);
-    });
+    };
 
     handlers[MESSAGES.CONFIRM_ID_CHANGE] = (data) => {
         ui.handleChangeIdResponse(MESSAGES.CONFIRM_ID_CHANGE, data);
-    });
+    };
 
     handlers[MESSAGES.NAME_CHANGE_REQUEST] = (data) => {
         ui.handleChangeIdResponse(MESSAGES.NAME_CHANGE_REQUEST, data);
-    });
+    };
 
     socket.addEventListener(`message`, function (event) {
         const object = JSON.parse(event.data);
@@ -97,10 +97,10 @@ const start = function () {
     };
 
     const socketSendAction = function (action, message) {
-        let stringMessage = JSON.stringify({
+        const stringMessage = JSON.stringify({
             action,
             data: message
-        };
+        });
         if (!open) {
             queue.push(stringMessage)
         } else {

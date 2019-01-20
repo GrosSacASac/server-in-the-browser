@@ -14,7 +14,7 @@ const state = {
     selectedUserId : "",
     lastSelectedUserId: "",
     uiIdStringLastSelected: "", // same with "_user"
-    connectedUsers: []
+    connectedUsers: [],
     files: [/*
         {
             name,
