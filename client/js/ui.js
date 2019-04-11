@@ -15,7 +15,7 @@ import uiFiles from "./uiFiles.js";
 import localData from "./localData.js";
 import {state} from "./state.js";
 import serviceWorkerManager from "./serviceWorkerManager.js";
-import {socketSendAction} from "./sockets.js";;
+import {socketSendAction} from "./sockets.js";
 import browserServer from "./built/browserserver_with_node_emulator_for_worker.js";
 export { ui as default };
 
@@ -158,7 +158,7 @@ const ui = (function () {
             d.feed(d.contextFromArray([uiIdString, "userDisplayName"]), displayedName);
             d.activate(userItemElement);
 
-            if (rtc.rtcPeerConnectionFromId.has(displayedName) && rtc.isOpenFromDisplayName(displayedName)) {
+            if (rtc.rtcPeerConnectionFromId.hasOwnProperty(displayedName) && rtc.isOpenFromDisplayName(displayedName)) {
                 d.elements[uiIdString + "host"].className = "";
 
                 d.feed(`${uiIdString}>connectButton`, UISTRINGS.CONNECTED);
@@ -217,7 +217,7 @@ const ui = (function () {
         d.elements.main.hidden = !wantToDisplay;
         const previous = localData.get("state.localDisplayedName");
         if (previous) {
-            d.feed(`newId`, previous);
+            d.feed(`newName`, previous);
             d.functions.idChangeRequest();
         }
         d.feed(`log`, "");
@@ -392,18 +392,18 @@ const ui = (function () {
                 return;
             }
             const PATTERN = /[a-zA-Z0-9]{4,25}/;
-            const newId = d.variables.newId;
+            const newId = d.variables.newName;
             const length = newId.length;
             if (!PATTERN.test(newId)) {
                 d.feed(`idChangeFeedback`, UISTRINGS.BAD_ID_FORMAT);
                 return;
             }
             socketSendAction(MESSAGES.NAME_CHANGE_REQUEST, {
-                newId
+                newName: newId
             });
             d.feed(`idChangeFeedback`, UISTRINGS.NAME_CHANGE_REQUEST_SENT);
             d.elements.idChangeRequestButton.disabled = true;
-            d.elements.newId.disabled = true;
+            d.elements.newName.disabled = true;
         };
 
         d.functions.changeLocalServerAvailability = function (event) {
@@ -446,7 +446,7 @@ const ui = (function () {
             log: "Starting ...",
             input: "",
             output: "",
-            newId: "",
+            newName: "",
             warnBeforeLeave: localData.getElseDefault("warnBeforeLeave", false),
             wantNotification: localData.getElseDefault("notifications", state.notificationEnabled)
         });
@@ -495,9 +495,10 @@ server.listen(port, hostname, () => {
     };
 
     const handleChangeIdResponse = function (message, data) {
-        if (message === MESSAGES.NAME_CHANGE_REQUEST || message === MESSAGES.CONFIRM_ID_CHANGE) {
-            const {newName, oldId} = data;
-            rtc.connectedUsers.some(function (userObject) {
+        if (message === MESSAGES.NAME_CHANGE || message === MESSAGES.CONFIRM_ID_CHANGE) {
+            const {newId, oldId} = data;
+            const newName = newId;
+            state.connectedUsers.some(function (userObject) {
                 if (userObject.displayedName === oldId) {
                     userObject.displayedName = newName;
                     return true;
@@ -513,9 +514,9 @@ server.listen(port, hostname, () => {
                     idChangeFeedback: UISTRINGS.ID_CHANGE_SUCCESS
                 });
 
-            } else if (message === MESSAGES.NAME_CHANGE_REQUEST) {
+            } else if (message === MESSAGES.NAME_CHANGE) {
                 rtc.userIdChange(oldId, newName);
-                updateUserList(rtc.connectedUsers);
+                updateUserList(state.connectedUsers);
                 return;
 
             }
