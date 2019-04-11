@@ -27,8 +27,6 @@ const staticFileFromUrl = {
     "/open_source": `${root}/client/html/built/open_source.min.html`,
     "/offline": `${root}/client/html/built/offline.min.html`,
     "/quit": `${root}/client/html/built/quit.min.html`,
-    //todo remove
-    "/quitt": `${root}/client/html/quitt.html`,
     "/service_worker": `${root}/client/js/built/service_worker.min.js`,
     "/all-external.js": `${root}/client/js/built/all-external.js`,
     "/z-worker.js": `${root}/client/js/external_dependencies/zip/z-worker.js`,
