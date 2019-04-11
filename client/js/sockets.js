@@ -67,6 +67,10 @@ const start = function () {
         ui.handleChangeIdResponse(MESSAGES.NAME_CHANGE_REQUEST, data);
     };
 
+    handlers[MESSAGES.NAME_CHANGE] = (data) => {
+        ui.handleChangeIdResponse(MESSAGES.NAME_CHANGE, data);
+    };
+
     socket.addEventListener(`message`, function (event) {
         const object = JSON.parse(event.data);
         if (object.action) {
@@ -92,20 +96,23 @@ const start = function () {
         queue = undefined;
     });
 
-    const socketSend = function (toSend) {
-        socket.send(toSend);
-    };
 
-    const socketSendAction = function (action, message) {
-        const stringMessage = JSON.stringify({
-            action,
-            data: message
-        });
-        if (!open) {
-            queue.push(stringMessage)
-        } else {
-            socketSend(stringMessage);
-        }
-    };
 
+
+};
+
+const socketSend = function (toSend) {
+    socket.send(toSend);
+};
+
+const socketSendAction = function (action, message) {
+    const stringMessage = JSON.stringify({
+        action,
+        data: message
+    });
+    if (!open) {
+        queue.push(stringMessage)
+    } else {
+        socketSend(stringMessage);
+    }
 };
