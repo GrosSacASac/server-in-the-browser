@@ -20,9 +20,10 @@ InvalidStateError: Can't create RTCPeerConnections when the network is down
 use http://danml.com/download.html to download files on single page
 */
 
+import d from "../../node_modules/dom99/built/dom99Module.js";
 import {MESSAGES} from "./settings/messages.js";
 import {state} from "./state.js";
-import {keyFromObjectAndValue, OutOfOrderError} from "./utilities/utilities.js";
+import {OutOfOrderError} from "./utilities/utilities.js";
 import bytes from "./bytes.js";
 import ui from "./ui.js";
 import uiFiles from "./uiFiles.js";
@@ -418,7 +419,7 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
             });
         }
 
-    }
+    };
 
 
 
@@ -521,8 +522,8 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
 
             rtcSendDataChannel.onopen = sendChannelStateChangeHandler;
             rtcSendDataChannel.onclose = sendChannelStateChangeHandler;
-            rtcPeerConnectionFromId.set(newId, rtcPeerConnectionFromId[oldId]);
-            rtcPeerConnectionFromId.delete(oldId);
+            rtcPeerConnectionFromId[newId] = rtcPeerConnectionFromId[oldId];
+            delete rtcPeerConnectionFromId[oldId];
             //rtcSendDataChannelFromId uses rtcPeerConnectionFromId so it is also updated
         }
     };
