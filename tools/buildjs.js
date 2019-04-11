@@ -1,7 +1,3 @@
-/*
-
-*/
-
 "use strict";
 
 const {
@@ -20,7 +16,11 @@ const rollup_babel = require('rollup-plugin-babel');
 //
 //
 // const drop_console = false;
-// const skipMinification = true;
+const skipMinification = true;
+let presets = [];
+if (!skipMinification) {
+    presets.push("minify")
+}
 const jsDirectory = `client/js`;
 
 
@@ -89,10 +89,7 @@ if (inputs.includes(OWN)) {
               "plugins": [
                 "transform-object-rest-spread"
               ],
-              "presets": [
-                    // not env
-                    "minify"
-                ]
+              presets
             })
         ]
     };
@@ -122,7 +119,6 @@ if (inputs.includes(EXTERNAL)) {
     ], `${jsDirectory}/built/all-external.js`, `\n`);
 }
 
-    // "bumpversion": "npm version patch --force",
     // "versioninserviceworker4": "node tools/service_worker_version.js",
     // "minifyserviceworkerjs5": "uglifyjs client/js/built/service_worker_with_version.js --mangle --compress --screw-ie8 --output client/js/built/service_worker.min.js",
 
