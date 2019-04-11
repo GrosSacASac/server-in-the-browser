@@ -4,12 +4,6 @@ todo make promises cahin so that cleanup promise can run after the others
 
 "use strict";
 
-// const {
-    // textFileContentPromiseFromPath,
-    // writeTextInFilePromiseFromPathAndString,
-    // copyFile
-// } = require("utilsac");
-
 const buildjs = require("./buildjs.js");
 const buildcss = require("./buildcss.js");
 const buildhtml = require("./buildhtml.js");
