@@ -4,6 +4,8 @@
     process, require, global
 */
 "use strict";
+const WEBSOCKET_PORT = 8081;
+const PORT = 8080;
 const WebSocket = require("ws");
 
 const MESSAGES = {
@@ -25,7 +27,19 @@ const MESSAGES = {
     CANNOT_SEND_ICE_CANDIDATE: "101"
 };
 
-let userId = 0;
+const socketSend = function (socket, toSend) {
+    socket.send(toSend);
+};
+
+const userIdFromAnything = function (fromWhat, value) {
+};
+
+const userNumberFromSocket = function (socket) {
+};
+
+const userNumberFromDisplayedName = function (displayedName) {
+};
+
 let nextUserNumber = Number.MIN_SAFE_INTEGER;
 let nextAutomatedUserNumberDisplayed = 0;
 const users = {};
@@ -34,7 +48,7 @@ const formatData = function (action, message) {
     let stringMessage = JSON.stringify({
         action,
         data: message
-    };
+    });
     return stringMessage;
 };
 
@@ -50,17 +64,17 @@ const userSendAction = function (user, action, message) {
 const socketSendAll = function (action, message) {
     const stringMessage = formatData(action, message);
     Object.values(users).forEach(function (user) {
-        user.socket.send(socket, stringMessage);
+        user.socket.send(stringMessage);
     });
 };
 
 const socketBroadcast = function (userIdToExclude, action, message) {
     const stringMessage = formatData(action, message);
     Object.entries(users).forEach(function ([id, user]) {
-        if (id === userIdToExcluded) {
+        if (id === userIdToExclude) {
             return;
         }
-        user.socket.send(socket, stringMessage);
+        user.socket.send(stringMessage);
     });
 };
 
@@ -85,43 +99,20 @@ const refreshAllClientUserList = () => {
 };
 
 const registerNewUser = function (socket) {
-    const displayedName = String(nextAutomatedUserNumberDisplayed)
+    const displayedName = String(nextAutomatedUserNumberDisplayed);
     const nextUserId = String(nextUserNumber)
     users[nextUserId] = {
         id: nextUserId,
         displayedName,
         socket,
         isServer: false
-    });
+    };
 
 
     nextUserNumber += 1;
     nextAutomatedUserNumberDisplayed += 1;
     return nextUserId;
 };
-
-// const userIdFromAnything = function (fromWhat, value) {
-//     let userNumber;
-//     let user;
-//     for ([userNumber, user] of user$s) {
-//         if (user[fromWhat] === value) {
-//             return userNumber;
-//         }
-//     }
-//     return;
-// };
-
-// const userNumberFromSocket = function (socket) {
-//     return userNumberFromAnything("socket", socket);
-// };
-
-// const userNumberFromDisplayedName = function (displayedName) {
-//     return userNumberFromAnything("displayedName", displayedName);
-// };
-
-// const userFromSocket = function (socket) {
-//     return user$s.get(userNumberFromSocket(socket));
-// };
 
 const removeUser = function (id) {
     // todo also ensure connection is closed
@@ -132,7 +123,7 @@ const getPublicUsersList = function () {
     return Object.values(users).map(function (user) {
         return {
             displayedName: user.displayedName,
-            id: user.id
+            id: user.id,
             isServer: user.isServer
         };
     });
@@ -144,17 +135,18 @@ const start = function (server) {
     wss.on(`connection`, function (socket) {
 
         const id = registerNewUser(socket);
-        console.log(`A new user connected, id: (${id})`)
-        refreshAllOtherClientsWithNewList(socket);
+        console.log(`A new user connected, id: (${id})`);
+        refreshAllOtherClientsWithNewList(id);
 
         socketSendAction(socket, MESSAGES.WELCOME, {
-            displayedName,
+            displayedName: users[id].displayedName,
             id,
             connectedUsers: getPublicUsersList()
         });
 
         socket.on(`message`, function (message) {
             const parsedMessage = JSON.parse(message);
+            parsedMessage.data = parsedMessage.data|| {};
             parsedMessage.data.id = id;
             if (messageHandlers[parsedMessage.action]) {
                 messageHandlers[parsedMessage.action](parsedMessage.data);
@@ -173,18 +165,18 @@ const start = function (server) {
 };
 
 const messageHandlers = {
-    MESSAGES.EXIT: function ({id}) {
+    [MESSAGES.EXIT]: function ({id}) {
         console.log("user has exit");
         removeUser(id);
-        refreshAllOtherClientsWithNewList(socket);
+        refreshAllOtherClientsWithNewList(id);
     },
-    MESSAGES.LOCAL_SERVER_STATE: data => {
+    [MESSAGES.LOCAL_SERVER_STATE]: data => {
         const user = users[data.id];
         user.isServer = Boolean(data.isServer);
 
         refreshAllOtherClientsWithNewList(data.id);
     },
-    MESSAGES.NAME_CHANGE_REQUEST: {newName, id} => {
+    [MESSAGES.NAME_CHANGE_REQUEST]: ({newName, id}) => {
         /*see ui.js*/
         const user = users[id];
         const oldId = user.displayedName;
@@ -194,48 +186,48 @@ const messageHandlers = {
         const PATTERN = /[a-zA-Z0-9]{4,25}/;
 
         //check if in correct format
-        if (typeof newId !== "string" || !PATTERN.test(newId)) {
+        if (typeof newName !== "string" || !PATTERN.test(newName)) {
             socketSendAction(user.socket, MESSAGES.BAD_ID_FORMAT_REJECTED, {});
             return;
         }
 
         //check if already taken
         if (Object.values(users).some(function (user) {
-            return user.displayedName === newId;
+            return user.displayedName === newName;
         })) {
             socketSendAction(user.socket, MESSAGES.ALREADY_TAKEN_REJECTED, {});
             return;
         }
 
         //we confirm changes to clients and change the local state
-        user.displayedName = newId;
+        user.displayedName = newName;
         socketSendAction(user.socket, MESSAGES.CONFIRM_ID_CHANGE, {
-            newId,
+            newId: newName,
             oldId
         });
 
-        socketBroadcast(user.socket, MESSAGES.NAME_CHANGE, {
-            newId,
+        socketBroadcast(user.id, MESSAGES.NAME_CHANGE, {
+            newId: newName,
             oldId
         });
     },
-    MESSAGES.SEND_DESCRIPTION: data => {
+[MESSAGES.SEND_DESCRIPTION]: data => {
         // This time, we will emit only to the recipient
         const targetId = data.targetId;
         //logAll(["SEND DESCRIPTION",targetDisplayedName, data.from]);
         if (users[targetId]) {
-            socketSend(users[targetId], MESSAGES.RECEIVE_DESCRIPTION, {
+            socketSend(users[targetId].socket, MESSAGES.RECEIVE_DESCRIPTION, {
                 sdp: data.sdp,
                 from: data.from
             });
         } else {
-            socketSend(users[data.id], MESSAGES.CANNOT_SEND_DESCRIPTION, {
+            socketSend(users[data.id].socket, MESSAGES.CANNOT_SEND_DESCRIPTION, {
 
             });
         }
     },
 
-    MESSAGES.SEND_ICE_CANDIDATE: data => {
+    [MESSAGES.SEND_ICE_CANDIDATE]: data => {
         const targetId = data.targetId;
 
         if (users[targetId]) {
