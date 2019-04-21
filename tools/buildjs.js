@@ -10,12 +10,8 @@ const {
 
 const rollup = require('rollup');
 const rollup_babel = require('rollup-plugin-babel');
-// const babel = require("babel-core");
-// const UglifyJSES5 = require("uglify-js");
-// const UglifyJS = require("uglify-es");
-//
-//
-// const drop_console = false;
+
+
 const skipMinification = true;
 let presets = [];
 if (!skipMinification) {
@@ -87,7 +83,7 @@ module.exports = function (inputs) {
                     exclude: 'node_modules/**',
                     externalHelpers: false,
                     "plugins": [
-                        "transform-object-rest-spread"
+                        "@babel/plugin-proposal-object-rest-spread"
                     ],
                     presets
                 })
@@ -118,11 +114,4 @@ module.exports = function (inputs) {
 
         ], `${jsDirectory}/built/all-external.js`, `\n`);
     }
-
-    // "versioninserviceworker4": "node tools/service_worker_version.js",
-    // "minifyserviceworkerjs5": "uglifyjs client/js/built/service_worker_with_version.js --mangle --compress --screw-ie8 --output client/js/built/service_worker.min.js",
-
-
-
-
-}; // end export
+};

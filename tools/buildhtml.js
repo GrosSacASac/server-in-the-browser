@@ -10,7 +10,7 @@ const {
     copyFile
 } = require("filesac");
 
-const minify = require("html-minifier").minify;
+
 
 
 // const skipMinification = false;
@@ -42,8 +42,7 @@ module.exports = function () {
 
     Object.keys(OUTPUT_FROM_INPUT_PATH).forEach(function (path) {
         textFileContent(path).then(function (textFileContent) {
-            //console.log(textFileContent);
-            const minifiedHtml = minify(textFileContent, OPTIONS);
+            const minifiedHtml = textFileContent;
             return writeTextInFilePromiseFromPathAndString(OUTPUT_FROM_INPUT_PATH[path],
                 minifiedHtml);
         }).then(function () {

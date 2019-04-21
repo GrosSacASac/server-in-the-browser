@@ -7,7 +7,7 @@
 */
 "use strict";
 const escapeHtml = require("escape-html");
-const minify = require("html-minifier").minify;
+
 
 const { textFileContent, writeTextInFilePromiseFromPathAndString } = require("filesac");
 const markdown = require("markdown-it")("default", {
@@ -92,7 +92,7 @@ module.exports = function () {
             textFileContent(path).then(function (textFileContent) {
                 //console.log(textFileContent);
                 const htmlText = markdown.render(textFileContent);
-                const minifiedHtml = minify(htmlText, OPTIONS);
+                const minifiedHtml = htmlText;
                 const standalone = minify((beforeBodyTemplate + minifiedHtml + afterBodyTemplate), OPTIONS);
                 return Promise.all([
                     writeTextInFile(

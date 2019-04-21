@@ -1,8 +1,23 @@
 {
   "name": "server-in-the-browser",
-  "author": "author",
-  "version": "0.4.10",
-  "main": "index.js",
+  "version": "0.5.0",
+  "scripts": {
+    "bumpversion": "npm version patch --no-git-tag",
+    "versioninserviceworker": "node tools/service_worker_version.js",
+    "build1js": "node tools/buildall.js JS OWN",
+    "buildjsrest": "npm run bumpversion && npm run versioninserviceworker && npm run minifyserviceworkerjs",
+    "buildjsexternaldependencies": "node tools/buildall.js JS EXTERNAL",
+    "buildcss1": "node tools/buildall.js CSS",
+    "buildhtml": "node tools/buildall.js HTML",
+    "builddoc": "node tools/buildall.js DOC",
+    "buildall": "npm run buildjsrest && node tools/buildall.js HTML JS OWN EXTERNAL CSS DOC",
+    "start": "node index.js",
+    "buildjsstart": "npm run build1js && npm run buildjsrest && npm start",
+    "buildallstart": "npm run buildall && npm start",
+    "heroku": "git push heroku master",
+    "herokulog": "heroku logs --tail",
+    "testw": "client\\js\\tests\\SpecRunner.html"
+  },
   "dependencies": {
     "dom99": "^19.0.3",
     "express": "^4.16.4",
@@ -11,44 +26,18 @@
     "webrtc-adapter": "^6.1.0",
     "ws": "^6.2.1"
   },
-  "engines": {
-    "node": ">=9"
-  },
-  "scripts": {
-    "bumpversion": "npm version patch --no-git-tag",
-    "versioninserviceworker": "node tools/service_worker_version.js",
-    "minifyserviceworkerjs": "terser client/js/built/service_worker_with_version.js --mangle --compress --screw-ie8 --output client/js/built/service_worker.min.js",
-    "build1js": "node tools/buildall.js JS OWN",
-    "buildjsrest": "npm run bumpversion && npm run versioninserviceworker && npm run minifyserviceworkerjs",
-    "buildjsexternaldependencies": "node tools/buildall.js JS EXTERNAL",
-    "buildcss1": "node tools/buildall.js CSS",
-    "minifycss2": "csso client/css/built/all.css --output client/css/built/all.min.css",
-    "minifycss3": "csso client/css/built/documentation.css --output client/css/built/documentation.min.css",
-    "buildcssrest": "npm run minifycss2 && npm run minifycss3",
-    "buildhtml": "node tools/buildall.js HTML",
-    "builddoc": "node tools/buildall.js DOC",
-    "buildall": "npm run buildjsrest && node tools/buildall.js HTML JS OWN EXTERNAL CSS DOC && npm run buildcssrest",
-    "start": "node index.js",
-    "buildjsstart": "npm run build1js && npm run buildjsrest && npm start",
-    "buildallstart": "npm run buildall && npm start",
-    "heroku": "git push heroku master",
-    "herokulog": "heroku logs --tail",
-    "testw": "client\\js\\tests\\SpecRunner.html"
-  },
   "devDependencies": {
-    "babel-core": "^6.26.0",
-    "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "babel-preset-minify": "^0.4.0",
-    "csso": "~3.5.0",
-    "csso-cli": "^2.0.2",
+    "@babel/core": "^7.4.3",
+    "@babel/plugin-proposal-object-rest-spread": "^7.4.3",
     "escape-html": "^1.0.3",
     "filesac": "^10.0.1",
-    "html-minifier": "3.5.15",
     "markdown-it": "^8.2.2",
     "markdown-it-lazy-headers": "^0.1.3",
     "rollup": "^1.10.1",
-    "rollup-plugin-babel": "^3.0.3",
-    "terser": "^3.14.1"
+    "rollup-plugin-babel": "^4.3.2"
+  },
+  "engines": {
+    "node": ">=10"
   },
   "devDependenciesGlobals": {
     "installed before with -g, see readme": "true",

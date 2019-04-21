@@ -29,12 +29,4 @@ module.exports = function () {
         `${cssDirectory}/header.css`,
         `${cssDirectory}/pre.css`
     ], `${cssDirectory}/built/documentation.css`, `\n`);
-
-
-    // "minifycss2": "csso client/css/built/all.css  client/css/built/all.min.css",
-    // "minifycss4": "csso client/css/built/documentation.css  client/css/built/documentation.min.css",
-
-
-
-
-}; // end export
+};
