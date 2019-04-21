@@ -8,12 +8,10 @@
 /*we can then send data as arrayBuffer
 */
 
-import d from "../../node_modules/dom99/built/dom99Module.js";
-import {yesNoDialog, textDialog} from "../../node_modules/dom99/components/yesNoDialog/yesNoDialog.js";
-import {keyFromObjectAndValue, OutOfOrderError} from "./utilities/utilities.js";
-import rtc from "./rtc.js";
+import * as d from "../../node_modules/dom99/source/dom99.js";
+import { yesNoDialog } from "../../node_modules/dom99/components/yesNoDialog/yesNoDialog.js";
 import bytes from "./bytes.js";
-import {state} from "./state.js";
+import { state } from "./state.js";
 /* import "./external_dependencies/zip/zip_zip-ext.js"; with file concatenation*/
 
 export { uiFiles as default };
@@ -99,8 +97,8 @@ const uiFiles = (function () {
         };
 
         return {
-            add : function (arrayBuffer, mime, name) {
-                all.push({arrayBuffer, mime, name});
+            add: function (arrayBuffer, mime, name) {
+                all.push({ arrayBuffer, mime, name });
                 loaded += 1;
                 tryResolve();
             },
@@ -129,8 +127,8 @@ const uiFiles = (function () {
         } else {
             bytes.arrayBufferPromiseFromBlob(blob).then(
                 function (arrayBuffer) {
-                addBuffer.add(arrayBuffer, mime, name);
-            });
+                    addBuffer.add(arrayBuffer, mime, name);
+                });
         }
     };
 
@@ -152,15 +150,15 @@ const uiFiles = (function () {
             const fileInput = d.createElement2(fileInputDescription);
             fileInput.readFileResolve = resolve;
             fileInput.readFileReject = reject;
-            d.activate(fileInput);
+            d.start(fileInput);
             d.elements.readFilesContainer.appendChild(fileInput);
             fileInput.click();
         });
     };
 
-    const zipEntriesFromFileObject = function(fileObject) {
+    const zipEntriesFromFileObject = function (fileObject) {
         return new Promise(function (resolve, reject) {
-            zip.createReader(new zip.BlobReader(fileObject), function(zipReader) {
+            zip.createReader(new zip.BlobReader(fileObject), function (zipReader) {
                 zipReader.getEntries(resolve);
             }, reject);
         });
@@ -203,9 +201,9 @@ const uiFiles = (function () {
                 //fileObject.size
                 if (isZipFromFileName(name)) {
                     /*we assume there is only 1 zip uploaded at once*/
-                    zipEntriesFromFileObject(fileObject).then(function(entries) {
+                    zipEntriesFromFileObject(fileObject).then(function (entries) {
                         onLoadBuffer = readerOnLoadPrepare(event.target, entries.length);
-                        entries.forEach(function(entry) {
+                        entries.forEach(function (entry) {
                             entry.getData(new zip.BlobWriter(), function (blob) {
                                 addBlob(onLoadBuffer, blob, "", entry.filename);
                             });
@@ -220,43 +218,43 @@ const uiFiles = (function () {
         };
 
         d.functions.removeFile = function (event) {
-            const context = d.contextFromEvent(event);
+            const scopeFromEvent = d.scopeFromEvent(event);
             const oldFile = state.files.find(function (oldFile) {
-                return oldFile.uiLink === context;
+                return oldFile.uiLink === scopeFromEvent;
             });
             yesNoDialog(`Remove "${oldFile.name}" file ?`, "Yes", "No, Cancel").then(function (answer) {
                 if (answer) {
-                    d.elements[context].remove();
-                    d.forgetContext(context);
+                    d.elements[scopeFromEvent].remove();
+                    d.forgetscopeFromEvent(scopeFromEvent);
                     state.files.splice(state.files.indexOf(oldFile), 1);
                 }
             });
         };
 
 
-            d.functions.rememberFileName = function (event) {
-                const context = d.contextFromEvent(event);
-                const oldFile = state.files.find(function (oldFile) {
-                    return oldFile.uiLink === context;
-                });
-                oldFile.name = d.variables[d.contextFromArray([context, `fileName`])];
-            };
+        d.functions.rememberFileName = function (event) {
+            const scopeFromEvent = d.scopeFromEventFromEvent(event);
+            const oldFile = state.files.find(function (oldFile) {
+                return oldFile.uiLink === scopeFromEvent;
+            });
+            oldFile.name = d.variables[d.scopeFromArray([scopeFromEvent, `fileName`])];
+        };
 
-            d.functions.rememberFileBody = function (event) {
-                const context = d.contextFromEvent(event);
-                const oldFile = state.files.find(function (oldFile) {
-                    return oldFile.uiLink === context;
-                });
-                oldFile.body = d.variables[d.contextFromArray([context, `fileBody`])];
-            };
+        d.functions.rememberFileBody = function (event) {
+            const scopeFromEvent = d.scopeFromEventFromEvent(event);
+            const oldFile = state.files.find(function (oldFile) {
+                return oldFile.uiLink === scopeFromEvent;
+            });
+            oldFile.body = d.variables[d.scopeFromArray([scopeFromEvent, `fileBody`])];
+        };
 
-            d.functions.rememberMime = function (event) {
-                const context = d.contextFromEvent(event);
-                const oldFile = state.files.find(function (oldFile) {
-                    return oldFile.uiLink === context;
-                });
-                oldFile.mime = d.variables[d.contextFromArray([context, `fileMime`])];
-            };
+        d.functions.rememberMime = function (event) {
+            const scopeFromEvent = d.scopeFromEventFromEvent(event);
+            const oldFile = state.files.find(function (oldFile) {
+                return oldFile.uiLink === scopeFromEvent;
+            });
+            oldFile.mime = d.variables[d.scopeFromArray([scopeFromEvent, `fileMime`])];
+        };
 
         let fileUiIdCounter = 0;
         d.functions.addFile = function (event) {
@@ -268,23 +266,23 @@ const uiFiles = (function () {
                 const oldFiles = state.files;
                 const dialogs = [];
                 files.files.forEach(function (fileObject) {
-                    const {arrayBuffer, mime, name} = fileObject;
+                    const { arrayBuffer, mime, name } = fileObject;
                     const oldFileWithSameName = oldFiles.find(function (oldFile) {
-                            return oldFile.name === name;
+                        return oldFile.name === name;
                     });
                     if (oldFileWithSameName) {
                         /*todo add more options see FileSystem.md
                         do not process package.json before this is finished*/
                         dialogs.push(yesNoDialog(
-                        `A file named "${name}" is already loaded. Overwrite old file with the new one ?`, "Yes, overwrite", "No, keep old"
-                            ).then(function (answer) {
+                            `A file named "${name}" is already loaded. Overwrite old file with the new one ?`, "Yes, overwrite", "No, keep old"
+                        ).then(function (answer) {
                             if (answer === true) {
                                 const uiLink = oldFileWithSameName.uiLink;
                                 d.elements[
-                                    d.contextFromArray([uiLink, `fileBody`])
+                                    d.scopeFromArray([uiLink, `fileBody`])
                                 ].disabled = true;
                                 d.feed(uiLink, {
-                                    "fileBody" : STRINGS.FILE_LOADED,
+                                    "fileBody": STRINGS.FILE_LOADED,
                                     fileMime: mime
                                 });
                                 oldFileWithSameName.body = arrayBuffer;
@@ -305,12 +303,12 @@ const uiFiles = (function () {
                     });
 
                     d.feed(fileId, {
-                        "fileName" : name,
-                        "fileBody" : STRINGS.FILE_LOADED,
+                        "fileName": name,
+                        "fileBody": STRINGS.FILE_LOADED,
                         fileMime: mime
                     });
-                    d.activate(fileInputElement);
-                    d.elements[d.contextFromArray([fileId, `fileBody`])].disabled = true;
+                    d.start(fileInputElement);
+                    d.elements[d.scopeFromArray([fileId, `fileBody`])].disabled = true;
                     state.files.push({
                         name,
                         body: arrayBuffer,
@@ -327,7 +325,7 @@ const uiFiles = (function () {
                     }
                     const serverinthebrowser = files.package.packageObject.serverinthebrowser;
 
-                    console.log("serverinthebrowser field detected",                    serverinthebrowser);
+                    console.log("serverinthebrowser field detected", serverinthebrowser);
                     const server = serverinthebrowser.server;
                     if (server) {
                         const serverArrayBuffer = fileFromFileName(server).body;
@@ -356,14 +354,14 @@ const uiFiles = (function () {
                 "data-element": fileId
             });
             d.feed(fileId, {
-                fileName : "",
-                fileBody : "",
+                fileName: "",
+                fileBody: "",
                 fileMime: ""
             });
-            d.activate(fileInputElement);
+            d.start(fileInputElement);
             d.elements.filesContainer.appendChild(fileInputElement);
             state.files.push({
-                name : ``,
+                name: ``,
                 body: ``,
                 mime: ``,
                 uiLink: fileId
@@ -384,9 +382,9 @@ const uiFiles = (function () {
                 yesNoDialog(`"${name}" already exists. Overwrite it ?`, "Yes", "No, Cancel").then(function (answer) {
                     if (answer) {
                         const uiLink = oldFileWithSameName.uiLink;
-                        d.elements[d.contextFromArray([uiLink, "fileBody"])].disabled = false;
+                        d.elements[d.scopeFromArray([uiLink, "fileBody"])].disabled = false;
                         d.feed(uiLink, {
-                            "fileBody" : indexHtmlString,
+                            "fileBody": indexHtmlString,
                             fileMime: mime
                         });
                         oldFileWithSameName.body = indexHtmlString;
@@ -404,11 +402,11 @@ const uiFiles = (function () {
                 "data-element": fileId
             });
             d.feed(fileId, {
-                "fileName" : name,
-                "fileBody" : indexHtmlString,
+                "fileName": name,
+                "fileBody": indexHtmlString,
                 fileMime: mime
             });
-            d.activate(fileInputElement);
+            d.start(fileInputElement);
             d.elements.filesContainer.appendChild(fileInputElement);
             state.files.push({
                 name,
@@ -442,7 +440,7 @@ const uiFiles = (function () {
         return indexHtml;
     };
 
-     const contentTypeFromFileExtension = {
+    const contentTypeFromFileExtension = {
         "": "text/html",
         "html": "text/html",
         "css": "text/css",

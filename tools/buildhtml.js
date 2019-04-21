@@ -43,7 +43,7 @@ module.exports = function () {
     Object.keys(OUTPUT_FROM_INPUT_PATH).forEach(function (path) {
         textFileContent(path).then(function (textFileContent) {
             const minifiedHtml = textFileContent;
-            return writeTextInFilePromiseFromPathAndString(OUTPUT_FROM_INPUT_PATH[path],
+            return writeTextInFile(OUTPUT_FROM_INPUT_PATH[path],
                 minifiedHtml);
         }).then(function () {
             //console.log(path + " minified !");

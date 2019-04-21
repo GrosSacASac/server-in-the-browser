@@ -1,11 +1,11 @@
 {
   "name": "server-in-the-browser",
-  "version": "0.5.0",
+  "version": "0.5.7",
   "scripts": {
     "bumpversion": "npm version patch --no-git-tag",
     "versioninserviceworker": "node tools/service_worker_version.js",
     "build1js": "node tools/buildall.js JS OWN",
-    "buildjsrest": "npm run bumpversion && npm run versioninserviceworker && npm run minifyserviceworkerjs",
+    "buildjsrest": "npm run bumpversion && npm run versioninserviceworker",
     "buildjsexternaldependencies": "node tools/buildall.js JS EXTERNAL",
     "buildcss1": "node tools/buildall.js CSS",
     "buildhtml": "node tools/buildall.js HTML",

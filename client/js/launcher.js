@@ -1,11 +1,11 @@
 //launcher.js
 
-import d from "../../node_modules/dom99/built/dom99Module.js";
-import {MESSAGES} from "./settings/messages.js";
+import * as d from "../../node_modules/dom99/source/dom99.js";
+import { MESSAGES } from "./settings/messages.js";
 import ui from "./ui.js";
-import {state} from "./state.js";
+import { state } from "./state.js";
 import serviceWorkerManager from "./serviceWorkerManager.js";
-import {start as socketStart, socketSendAction} from "./sockets.js";
+import { start as socketStart, socketSendAction } from "./sockets.js";
 
 
 
@@ -13,10 +13,10 @@ const MAX_NOTIFICATION_TIME = 8000; // ms
 const launcher = function () {
 
     if (location.protocol === "http:" && location.href !== "http://localhost:8080/") {
-    /*should be useless , use server redirect
-    see
-    http://stackoverflow.com/questions/7185074/heroku-nodejs-http-to-https-ssl-forced-redirect
-    */
+        /*should be useless , use server redirect
+        see
+        http://stackoverflow.com/questions/7185074/heroku-nodejs-http-to-https-ssl-forced-redirect
+        */
         location.href = "https" + location.href.slice(4);
     }
     const startErrorElement = document.getElementById("starterror");
@@ -87,8 +87,8 @@ const launcher = function () {
                         event.preventDefault();
                     }
                 } else {*/
-                    event.returnValue = message;
-                    return message;
+                event.returnValue = message;
+                return message;
                 /*}*/
             } else {
                 ; // do not warn before leaving

@@ -20,14 +20,14 @@ InvalidStateError: Can't create RTCPeerConnections when the network is down
 use http://danml.com/download.html to download files on single page
 */
 
-import d from "../../node_modules/dom99/built/dom99Module.js";
-import {MESSAGES} from "./settings/messages.js";
-import {state} from "./state.js";
-import {OutOfOrderError} from "./utilities/utilities.js";
+import * as d from "../../node_modules/dom99/source/dom99.js";
+import { MESSAGES } from "./settings/messages.js";
+import { state } from "./state.js";
+import { OutOfOrderError } from "./utilities/utilities.js";
 import bytes from "./bytes.js";
 import ui from "./ui.js";
 import uiFiles from "./uiFiles.js";
-import {socketSendAction} from "./sockets.js";
+import { socketSendAction } from "./sockets.js";
 import browserServer from "./built/browserserver_with_node_emulator_for_worker.js";
 
 export { rtc as default };
@@ -37,9 +37,10 @@ const rtc = (function () {
     };
 
     let useCustom = false;
-    let audioContext;
+    // dooes not work anymore
+    //let audioscopeFromEvent;
     try {
-        audioContext = new AudioContext();//http://stackoverflow.com/questions/40363606/how-to-keep-webrtc-datachannel-open-in-phone-browser-inactive-tab/40563729
+        // audioscopeFromEvent = new AudioscopeFromEvent();//http://stackoverflow.com/questions/40363606/how-to-keep-webrtc-datachannel-open-in-phone-browser-inactive-tab/40563729
     } catch (notUsed) {
         ;//not important
     }
@@ -88,7 +89,7 @@ const rtc = (function () {
 
 
 
-//make connected list reappear with the map
+    //make connected list reappear with the map
     const handleRequestDefault = function (headerBodyObject, fromId) {
         //console.log("headerBodyObject:", headerBodyObject);
         let fileName = headerBodyObject.header.fileName;
@@ -100,7 +101,7 @@ const rtc = (function () {
             return {
                 header: {
                     "Content-Type": answer.header["Content-Type"] ||
-                                    uiFiles.contentTypeFromFileName(fileName)
+                        uiFiles.contentTypeFromFileName(fileName)
                 },
                 body: answer.body
             };
@@ -109,7 +110,7 @@ const rtc = (function () {
             header: {
                 "Content-Type": "text/html",
                 status: 404,
-                statusText : "NOT FOUND"
+                statusText: "NOT FOUND"
             },
             body: `<html><p>Connection Successful ! But /${headerBodyObject.header.fileName} Not found (404)</p></html>`
         };
@@ -121,13 +122,13 @@ const rtc = (function () {
 
 
     const sendOrPutIntoSendBuffer = function (rtcSendDataChannel,
-            data, forcePutIntoSendBuffer = false) {
+        data, forcePutIntoSendBuffer = false) {
         /*console.log("sendOrPutIntoSendBuffer", (!forcePutIntoSendBuffer &&
         (rtcSendDataChannel.bufferedAmount <
         rtcSendDataChannel.bufferedAmountLowThreshold)));*/
         if (!forcePutIntoSendBuffer &&
             (rtcSendDataChannel.bufferedAmount <
-            rtcSendDataChannel.bufferedAmountLowThreshold)) {
+                rtcSendDataChannel.bufferedAmountLowThreshold)) {
             rtcSendDataChannel.send(data);
             return false;
         } else {
@@ -192,7 +193,7 @@ const rtc = (function () {
 
     const buildTrySendRemaining = function (targetId) {
         //close over targetId
-        let trySendRemaining =  function (event) { //TrySendRemaining
+        let trySendRemaining = function (event) { //TrySendRemaining
             /*gets called when the send buffer is low, see
 https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamountlow*/
             const rtcSendDataChannel = rtcSendDataChannelFromId.get(targetId);
@@ -206,11 +207,11 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
                 }
                 const data = applicationLevelSendBuffer.shift();
                 if (isOpenFromDisplayName(targetId)) {
-//console.log(`TrySendRemaining  : ${data.byteLength}`);
+                    //console.log(`TrySendRemaining  : ${data.byteLength}`);
                     rtcSendDataChannel.send(data);
                     trySendRemaining();
 
-    //todo recall itself
+                    //todo recall itself
                 } else {
                     ui.displayFatalError("The connection is not open 2 or is it ?");
                 }
@@ -233,15 +234,15 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
             /*as arrayBuffer*/
 
             if (data.size) { //Blob
-            /* or blob, if data arrives as blob
-            this block should never run*/
+                /* or blob, if data arrives as blob
+                this block should never run*/
                 bytes.arrayBufferPromiseFromBlob(data).then(
-                function (arrayBuffer) {
-                    receiveRtcData(arrayBuffer, from);
-                }).catch(function (error) {
-                    ui.displayFatalError("bytes.arrayBufferPromiseFromBlob" +
-                        error.toString(), error);
-                });
+                    function (arrayBuffer) {
+                        receiveRtcData(arrayBuffer, from);
+                    }).catch(function (error) {
+                        ui.displayFatalError("bytes.arrayBufferPromiseFromBlob" +
+                            error.toString(), error);
+                    });
                 return;
             }
             const prefix = bytes.internalMessagePrefixFromArrayBuffer(data);
@@ -299,7 +300,7 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
                     sendAnswerObject(handleRequestDefault(headerBodyObject, from));
                 } else {
                     const answerObjectPromise = browserServer.
-                    answerObjectPromiseFromRequest(headerBodyObject, from);
+                        answerObjectPromiseFromRequest(headerBodyObject, from);
                     //console.log(answerObjectPromise);
                     answerObjectPromise.then(sendAnswerObject).catch(function (reason) {
                         console.log(reason);
@@ -335,12 +336,12 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
         rtcPeerConnection.setLocalDescription(description).then(function () {
             socketSendAction(MESSAGES.SEND_DESCRIPTION, {
                 sdp: rtcPeerConnection.localDescription,
-                displayedName : state.localDisplayedName,
+                displayedName: state.localDisplayedName,
                 from: state.localDisplayedName,
                 targetDisplayedName: to
             });
         }).catch(function (error) {
-                console.log("An error occured", error)
+            console.log("An error occured", error)
         });
 
     };
@@ -410,13 +411,13 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
 
         if (isCaller) {
             rtcPeerConnection.createOffer()
-            .then(function (description) {
-                createdDescription(description, to);
-                //console.log("Description created 1");
-            })
-            .catch(function (error) {
-                console.log("An error occured", error)
-            });
+                .then(function (description) {
+                    createdDescription(description, to);
+                    //console.log("Description created 1");
+                })
+                .catch(function (error) {
+                    console.log("An error occured", error)
+                });
         }
 
     };
@@ -439,22 +440,22 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
         const rtcPeerConnection = rtcPeerConnectionFromId[data.from];
         if (rtcPeerConnection) {
             rtcPeerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp))
-            .then(function () {
-                // Only create answers in response to offers
-                if (data.sdp.type === "offer") {
-                    rtcPeerConnection.createAnswer()
-                    .then(description => {
-                        // Receive description
-                        //console.log("onReceiveRtcConnectionDescription, data: ", data);
-                        createdDescription(description, data.from);
-                    })
-                    .catch(function (error) {
-                        console.log("An error occured", error)
-                    });
-                }
-            }).catch(function (error) {
-                console.log("An error occured", error)
-            });
+                .then(function () {
+                    // Only create answers in response to offers
+                    if (data.sdp.type === "offer") {
+                        rtcPeerConnection.createAnswer()
+                            .then(description => {
+                                // Receive description
+                                //console.log("onReceiveRtcConnectionDescription, data: ", data);
+                                createdDescription(description, data.from);
+                            })
+                            .catch(function (error) {
+                                console.log("An error occured", error)
+                            });
+                    }
+                }).catch(function (error) {
+                    console.log("An error occured", error)
+                });
         }
     };
 
@@ -465,11 +466,11 @@ https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/onbufferedamount
         let rtcPeerConnection = rtcPeerConnectionFromId[data.from];
         if (rtcPeerConnection) {
             rtcPeerConnection.addIceCandidate(new RTCIceCandidate(data.ice))
-            .then(function (x) {
-                //console.log("Added ICE 3");
-            }).catch(function (error) {
-                console.log("An error occured", error)
-            });
+                .then(function (x) {
+                    //console.log("Added ICE 3");
+                }).catch(function (error) {
+                    console.log("An error occured", error)
+                });
         }
     };
 

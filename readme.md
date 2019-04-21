@@ -53,7 +53,7 @@ try it out locally:
  * open the node command line interface, go in the correct directory
  * `npm install`
  * `npm run start`
- * open the local host address in 2 different browser context
+ * open the local host address in 2 different browser
  * http://localhost:8080/
 
 

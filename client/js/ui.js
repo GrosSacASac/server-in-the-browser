@@ -6,16 +6,16 @@
     caches
 */
 /*could add close connection button*/
-import {MESSAGES} from "./settings/messages.js";
+import { MESSAGES } from "./settings/messages.js";
 
-import d from "../../node_modules/dom99/built/dom99Module.js";
-import {yesNoDialog, textDialog} from "../../node_modules/dom99/components/yesNoDialog/yesNoDialog.js";
+import * as d from "../../node_modules/dom99/source/dom99.js";
+import { yesNoDialog, useYesNoDialog } from "../../node_modules/dom99/components/yesNoDialog/yesNoDialog.js";
 import rtc from "./rtc.js";
 import uiFiles from "./uiFiles.js";
 import localData from "./localData.js";
-import {state} from "./state.js";
+import { state } from "./state.js";
 import serviceWorkerManager from "./serviceWorkerManager.js";
-import {socketSendAction} from "./sockets.js";
+import { socketSendAction } from "./sockets.js";
 import browserServer from "./built/browserserver_with_node_emulator_for_worker.js";
 export { ui as default };
 
@@ -43,7 +43,7 @@ const ui = (function () {
         );
     };
 
-    let acceptConditionResolve = function () {};
+    let acceptConditionResolve = function () { };
     let wantToConnectTo = "";
     let uiIdStrings = [];
     const uiUserRelationState = {}; // 0: None 1 Connecting 2 Connected
@@ -59,8 +59,8 @@ const ui = (function () {
     };
 
     const markUserAsConnected = function (selectedUserId, connected = true) {
-    /*multiple connections can be open at once.
-    It is only possible to select an user if it is connected, we need to reflect that*/
+        /*multiple connections can be open at once.
+        It is only possible to select an user if it is connected, we need to reflect that*/
         const uiIdString = "user_" + selectedUserId;
         // console.log(selectedUserId);
         if (selectedUserId) {
@@ -142,7 +142,9 @@ const ui = (function () {
         //console.log(connected_users);
         d.elements.connected_users.innerHTML = "";
         uiIdStrings.forEach(function (uiIdString) {
-            d.forgetContext(uiIdString);
+
+            // todo
+            // d.forgetscopeFromEvent(uiIdString);
         });
         uiIdStrings = [];
         connected_users.map(function (displayedName) {
@@ -155,10 +157,11 @@ const ui = (function () {
                 "data-inside": uiIdString,
                 "data-element": uiIdString + "host"
             });
-            d.feed(d.contextFromArray([uiIdString, "userDisplayName"]), displayedName);
-            d.activate(userItemElement);
+            d.feed(d.scopeFromArray([uiIdString, "userDisplayName"]), displayedName);
+            d.start(userItemElement);
 
             if (rtc.rtcPeerConnectionFromId.hasOwnProperty(displayedName) && rtc.isOpenFromDisplayName(displayedName)) {
+                // todo
                 d.elements[uiIdString + "host"].className = "";
 
                 d.feed(`${uiIdString}>connectButton`, UISTRINGS.CONNECTED);
@@ -238,10 +241,10 @@ const ui = (function () {
     };
 
     let displayNonMetRequirement = function (nonMetRequirement) {
-        d.activate();
+        d.start();
         let i = 0;
         const splitTextContentHref = function (link) {
-            return {innerHTML: `<a href="${link}" target="_blank" rel="noopener noreferrer">${link}</a>`};
+            return { innerHTML: `<a href="${link}" target="_blank" rel="noopener noreferrer">${link}</a>` };
         };
         Object.keys(nonMetRequirement).forEach(function (technicalName) {
             i += 1;
@@ -254,17 +257,18 @@ const ui = (function () {
             });
 
             d.feed(iString, {
-                title : technicalName,
-                text : requirementI.text,
+                title: technicalName,
+                text: requirementI.text,
                 links: requirementI.links.map(splitTextContentHref)
             });
 
-            d.activate(missingFeatureElement);
+            d.start(missingFeatureElement);
             d.elements.missingFeatures.appendChild(missingFeatureElement);
         });
     };
 
     const start = function () {
+        useYesNoDialog(d);
         uiFiles.start();
         d.functions.acceptAndStart = function (event) {
             acceptConditionResolve();
@@ -365,7 +369,7 @@ const ui = (function () {
         };
 
         d.functions.connectToUser = function (event) {
-            const selectedUserName = d.variables[d.contextFromArray([d.contextFromEvent(event), "userDisplayName"])];
+            const selectedUserName = d.variables[d.scopeFromArray([d.scopeFromEvent(event), "userDisplayName"])];
             markUserAsConnecting(selectedUserName);
             const selectedUserId = state.connectedUsers.find(function (user) {
                 return user.displayedName = selectedUserName;
@@ -376,7 +380,7 @@ const ui = (function () {
         };
 
         d.functions.selectUser = function (event) {
-            const selectedUserId = d.variables[d.contextFromArray([d.contextFromEvent(event), "userDisplayName"])];
+            const selectedUserId = d.variables[d.scopeFromArray([d.scopeFromEvent(event), "userDisplayName"])];
             //wantToConnectTo = selectedUserId;
             markUserAsSelected(selectedUserId);
         };
@@ -407,7 +411,7 @@ const ui = (function () {
         };
 
         d.functions.changeLocalServerAvailability = function (event) {
-        //todo needs server confirmation ? not important
+            //todo needs server confirmation ? not important
             socketSendAction(MESSAGES.LOCAL_SERVER_STATE, {
                 displayedName: state.localDisplayedName,
                 isServer: d.variables.localServerAvailability
@@ -438,7 +442,8 @@ const ui = (function () {
         };
         const removeAndForget = function (elementName) {
             d.elements[elementName].remove();
-            d.forgetContext(elementName);
+            // todo
+            // d.forgetscopeFromEvent(elementName);
         };
         displayNonMetRequirement = undefined;
 
@@ -471,7 +476,7 @@ server.listen(port, hostname, () => {
     `
         });
 
-        d.activate();
+        d.start();
         removeAndForget("missingFeatures");
         removeAndForget("missingFeatureTemplate");
 
@@ -496,7 +501,7 @@ server.listen(port, hostname, () => {
 
     const handleChangeIdResponse = function (message, data) {
         if (message === MESSAGES.NAME_CHANGE || message === MESSAGES.CONFIRM_ID_CHANGE) {
-            const {newId, oldId} = data;
+            const { newId, oldId } = data;
             const newName = newId;
             state.connectedUsers.some(function (userObject) {
                 if (userObject.displayedName === oldId) {

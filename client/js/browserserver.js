@@ -46,7 +46,7 @@ const browserServer = (function () {
 
     const setBrowserServerCode = function (readyCodeText) {
         /*a web worker needs direct source code becuase it has a new separate
-        execution context. Below gets injected readyCodeText*/
+        execution scopeFromEvent. Below gets injected readyCodeText*/
         browserServerCode = NODE_EMULATOR_FOR_WORKERTEXT;//see buildbrowserserverwithemulator.js
     };
 

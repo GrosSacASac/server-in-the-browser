@@ -3,7 +3,7 @@
  is used before, see package.json */
 "use strict";
 
-const { textFileContent, writeTextInFilePromiseFromPathAndString } = require("filesac");
+const { textFileContent, writeTextInFile } = require("filesac");
 
 
 const thisName = "service_worker_version.js build";
@@ -20,7 +20,7 @@ Promise.all([
     const packageVersion = JSON.parse(packageText)["version"];
     const service_workerTextWithVersion = service_workerText.replace(REPLACED_WITH_SERVICE_WORKER_VERSION, packageVersion);
 
-    return writeTextInFilePromiseFromPathAndString(SERVICE_WORKER_WITH_VERSION_PATH, service_workerTextWithVersion);
+    return writeTextInFile(SERVICE_WORKER_WITH_VERSION_PATH, service_workerTextWithVersion);
 }).then(function () {
     //console.log(thisName + " finished with success !");
 }).catch(function (reason) {

@@ -1,15 +1,8 @@
-/*minifyHtml.js*/
-/*jslint
-    es6, maxerr: 100, devel, fudge, maxlen: 120, white, node, eval
-*/
-/*global
-
-*/
 "use strict";
 const escapeHtml = require("escape-html");
 
 
-const { textFileContent, writeTextInFilePromiseFromPathAndString } = require("filesac");
+const { textFileContent, writeTextInFile } = require("filesac");
 const markdown = require("markdown-it")("default", {
     html: true,
     linkify: true,
@@ -93,7 +86,7 @@ module.exports = function () {
                 //console.log(textFileContent);
                 const htmlText = markdown.render(textFileContent);
                 const minifiedHtml = htmlText;
-                const standalone = minify((beforeBodyTemplate + minifiedHtml + afterBodyTemplate), OPTIONS);
+                const standalone = beforeBodyTemplate + minifiedHtml + afterBodyTemplate;
                 return Promise.all([
                     writeTextInFile(
                         OUTPUTS_FROM_INPUT_PATH[path][0], minifiedHtml),
@@ -115,8 +108,8 @@ module.exports = function () {
                 }, "");
                 //console.log(typeof allHtmlNotes); // string
                 const htmlTextPreamble = markdown.render(open_source_preamble);
-                const minifiedHtml = minify(htmlTextPreamble + allHtmlNotes, OPTIONS);
-                const standalone = minify((beforeBodyTemplate + minifiedHtml + afterBodyTemplate), OPTIONS);
+                const minifiedHtml = htmlTextPreamble + allHtmlNotes;
+                const standalone = beforeBodyTemplate + minifiedHtml + afterBodyTemplate;
                 return Promise.all([
                     writeTextInFile(OPEN_SOURCE_BUILT_PATH_PART, minifiedHtml),
                     writeTextInFile(OPEN_SOURCE_BUILT_PATH, standalone)

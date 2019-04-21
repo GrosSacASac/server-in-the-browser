@@ -7,16 +7,10 @@ const {
     concatenateFiles,
     deleteFile
 } = require("filesac");
-
 const rollup = require('rollup');
 const rollup_babel = require('rollup-plugin-babel');
 
 
-const skipMinification = true;
-let presets = [];
-if (!skipMinification) {
-    presets.push("minify")
-}
 const jsDirectory = `client/js`;
 
 
@@ -60,7 +54,7 @@ module.exports = function (inputs) {
         ]).then(function ([browserserverText, node_emulator_for_workerText]) {
             const node_emulator_for_workerTemplateString = putInsideTemplateStringSafe(node_emulator_for_workerText);
             const browserserver_with_node_emulator_for_workerText = browserserverText.replace(NODE_EMULATOR_FOR_WORKERTEXT, node_emulator_for_workerTemplateString);
-            return writeTextInFilePromiseFromPathAndString(BROWSERSERVER_WITH_NODE_EMULATOR_FOR_WORKER_PATH, browserserver_with_node_emulator_for_workerText);
+            return writeTextInFile(BROWSERSERVER_WITH_NODE_EMULATOR_FOR_WORKER_PATH, browserserver_with_node_emulator_for_workerText);
         });
 
 
@@ -85,7 +79,7 @@ module.exports = function (inputs) {
                     "plugins": [
                         "@babel/plugin-proposal-object-rest-spread"
                     ],
-                    presets
+                    presets: []
                 })
             ]
         };
