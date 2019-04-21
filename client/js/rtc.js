@@ -38,12 +38,7 @@ const rtc = (function () {
 
     let useCustom = false;
     // dooes not work anymore
-    //let audioscopeFromEvent;
-    try {
-        // audioscopeFromEvent = new AudioscopeFromEvent();//http://stackoverflow.com/questions/40363606/how-to-keep-webrtc-datachannel-open-in-phone-browser-inactive-tab/40563729
-    } catch (notUsed) {
-        ;//not important
-    }
+
     const SEND_BUFFERED_AMOUNT_LOW_THRESHOLD = 2000; // Bytes
     const MAX_MESSAGE_SIZE = 798; //Bytes some say it should be 800
     const PREFIX_MAX_SIZE = 10; //Bytes

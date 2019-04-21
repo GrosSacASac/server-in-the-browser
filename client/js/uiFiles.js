@@ -218,14 +218,15 @@ const uiFiles = (function () {
         };
 
         d.functions.removeFile = function (event) {
-            const scopeFromEvent = d.scopeFromEvent(event);
+            const scope = d.scopeFromEvent(event);
             const oldFile = state.files.find(function (oldFile) {
-                return oldFile.uiLink === scopeFromEvent;
+                return oldFile.uiLink === scope;
             });
             yesNoDialog(`Remove "${oldFile.name}" file ?`, "Yes", "No, Cancel").then(function (answer) {
                 if (answer) {
-                    d.elements[scopeFromEvent].remove();
-                    d.forgetscopeFromEvent(scopeFromEvent);
+                    d.elements[scope].remove();
+                    //d.forgetscope(scope);
+                    //todo
                     state.files.splice(state.files.indexOf(oldFile), 1);
                 }
             });
@@ -233,27 +234,27 @@ const uiFiles = (function () {
 
 
         d.functions.rememberFileName = function (event) {
-            const scopeFromEvent = d.scopeFromEventFromEvent(event);
+            const scope = d.scopeFromEvent(event);
             const oldFile = state.files.find(function (oldFile) {
-                return oldFile.uiLink === scopeFromEvent;
+                return oldFile.uiLink === scope;
             });
-            oldFile.name = d.variables[d.scopeFromArray([scopeFromEvent, `fileName`])];
+            oldFile.name = d.variables[d.scopeFromArray([scope, `fileName`])];
         };
 
         d.functions.rememberFileBody = function (event) {
-            const scopeFromEvent = d.scopeFromEventFromEvent(event);
+            const scope = d.scopeFromEvent(event);
             const oldFile = state.files.find(function (oldFile) {
-                return oldFile.uiLink === scopeFromEvent;
+                return oldFile.uiLink === scope;
             });
-            oldFile.body = d.variables[d.scopeFromArray([scopeFromEvent, `fileBody`])];
+            oldFile.body = d.variables[d.scopeFromArray([scope, `fileBody`])];
         };
 
         d.functions.rememberMime = function (event) {
-            const scopeFromEvent = d.scopeFromEventFromEvent(event);
+            const scope = d.scopeFromEvent(event);
             const oldFile = state.files.find(function (oldFile) {
-                return oldFile.uiLink === scopeFromEvent;
+                return oldFile.uiLink === scope;
             });
-            oldFile.mime = d.variables[d.scopeFromArray([scopeFromEvent, `fileMime`])];
+            oldFile.mime = d.variables[d.scopeFromArray([scope, `fileMime`])];
         };
 
         let fileUiIdCounter = 0;

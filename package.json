@@ -1,6 +1,6 @@
 {
   "name": "server-in-the-browser",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "scripts": {
     "bumpversion": "npm version patch --no-git-tag",
     "versioninserviceworker": "node tools/service_worker_version.js",
@@ -19,10 +19,8 @@
     "testw": "client\\js\\tests\\SpecRunner.html"
   },
   "dependencies": {
-    "dom99": "^19.0.3",
+    "dom99": "^19.0.5",
     "express": "^4.16.4",
-    "socketiyo": "^6.0.1",
-    "socketiyo-client": "^4.0.0",
     "webrtc-adapter": "^6.1.0",
     "ws": "^6.2.1"
   },

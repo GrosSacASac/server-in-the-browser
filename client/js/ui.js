@@ -144,7 +144,7 @@ const ui = (function () {
         uiIdStrings.forEach(function (uiIdString) {
 
             // todo
-            // d.forgetscopeFromEvent(uiIdString);
+            // d.forgetscope(uiIdString);
         });
         uiIdStrings = [];
         connected_users.map(function (displayedName) {
@@ -443,7 +443,7 @@ const ui = (function () {
         const removeAndForget = function (elementName) {
             d.elements[elementName].remove();
             // todo
-            // d.forgetscopeFromEvent(elementName);
+            // d.forgetscope(elementName);
         };
         displayNonMetRequirement = undefined;
 
