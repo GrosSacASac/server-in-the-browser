@@ -4,8 +4,6 @@
     process, require, global
 */
 "use strict";
-const WEBSOCKET_PORT = 8081;
-const PORT = 8080;
 const WebSocket = require("ws");
 
 const MESSAGES = {
@@ -17,8 +15,8 @@ const MESSAGES = {
     RECEIVE_DESCRIPTION: "receive_description",
     LOCAL_SERVER_STATE: "LOCAL_SERVER_STATE",
     WELCOME: "welcome",
-    SERVERLOG:  "SERVERLOG",
-    NAME_CHANGE_REQUEST : "10",
+    SERVERLOG: "SERVERLOG",
+    NAME_CHANGE_REQUEST: "10",
     BAD_ID_FORMAT_REJECTED: "200",
     ALREADY_TAKEN_REJECTED: "201",
     CONFIRM_ID_CHANGE: "11",
@@ -79,9 +77,9 @@ const socketBroadcast = function (userIdToExclude, action, message) {
 };
 
 const refreshAllOtherClientsWithNewList = (userIdToExclude) => {
-  socketBroadcast(userIdToExclude, MESSAGES.LOADING_USER_LIST, {
-    connectedUsers: getPublicUsersList()
-  });
+    socketBroadcast(userIdToExclude, MESSAGES.LOADING_USER_LIST, {
+        connectedUsers: getPublicUsersList()
+    });
 };
 
 const logAll = function (any) {
@@ -93,9 +91,9 @@ const logAll = function (any) {
 
 
 const refreshAllClientUserList = () => {
-  socketSendAll(MESSAGES.LOADING_USER_LIST, {
-    connectedUsers: getPublicUsersList()
-  });
+    socketSendAll(MESSAGES.LOADING_USER_LIST, {
+        connectedUsers: getPublicUsersList()
+    });
 };
 
 const registerNewUser = function (socket) {
@@ -130,7 +128,9 @@ const getPublicUsersList = function () {
 };
 
 
-const start = function (server) {
+const start = function (WEBSOCKET_PORT) {
+
+    console.log(`WebSocket.Server on PORT ${WEBSOCKET_PORT}`);
     const wss = new WebSocket.Server({ port: WEBSOCKET_PORT });
     wss.on(`connection`, function (socket) {
 
@@ -146,7 +146,7 @@ const start = function (server) {
 
         socket.on(`message`, function (message) {
             const parsedMessage = JSON.parse(message);
-            parsedMessage.data = parsedMessage.data|| {};
+            parsedMessage.data = parsedMessage.data || {};
             parsedMessage.data.id = id;
             if (messageHandlers[parsedMessage.action]) {
                 messageHandlers[parsedMessage.action](parsedMessage.data);
@@ -159,13 +159,11 @@ const start = function (server) {
             refreshAllOtherClientsWithNewList(socket);
         });
     });
-    server.listen(PORT);
-    console.log(`Listening on ${PORT}`);
 
 };
 
 const messageHandlers = {
-    [MESSAGES.EXIT]: function ({id}) {
+    [MESSAGES.EXIT]: function ({ id }) {
         console.log("user has exit");
         removeUser(id);
         refreshAllOtherClientsWithNewList(id);
@@ -176,7 +174,7 @@ const messageHandlers = {
 
         refreshAllOtherClientsWithNewList(data.id);
     },
-    [MESSAGES.NAME_CHANGE_REQUEST]: ({newName, id}) => {
+    [MESSAGES.NAME_CHANGE_REQUEST]: ({ newName, id }) => {
         /*see ui.js*/
         const user = users[id];
         const oldId = user.displayedName;
@@ -211,7 +209,7 @@ const messageHandlers = {
             oldId
         });
     },
-[MESSAGES.SEND_DESCRIPTION]: data => {
+    [MESSAGES.SEND_DESCRIPTION]: data => {
         // This time, we will emit only to the recipient
         const targetId = data.targetId;
         //logAll(["SEND DESCRIPTION",targetDisplayedName, data.from]);

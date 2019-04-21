@@ -15,7 +15,7 @@ const bridge = require("./server/server-client_bridge.js");
 
 
 const PORT = process.env.PORT || 8080;
+const WEBSOCKET_PORT = 8081;
 
-
-bridge.start(server);
+bridge.start(WEBSOCKET_PORT);
 serve.start(app, server, PORT);

@@ -1,6 +1,6 @@
 {
   "name": "server-in-the-browser",
-  "version": "0.5.8",
+  "version": "0.5.10",
   "scripts": {
     "bumpversion": "npm version patch --no-git-tag",
     "versioninserviceworker": "node tools/service_worker_version.js",
