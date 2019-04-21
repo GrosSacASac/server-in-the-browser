@@ -3,7 +3,7 @@
  is used before, see package.json */
 "use strict";
 
-const {textFileContentPromiseFromPath, writeTextInFilePromiseFromPathAndString} = require("utilsac");
+const { textFileContent, writeTextInFilePromiseFromPathAndString } = require("filesac");
 
 
 const thisName = "service_worker_version.js build";
@@ -14,8 +14,8 @@ const PACKAGE_PATH = "package.json";
 const SERVICE_WORKER_WITH_VERSION_PATH = "client/js/built/service_worker_with_version.js";
 
 Promise.all([
-    textFileContentPromiseFromPath(SERVICE_WORKER_PATH),
-    textFileContentPromiseFromPath(PACKAGE_PATH),
+    textFileContent(SERVICE_WORKER_PATH),
+    textFileContent(PACKAGE_PATH),
 ]).then(function ([service_workerText, packageText]) {
     const packageVersion = JSON.parse(packageText)["version"];
     const service_workerTextWithVersion = service_workerText.replace(REPLACED_WITH_SERVICE_WORKER_VERSION, packageVersion);
