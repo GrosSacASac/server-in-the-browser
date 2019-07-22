@@ -1,22 +1,22 @@
 {
   "name": "server-in-the-browser",
-  "version": "0.5.10",
+  "version": "0.5.11",
   "scripts": {
-    "bumpversion": "npm version patch --no-git-tag",
-    "versioninserviceworker": "node tools/service_worker_version.js",
-    "build1js": "node tools/buildall.js JS OWN",
-    "buildjsrest": "npm run bumpversion && npm run versioninserviceworker",
-    "buildjsexternaldependencies": "node tools/buildall.js JS EXTERNAL",
-    "buildcss1": "node tools/buildall.js CSS",
-    "buildhtml": "node tools/buildall.js HTML",
-    "builddoc": "node tools/buildall.js DOC",
-    "buildall": "npm run buildjsrest && node tools/buildall.js HTML JS OWN EXTERNAL CSS DOC",
+    "bump-version": "npm version patch --no-git-tag",
+    "version-in-service-worker": "node tools/service_worker_version.js",
+    "build-js": "node tools/buildall.js JS OWN",
+    "build-js-rest": "npm run bumpversion && npm run version-in-serviceworker",
+    "build-js-external-dependencies": "node tools/buildall.js JS EXTERNAL",
+    "build-css": "node tools/buildall.js CSS",
+    "build-html": "node tools/buildall.js HTML",
+    "build-doc": "node tools/buildall.js DOC",
+    "build-all": "npm run buildjsrest && node tools/buildall.js HTML JS OWN EXTERNAL CSS DOC",
     "start": "node index.js",
-    "buildjsstart": "npm run build1js && npm run buildjsrest && npm start",
-    "buildallstart": "npm run buildall && npm start",
+    "build-js-start": "npm run build-js && npm run build-js-rest && npm start",
+    "build-all-start": "npm run build-all && npm start",
     "heroku": "git push heroku master",
     "herokulog": "heroku logs --tail",
-    "testw": "client\\js\\tests\\SpecRunner.html"
+    "test": "client\\js\\tests\\SpecRunner.html"
   },
   "dependencies": {
     "dom99": "^19.0.5",
@@ -36,10 +36,6 @@
   },
   "engines": {
     "node": ">=10"
-  },
-  "devDependenciesGlobals": {
-    "installed before with -g, see readme": "true",
-    "heroku": "?"
   },
   "private": true
 }
